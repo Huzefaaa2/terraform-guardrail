@@ -12,6 +12,41 @@ usage.
 - Minimal web UI for quick scans and reports
 - Rules engine focused on ephemeral values, write-only arguments, and secret hygiene
 
+## Architecture
+
+```mermaid
+flowchart LR
+    subgraph Interfaces
+        CLI[CLI]
+        MCP[MCP Server]
+        WEB[Web UI]
+    end
+
+    subgraph Core
+        SCAN[Compliance Engine]
+        GEN[Snippet Generator]
+    end
+
+    REG[Terraform Registry]
+    TF[Terraform CLI]
+
+    CLI --> SCAN
+    WEB --> SCAN
+    MCP --> SCAN
+    MCP --> GEN
+    SCAN --> TF
+    GEN --> REG
+    MCP --> REG
+```
+
+```mermaid
+flowchart TB
+    INPUTS[Inputs: .tf, .tfvars, .tfstate] --> PARSE[Parse & Normalize]
+    PARSE --> RULES[Apply Rules TG001-TG005]
+    RULES --> REPORT[Findings + Summary Report]
+    REPORT --> OUTPUT[CLI JSON / UI Render / MCP Response]
+```
+
 ## MVP scope (v0.1)
 
 - Scan `.tf` and `.tfvars` for sensitive values and missing `ephemeral = true`
