@@ -19,6 +19,24 @@ resource \"aws_s3_bucket\" \"{name}\" {{
   }}
 }}
 """,
+        "aws_vpc": """
+resource \"aws_vpc\" \"{name}\" {{
+  cidr_block           = \"10.0.0.0/16\"
+  enable_dns_support   = true
+  enable_dns_hostnames = true
+  tags = {{
+    Name = \"{name}\"
+  }}
+}}
+""",
+        "aws_subnet": """
+resource \"aws_subnet\" \"{name}\" {{
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = \"10.0.1.0/24\"
+  map_public_ip_on_launch = true
+  availability_zone       = \"us-east-1a\"
+}}
+""",
         "aws_iam_role": """
 resource \"aws_iam_role\" \"{name}\" {{
   name = \"{name}\"
@@ -34,6 +52,12 @@ resource \"aws_iam_role\" \"{name}\" {{
 """,
     },
     "azure": {
+        "azurerm_resource_group": """
+resource \"azurerm_resource_group\" \"{name}\" {{
+  name     = \"{name}-rg\"
+  location = \"East US\"
+}}
+""",
         "azurerm_storage_account": """
 resource \"azurerm_storage_account\" \"{name}\" {{
   name                     = \"{name}sa\"
