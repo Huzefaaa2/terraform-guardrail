@@ -1,4 +1,4 @@
-.PHONY: changelog release
+.PHONY: changelog release release-dry
 
 changelog:
 	git cliff -o CHANGELOG.md
@@ -14,3 +14,7 @@ release:
 	git tag -a v$(VERSION) -m "v$(VERSION)"
 	git push origin main
 	git push origin v$(VERSION)
+
+release-dry:
+	@if [ -z "$(VERSION)" ]; then echo "Usage: make release-dry VERSION=x.y.z"; exit 1; fi
+	@echo "Would set version to $(VERSION) and generate release notes."
