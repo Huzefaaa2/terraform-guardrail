@@ -6,6 +6,7 @@ Terraform Guardrail MCP is a Python-based MCP server + CLI + minimal web UI that
 and platform teams generate valid Terraform code and enforce ephemeral-values compliance. It targets
 multi-cloud teams and focuses on reducing configuration drift, secret leakage, and invalid provider
 usage.
+Live app: https://terraform-guardrail.streamlit.app/
 
 ## What it does
 
