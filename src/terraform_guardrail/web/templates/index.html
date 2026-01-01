@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Terraform Guardrail MCP</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header class="hero">
+        <p class="badge">Terraform Guardrail MCP</p>
+        <h1>Ephemeral-values compliance, fast.</h1>
+        <p class="subtitle">
+          Upload a Terraform file to scan for sensitive leaks and missing ephemeral controls.
+        </p>
+      </header>
+
+      <section class="panel">
+        <form action="/scan" method="post" enctype="multipart/form-data">
+          <label class="file-input">
+            <span>Select Terraform file</span>
+            <input type="file" name="tf_file" accept=".tf,.tfvars,.hcl" required />
+          </label>
+          <button type="submit">Scan</button>
+        </form>
+      </section>
+
+      {% if error %}
+      <section class="panel error">{{ error }}</section>
+      {% endif %}
+
+      {% if report %}
+      <section class="panel report">
+        <h2>Scan Report</h2>
+        <p class="meta">Scanned: {{ report.scanned_path }}</p>
+        <div class="summary">
+          <div><strong>Total</strong> {{ report.summary.findings }}</div>
+          <div><strong>High</strong> {{ report.summary.high }}</div>
+          <div><strong>Medium</strong> {{ report.summary.medium }}</div>
+          <div><strong>Low</strong> {{ report.summary.low }}</div>
+        </div>
+        <ul class="findings">
+          {% for finding in report.findings %}
+          <li class="finding {{ finding.severity }}">
+            <span class="tag">{{ finding.severity }}</span>
+            <span class="rule">{{ finding.rule_id }}</span>
+            <span class="message">{{ finding.message }}</span>
+            <span class="path">{{ finding.path }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </section>
+      {% endif %}
+    </main>
+  </body>
+</html>
