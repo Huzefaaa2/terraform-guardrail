@@ -7,10 +7,44 @@ import streamlit as st
 
 from terraform_guardrail.scanner.scan import scan_path
 
+REPO_URL = "https://github.com/Huzefaaa2/terraform-guardrail"
+WIKI_URL = "https://github.com/Huzefaaa2/terraform-guardrail/wiki"
+LINKEDIN_URL = "https://www.linkedin.com/in/huzefaaa"
+
 st.set_page_config(page_title="Terraform Guardrail MCP", page_icon="🛡️", layout="wide")
 
 st.title("Terraform Guardrail MCP")
 st.caption("MCP-backed Terraform assistant with ephemeral-values compliance.")
+
+st.markdown("### What it checks")
+col_a, col_b, col_c = st.columns(3)
+with col_a:
+    st.markdown("#### 🔐 Secret Hygiene")
+    st.caption("Detects hardcoded secrets in configs and tfvars.")
+with col_b:
+    st.markdown("#### 🧾 State Leaks")
+    st.caption("Flags sensitive values written to Terraform state.")
+with col_c:
+    st.markdown("#### ✅ Schema Validity")
+    st.caption("Validates attributes against provider schemas.")
+
+with st.sidebar:
+    st.header("Resources")
+    st.markdown(f"- [GitHub Repo]({REPO_URL})")
+    st.markdown(f"- [Wiki Docs]({WIKI_URL})")
+    st.markdown(f"- [Follow on LinkedIn]({LINKEDIN_URL})")
+    st.divider()
+    st.subheader("How to use")
+    st.markdown(
+        "\n".join(
+            [
+                "1. Upload a Terraform config file (`.tf`, `.tfvars`, `.hcl`).",
+                "2. (Optional) Upload a `.tfstate` file for state leak checks.",
+                "3. Toggle schema-aware validation if Terraform CLI is available.",
+                "4. Click **Scan** to generate a compliance report.",
+            ]
+        )
+    )
 
 col1, col2 = st.columns(2)
 with col1:
