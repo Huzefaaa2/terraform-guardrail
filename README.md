@@ -114,6 +114,14 @@ streamlit run streamlit_app.py
 
 See `docs/streamlit_cloud.md` for a detailed Streamlit Cloud walkthrough.
 
+## Release Checklist
+
+- Update version in `pyproject.toml`.
+- Update `RELEASE_NOTES.md` and `CHANGELOG.md`.
+- Commit changes and push to `main`.
+- Create and push a tag: `git tag -a vX.Y.Z -m "vX.Y.Z"` then `git push origin vX.Y.Z`.
+- Confirm GitHub Actions release workflow completed successfully.
+
 ## MCP tools (current)
 
 - `scan_terraform`: Run compliance checks over a path and optional state file.
