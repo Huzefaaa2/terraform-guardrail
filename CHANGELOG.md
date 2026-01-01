@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.2] - 2026-01-01
+
+### Added
+- Streamlit live app link in README and wiki.
+- PyPI-friendly diagram links for non-rendered Mermaid.
+
 ## [0.2.0] - 2026-01-01
 
 ### Added

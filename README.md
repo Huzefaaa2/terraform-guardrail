@@ -118,6 +118,13 @@ Live app: https://terraform-guardrail.streamlit.app/
 
 See `docs/streamlit_cloud.md` for a detailed Streamlit Cloud walkthrough.
 
+## Diagrams
+
+Mermaid diagrams render on GitHub and the Wiki. If you're viewing this on PyPI, use these links:
+
+- GitHub README: https://github.com/Huzefaaa2/terraform-guardrail#architecture
+- Wiki Diagrams: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Diagrams
+
 ## Release Checklist
 
 - Update version in `pyproject.toml`.

@@ -1,15 +1,12 @@
-# v0.2.0
+# v0.2.2
 
 ## Highlights
-- Streamlit app for instant scanning and reporting.
-- Schema-aware validation (TG005) with Terraform CLI integration.
-- Expanded snippet generator templates.
-- Wiki-ready documentation and diagrams.
+- Streamlit app link visible on PyPI docs.
+- Added diagram links for PyPI readers.
 
 ## Added
-- `streamlit_app.py` and Streamlit deployment guidance.
-- `docs/wiki` documentation set with diagrams and usage.
-- Schema validation rule and helper utilities.
+- Streamlit live app URL in README and wiki.
+- PyPI-friendly diagram links.
 
 ## Changed
-- Updated dependencies and version bump to `0.2.0`.
+- Version bump to `0.2.2`.
