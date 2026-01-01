@@ -92,6 +92,19 @@ terraform-guardrail scan ./examples --schema
 
 Visit `http://127.0.0.1:8000` and upload a Terraform file to view a compliance report.
 
+## Streamlit App
+
+```bash
+streamlit run streamlit_app.py
+```
+
+### Streamlit Cloud deployment
+
+1. Push this repo to GitHub.
+2. Create a new Streamlit Cloud app.
+3. Set the main file path to `streamlit_app.py`.
+4. Deploy (Streamlit will install from `requirements.txt`).
+
 ## MCP tools (current)
 
 - `scan_terraform`: Run compliance checks over a path and optional state file.
