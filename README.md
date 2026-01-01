@@ -138,6 +138,13 @@ Or run:
 make changelog
 ```
 
+### Release Helpers
+
+```bash
+make release-dry VERSION=0.2.1
+make version-bump VERSION=0.2.1
+```
+
 ## MCP tools (current)
 
 - `scan_terraform`: Run compliance checks over a path and optional state file.

@@ -1,4 +1,4 @@
-.PHONY: changelog release release-dry
+.PHONY: changelog release release-dry version-bump
 
 changelog:
 	git cliff -o CHANGELOG.md
@@ -18,3 +18,7 @@ release:
 release-dry:
 	@if [ -z "$(VERSION)" ]; then echo "Usage: make release-dry VERSION=x.y.z"; exit 1; fi
 	@echo "Would set version to $(VERSION) and generate release notes."
+
+version-bump:
+	@if [ -z "$(VERSION)" ]; then echo "Usage: make version-bump VERSION=x.y.z"; exit 1; fi
+	sed -i '' 's/version = "[0-9.]*"/version = "$(VERSION)"/' pyproject.toml
