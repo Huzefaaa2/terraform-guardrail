@@ -10,5 +10,6 @@ compliance rules, and deployment guides for the CLI, MCP server, and Streamlit U
 - [MCP Server](MCP-Server.md)
 - [Compliance Rules](Compliance-Rules.md)
 - [Streamlit Deployment](Streamlit-Deployment.md)
+- [Live Streamlit App](https://terraform-guardrail.streamlit.app/)
 - [Release Process](Release-Process.md)
 - [Diagrams](Diagrams.md)

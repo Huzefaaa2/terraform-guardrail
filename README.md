@@ -100,6 +100,8 @@ Visit `http://127.0.0.1:8000` and upload a Terraform file to view a compliance r
 streamlit run streamlit_app.py
 ```
 
+Live app: https://terraform-guardrail.streamlit.app/
+
 ### Streamlit Cloud deployment
 
 1. Push this repo to GitHub.
