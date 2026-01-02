@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import csv
 import tempfile
+from io import StringIO
 from pathlib import Path
 
 import streamlit as st
@@ -52,45 +54,76 @@ with st.sidebar:
 
 col1, col2 = st.columns(2)
 with col1:
-    tf_file = st.file_uploader("Terraform config (.tf/.tfvars/.hcl)", type=["tf", "tfvars", "hcl"])
+    tf_files = st.file_uploader(
+        "Terraform config (.tf/.tfvars/.hcl)",
+        type=["tf", "tfvars", "hcl"],
+        accept_multiple_files=True,
+    )
 with col2:
     state_file = st.file_uploader("Optional state file (.tfstate)", type=["tfstate"])
 
 use_schema = st.checkbox("Enable schema-aware validation (requires terraform CLI)")
 
 if st.button("Scan"):
-    if not tf_file:
-        st.error("Please upload a Terraform file first.")
+    if not tf_files:
+        st.error("Please upload at least one Terraform file.")
+    elif len(tf_files) > 10:
+        st.error("Please upload no more than 10 Terraform files.")
     else:
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_dir_path = Path(tmp_dir)
-            tf_path = tmp_dir_path / tf_file.name
-            tf_path.write_bytes(tf_file.getvalue())
             state_path = None
             if state_file:
                 state_path = tmp_dir_path / state_file.name
                 state_path.write_bytes(state_file.getvalue())
 
-            try:
-                report = scan_path(tf_path, state_path=state_path, use_schema=use_schema)
-            except Exception as exc:  # noqa: BLE001
-                st.error(f"Scan failed: {exc}")
-                st.stop()
+            all_findings = []
+            summary = {"Total findings": 0, "High": 0, "Medium": 0, "Low": 0}
+            scanned_paths = []
+
+            for tf_file in tf_files:
+                tf_path = tmp_dir_path / tf_file.name
+                tf_path.write_bytes(tf_file.getvalue())
+                try:
+                    report = scan_path(tf_path, state_path=state_path, use_schema=use_schema)
+                except Exception as exc:  # noqa: BLE001
+                    st.error(f"Scan failed for {tf_file.name}: {exc}")
+                    st.stop()
+                scanned_paths.append(report.scanned_path)
+                summary["Total findings"] += report.summary.findings
+                summary["High"] += report.summary.high
+                summary["Medium"] += report.summary.medium
+                summary["Low"] += report.summary.low
+                all_findings.extend([finding.model_dump() for finding in report.findings])
 
         st.subheader("Summary")
         st.write(
             {
-                "Scanned": report.scanned_path,
-                "Total findings": report.summary.findings,
-                "High": report.summary.high,
-                "Medium": report.summary.medium,
-                "Low": report.summary.low,
+                "Scanned files": scanned_paths,
+                "Total findings": summary["Total findings"],
+                "High": summary["High"],
+                "Medium": summary["Medium"],
+                "Low": summary["Low"],
             }
         )
 
         st.subheader("Findings")
-        if report.findings:
-            table = [finding.model_dump() for finding in report.findings]
-            st.dataframe(table, use_container_width=True)
+        if all_findings:
+            st.dataframe(all_findings, use_container_width=True)
         else:
             st.success("No findings detected.")
+
+        output = StringIO()
+        writer = csv.DictWriter(
+            output,
+            fieldnames=["rule_id", "severity", "message", "path", "detail"],
+        )
+        writer.writeheader()
+        for finding in all_findings:
+            writer.writerow(finding)
+        st.download_button(
+            "Download findings CSV",
+            data=output.getvalue(),
+            file_name="terraform_guardrail_findings.csv",
+            mime="text/csv",
+        )
