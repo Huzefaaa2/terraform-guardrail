@@ -14,3 +14,4 @@ compliance rules, and deployment guides for the CLI, MCP server, and Streamlit U
 - [PyPI Package](https://pypi.org/project/terraform-guardrail/)
 - [Release Process](Release-Process.md)
 - [Diagrams](Diagrams.md)
+- Supported providers: AWS, Azure, GCP, Kubernetes, Helm, OCI, Vault, Alicloud, vSphere

@@ -53,6 +53,11 @@ with st.sidebar:
         )
     )
 
+st.markdown("### Supported providers")
+st.caption(
+    "AWS, Azure, GCP, Kubernetes, Helm, OCI, Vault, Alicloud, and vSphere."
+)
+
 col1, col2 = st.columns(2)
 with col1:
     tf_files = st.file_uploader(

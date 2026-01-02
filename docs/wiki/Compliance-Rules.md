@@ -13,3 +13,15 @@
 - Use `ephemeral = true` for sensitive variables.
 - Avoid hardcoding secrets in `.tf` or `.tfvars`.
 - Keep secrets out of state using write-only or ephemeral values.
+
+## Supported providers
+
+- AWS
+- Azure
+- GCP
+- Kubernetes
+- Helm
+- OCI
+- Vault
+- Alicloud
+- vSphere
