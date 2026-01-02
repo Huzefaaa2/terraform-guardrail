@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import tempfile
+from datetime import datetime, timezone
 from io import StringIO
 from pathlib import Path
 
@@ -80,6 +81,7 @@ if st.button("Scan"):
             all_findings = []
             summary = {"Total findings": 0, "High": 0, "Medium": 0, "Low": 0}
             scanned_paths = []
+            scanned_at = datetime.now(timezone.utc).isoformat()
 
             for tf_file in tf_files:
                 tf_path = tmp_dir_path / tf_file.name
@@ -94,7 +96,11 @@ if st.button("Scan"):
                 summary["High"] += report.summary.high
                 summary["Medium"] += report.summary.medium
                 summary["Low"] += report.summary.low
-                all_findings.extend([finding.model_dump() for finding in report.findings])
+                for finding in report.findings:
+                    payload = finding.model_dump()
+                    payload["file_name"] = tf_file.name
+                    payload["scanned_at"] = scanned_at
+                    all_findings.append(payload)
 
         st.subheader("Summary")
         st.write(
@@ -116,7 +122,7 @@ if st.button("Scan"):
         output = StringIO()
         writer = csv.DictWriter(
             output,
-            fieldnames=["rule_id", "severity", "message", "path", "detail"],
+            fieldnames=["file_name", "scanned_at", "rule_id", "severity", "message", "path", "detail"],
         )
         writer.writeheader()
         for finding in all_findings:
