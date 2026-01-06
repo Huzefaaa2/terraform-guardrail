@@ -2,10 +2,14 @@
 
 [![CI](https://github.com/Huzefaaa2/terraform-guardrail/actions/workflows/ci.yml/badge.svg)](https://github.com/Huzefaaa2/terraform-guardrail/actions/workflows/ci.yml)
 
-Terraform Guardrail MCP is a Python-based MCP server + CLI + minimal web UI that helps AI assistants
-and platform teams generate valid Terraform code and enforce ephemeral-values compliance. It targets
-multi-cloud teams and focuses on reducing configuration drift, secret leakage, and invalid provider
-usage.
+Terraform Guardrail MCP is a Python-based MCP server + CLI + web UI that turns Terraform governance
+into a fast, repeatable workflow. It gives AI assistants and platform teams real context from
+provider metadata and adds compliance intelligence so every plan, module, and refactor is safer by
+default. The result is fewer failures, cleaner state, and a shorter path from idea to production.
+
+This project is built for teams shipping infrastructure at scale who need speed without sacrificing
+security. It eliminates secret leakage, validates schema usage, and produces human-readable reports
+that make decisions obvious and auditable.
 Live app: https://terraform-guardrail.streamlit.app/
 
 ## What it does
@@ -50,13 +54,27 @@ flowchart TB
     REPORT --> OUTPUT[CLI JSON / UI Render / MCP Response]
 ```
 
-## MVP scope (v0.1)
+## Scope
 
-- Scan `.tf` and `.tfvars` for sensitive values and missing `ephemeral = true`
-- Scan `.tfstate` for leaked sensitive values
-- Provider metadata retrieval for AWS, Azure, GCP, Kubernetes, Helm, OCI, Vault, Alicloud, and vSphere via Terraform Registry
-- MCP server with `scan_terraform` and `get_provider_metadata` tools
-- Minimal web UI for uploading a file and viewing the report
+- Multi-file scanning with summaries and CSV export
+- Secret hygiene checks across `.tf`, `.tfvars`, and `.tfstate`
+- Schema-aware validation with Terraform CLI integration
+- Provider metadata lookup via Terraform Registry
+- MCP tools for scan, metadata, and snippet generation
+- Streamlit and web UI for instant reporting
+
+## Feature Matrix
+
+| Area | CLI | Web UI / Streamlit |
+| --- | --- | --- |
+| Config scan (`.tf`, `.tfvars`, `.hcl`) | Yes | Yes |
+| State leak scan (`.tfstate`) | Yes | Yes |
+| Schema-aware validation | Yes | Yes |
+| CSV export | No | Yes |
+| Provider metadata | Yes | Yes |
+| Snippet generation | Yes | No |
+| Multi-file scan | Yes (directory) | Yes (upload up to 10) |
+| Human-readable report | Yes | Yes |
 
 ## Quickstart
 
@@ -84,7 +102,7 @@ terraform-guardrail web
 pip install terraform-guardrail
 ```
 
-PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 0.2.3)
+PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 0.2.4)
 
 ## CLI examples
 
