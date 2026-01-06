@@ -1,14 +1,11 @@
-# v0.2.4
+# v0.2.5
 
 ## Highlights
-- Streamlit multi-file upload (up to 10 files) with CSV export.
-- Provider coverage expanded and documented across UI and wiki.
+- PyPI description aligned with updated README.
+- Removed Mermaid blocks from PyPI view with direct diagram links.
 
 ## Added
-- CSV export includes `file_name` and `scanned_at`.
-- Streamlit sidebar install snippet and resource links.
-- Supported providers listed in UI and wiki.
+- Architecture diagram links for PyPI readers.
 
 ## Changed
-- Findings table shows file metadata by default.
-- Version bump to `0.2.4`.
+- Version bump to `0.2.5`.

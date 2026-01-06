@@ -21,38 +21,10 @@ Live app: https://terraform-guardrail.streamlit.app/
 
 ## Architecture
 
-```mermaid
-flowchart LR
-    subgraph Interfaces
-        CLI[CLI]
-        MCP[MCP Server]
-        WEB[Web UI]
-    end
+Mermaid diagrams are available on GitHub and in the Wiki:
 
-    subgraph Core
-        SCAN[Compliance Engine]
-        GEN[Snippet Generator]
-    end
-
-    REG[Terraform Registry]
-    TF[Terraform CLI]
-
-    CLI --> SCAN
-    WEB --> SCAN
-    MCP --> SCAN
-    MCP --> GEN
-    SCAN --> TF
-    GEN --> REG
-    MCP --> REG
-```
-
-```mermaid
-flowchart TB
-    INPUTS[Inputs: .tf, .tfvars, .tfstate] --> PARSE[Parse & Normalize]
-    PARSE --> RULES[Apply Rules TG001-TG005]
-    RULES --> REPORT[Findings + Summary Report]
-    REPORT --> OUTPUT[CLI JSON / UI Render / MCP Response]
-```
+- GitHub README: https://github.com/Huzefaaa2/terraform-guardrail#architecture
+- Wiki Diagrams: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Diagrams
 
 ## Scope
 
@@ -145,12 +117,6 @@ Live app: https://terraform-guardrail.streamlit.app/
 
 See `docs/streamlit_cloud.md` for a detailed Streamlit Cloud walkthrough.
 
-## Diagrams
-
-Mermaid diagrams render on GitHub and the Wiki. If you're viewing this on PyPI, use these links:
-
-- GitHub README: https://github.com/Huzefaaa2/terraform-guardrail#architecture
-- Wiki Diagrams: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Diagrams
 
 ## Release Checklist
 

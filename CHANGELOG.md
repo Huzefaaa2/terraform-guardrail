@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.5] - 2026-01-01
+
+### Added
+- Architecture diagram links for PyPI readers.
+
+### Changed
+- README long description aligned for PyPI display.
+
 ## [0.2.4] - 2026-01-01
 
 ### Added
