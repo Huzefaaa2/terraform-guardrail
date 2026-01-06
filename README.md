@@ -21,10 +21,38 @@ Live app: https://terraform-guardrail.streamlit.app/
 
 ## Architecture
 
-Mermaid diagrams are available on GitHub and in the Wiki:
+```mermaid
+flowchart LR
+    subgraph Interfaces
+        CLI[CLI]
+        MCP[MCP Server]
+        WEB[Web UI]
+    end
 
-- GitHub README: https://github.com/Huzefaaa2/terraform-guardrail#architecture
-- Wiki Diagrams: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Diagrams
+    subgraph Core
+        SCAN[Compliance Engine]
+        GEN[Snippet Generator]
+    end
+
+    REG[Terraform Registry]
+    TF[Terraform CLI]
+
+    CLI --> SCAN
+    WEB --> SCAN
+    MCP --> SCAN
+    MCP --> GEN
+    SCAN --> TF
+    GEN --> REG
+    MCP --> REG
+```
+
+```mermaid
+flowchart TB
+    INPUTS[Inputs: .tf, .tfvars, .tfstate] --> PARSE[Parse & Normalize]
+    PARSE --> RULES[Apply Rules TG001-TG005]
+    RULES --> REPORT[Findings + Summary Report]
+    REPORT --> OUTPUT[CLI JSON / UI Render / MCP Response]
+```
 
 ## Scope
 
@@ -34,6 +62,18 @@ Mermaid diagrams are available on GitHub and in the Wiki:
 - Provider metadata lookup via Terraform Registry
 - MCP tools for scan, metadata, and snippet generation
 - Streamlit and web UI for instant reporting
+
+## Supported Providers
+
+- AWS
+- Azure
+- GCP
+- Kubernetes
+- Helm
+- OCI
+- Vault
+- Alicloud
+- vSphere
 
 ## Feature Matrix
 
