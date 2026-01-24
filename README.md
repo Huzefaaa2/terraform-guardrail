@@ -177,13 +177,13 @@ curl -X POST http://localhost:8080/scan \\
 Pull the published container image (built on release tags):
 
 ```bash
-docker pull ghcr.io/huzefaaa2/terraform-guardrail:v0.2.6
+docker pull ghcr.io/huzefaaa2/terraform-guardrail:v0.2.7
 ```
 
 Run it:
 
 ```bash
-docker run --rm -p 8080:8080 ghcr.io/huzefaaa2/terraform-guardrail:v0.2.6
+docker run --rm -p 8080:8080 ghcr.io/huzefaaa2/terraform-guardrail:v0.2.7
 ```
 
 ## Release Links
