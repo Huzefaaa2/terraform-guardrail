@@ -23,3 +23,10 @@ jobs:
         run: ruff check .
       - name: Test
         run: pytest
+      - name: Docker API smoke test
+        run: |
+          docker build -t terraform-guardrail-ci .
+          docker run -d --rm -p 8080:8080 --name terraform-guardrail-ci terraform-guardrail-ci
+          sleep 2
+          curl -f http://127.0.0.1:8080/health
+          docker stop terraform-guardrail-ci
