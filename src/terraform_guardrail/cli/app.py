@@ -8,10 +8,10 @@ import typer
 from rich.console import Console
 from rich.json import JSON
 
+from terraform_guardrail.api.app import create_app as create_api_app
 from terraform_guardrail.generator import generate_snippet
 from terraform_guardrail.mcp.server import run_stdio
 from terraform_guardrail.scanner.scan import scan_path
-from terraform_guardrail.api.app import create_app as create_api_app
 from terraform_guardrail.web.app import create_app
 
 app = typer.Typer(add_completion=False)
