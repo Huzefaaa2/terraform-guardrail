@@ -1,11 +1,29 @@
 # Terraform Guardrail MCP Wiki
 
-Welcome to the Terraform Guardrail MCP documentation. This wiki covers architecture, usage,
-compliance rules, and deployment guides for the CLI, MCP server, and Streamlit UI.
+Terraform Guardrail MCP (Model Context Protocol) is a governance control plane for Infrastructure as
+Code. It runs outside Terraform, exposes provider context, and enforces guardrails that prevent bad
+state before apply.
+
+## Design Principle
+
+Non-negotiable safety floor, composable freedom above it. Guardrails live outside Terraform.
+
+## User Perspective (High-Level)
+
+```mermaid
+flowchart LR
+    USER[Platform + Product Teams] --> CHANNELS[CLI • Streamlit • REST API • MCP]
+    CHANNELS --> GUARDRAIL[Terraform Guardrail MCP]
+    GUARDRAIL --> REPORTS[Readable Guidance + Evidence]
+    GUARDRAIL --> TERRAFORM[Safer Terraform Applies]
+```
 
 ## Quick links
 
+- [Roadmap](Roadmap.md)
 - [Architecture](Architecture.md)
+- [Diagrams](Diagrams.md)
+- [Comparison with Other Tools](Comparison.md)
 - [CLI Usage](CLI-Usage.md)
 - [MCP Server](MCP-Server.md)
 - [Compliance Rules](Compliance-Rules.md)
@@ -13,10 +31,12 @@ compliance rules, and deployment guides for the CLI, MCP server, and Streamlit U
 - [Live Streamlit App](https://terraform-guardrail.streamlit.app/)
 - [PyPI Package](https://pypi.org/project/terraform-guardrail/)
 - [Release Process](Release-Process.md)
-- [Diagrams](Diagrams.md)
+
+## Latest Release
+
+- Version: 0.2.7
+- Container image: https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail
 - Supported providers: AWS, Azure, GCP, Kubernetes, Helm, OCI, Vault, Alicloud, vSphere
- - Latest version: 0.2.7
- - Container image: https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail
 
 ## Feature Matrix
 

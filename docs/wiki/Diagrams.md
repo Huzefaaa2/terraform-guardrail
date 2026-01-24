@@ -1,6 +1,34 @@
 # Diagrams
 
-## Architecture
+## User Perspective
+
+```mermaid
+flowchart LR
+    USER[Platform + Product Teams] --> CHANNELS[CLI • Streamlit • REST API • MCP]
+    CHANNELS --> GUARDRAIL[Terraform Guardrail MCP]
+    GUARDRAIL --> REPORTS[Readable Guidance + Evidence]
+    GUARDRAIL --> TERRAFORM[Safer Terraform Applies]
+```
+
+## Ways Developers Use Guardrail
+
+```mermaid
+flowchart LR
+    DEV[Developer] --> CLI[CLI]
+    DEV --> UI[Streamlit UI]
+    DEV --> API[REST API]
+    DEV --> MCP[MCP for AI Assistants]
+    DEV --> CI[GitHub Action (planned)]
+    DEV --> ADO[Azure DevOps (planned)]
+    CLI --> GUARDRAIL
+    UI --> GUARDRAIL
+    API --> GUARDRAIL
+    MCP --> GUARDRAIL
+    CI --> GUARDRAIL
+    ADO --> GUARDRAIL
+```
+
+## High-Level Architecture
 
 ```mermaid
 flowchart LR
@@ -8,12 +36,14 @@ flowchart LR
         CLI[CLI]
         MCP[MCP Server]
         WEB[Web UI]
+        API[REST API]
         STL[Streamlit App]
     end
 
     subgraph Core
         SCAN[Compliance Engine]
         GEN[Snippet Generator]
+        POLICY[Policy Layering]
     end
 
     REG[Terraform Registry]
@@ -21,20 +51,22 @@ flowchart LR
 
     CLI --> SCAN
     WEB --> SCAN
+    API --> SCAN
     STL --> SCAN
     MCP --> SCAN
     MCP --> GEN
     SCAN --> TF
     GEN --> REG
-    MCP --> REG
+    SCAN --> POLICY
 ```
 
-## Compliance Flow
+## Detailed Flow
 
 ```mermaid
 flowchart TB
     INPUTS[Inputs: .tf, .tfvars, .tfstate] --> PARSE[Parse & Normalize]
-    PARSE --> RULES[Apply Rules TG001-TG005]
-    RULES --> REPORT[Findings + Summary Report]
-    REPORT --> OUTPUT[CLI JSON / UI Render / MCP Response]
+    PARSE --> SCHEMA[Provider Schema + Metadata]
+    SCHEMA --> RULES[Apply Guardrail Rules]
+    RULES --> REPORT[Findings + Summary]
+    REPORT --> OUTPUTS[CLI JSON • UI • MCP • REST]
 ```
