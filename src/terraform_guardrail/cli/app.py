@@ -17,6 +17,7 @@ from terraform_guardrail.policy_registry import (
     get_policy_bundle,
     list_policy_bundles,
 )
+from terraform_guardrail.registry_api import create_registry_app
 from terraform_guardrail.scanner.scan import scan_path
 from terraform_guardrail.web.app import create_app
 
@@ -32,9 +33,23 @@ def scan(
     state: Annotated[Path | None, typer.Option(help="Optional path to a .tfstate file.")] = None,
     format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
     schema: Annotated[bool, typer.Option(help="Enable schema-aware validation")] = False,
+    policy_bundle: Annotated[str | None, typer.Option(help="Policy bundle ID to evaluate")] = None,
+    policy_registry: Annotated[str | None, typer.Option(help="Policy registry URL")] = None,
+    policy_query: Annotated[str | None, typer.Option(help="OPA query override")] = None,
+    fail_on: Annotated[
+        str | None,
+        typer.Option(help="Fail if findings at/above severity: low, medium, high"),
+    ] = None,
 ) -> None:
     try:
-        report = scan_path(path=path, state_path=state, use_schema=schema)
+        report = scan_path(
+            path=path,
+            state_path=state,
+            use_schema=schema,
+            policy_bundle=policy_bundle,
+            policy_registry=policy_registry,
+            policy_query=policy_query,
+        )
     except Exception as exc:  # noqa: BLE001
         console.print(f"Scan failed: {exc}")
         raise typer.Exit(code=1) from exc
@@ -51,6 +66,9 @@ def scan(
             console.print(
                 f"- [{finding.severity}] {finding.rule_id} {finding.message} ({finding.path})"
             )
+
+    if fail_on:
+        _maybe_fail(report.summary, fail_on.lower())
 
 
 @app.command()
@@ -93,6 +111,16 @@ def api(
     uvicorn.run(create_api_app(), host=host, port=port)
 
 
+@app.command("registry-api")
+def registry_api(
+    host: Annotated[str, typer.Option(help="Bind host")] = "127.0.0.1",
+    port: Annotated[int, typer.Option(help="Bind port")] = 8090,
+) -> None:
+    import uvicorn
+
+    uvicorn.run(create_registry_app(), host=host, port=port)
+
+
 @policy_app.command("list")
 def list_policies(
     registry: Annotated[str | None, typer.Option(help="Policy registry URL")] = None,
@@ -125,6 +153,18 @@ def fetch_policy(
 
 def main() -> None:
     app()
+
+
+def _maybe_fail(summary, level: str) -> None:
+    if level not in {"low", "medium", "high"}:
+        console.print("Invalid fail-on severity. Use low, medium, or high.")
+        raise typer.Exit(code=2)
+    if level == "high" and summary.high > 0:
+        raise typer.Exit(code=1)
+    if level == "medium" and (summary.high + summary.medium) > 0:
+        raise typer.Exit(code=1)
+    if level == "low" and summary.findings > 0:
+        raise typer.Exit(code=1)
 
 
 if __name__ == "__main__":

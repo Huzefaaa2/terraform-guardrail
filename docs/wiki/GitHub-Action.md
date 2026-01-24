@@ -1,0 +1,41 @@
+# GitHub Action (Pre-apply / PR checks)
+
+Terraform Guardrail MCP ships with a composite GitHub Action that runs scans on pull requests.
+
+## Workflow example
+
+```yaml
+name: Guardrail
+
+on:
+  pull_request:
+    paths:
+      - "**/*.tf"
+      - "**/*.tfvars"
+      - "**/*.hcl"
+      - "**/*.tfstate"
+
+jobs:
+  guardrail:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/guardrail
+        with:
+          path: .
+          fail_on: medium
+```
+
+## Inputs
+
+- `path`: path to scan (default `.`)
+- `state`: optional path to `.tfstate`
+- `schema`: enable schema validation (`true`/`false`)
+- `fail_on`: fail threshold (`low`, `medium`, `high`)
+- `policy_bundle`: bundle ID to evaluate
+- `policy_registry`: registry URL
+- `policy_query`: override OPA query
+- `install_source`: `pypi` (default) or `repo`
+- `python_version`: Python version for runner
+
+Policy bundle evaluation requires the `opa` CLI in the runner.

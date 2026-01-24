@@ -56,6 +56,8 @@ flowchart LR
 - Dockerized REST API for CI/CD adoption
 - Docker Compose dev stack (API + UI + policy registry, optional analytics)
 - OPA bundle-ready policy registry for guardrail packs
+- Policy evaluation via OPA bundles with optional signature verification
+- Minimal policy registry API (versions + audit history)
 
 ## Supported Providers
 
@@ -82,6 +84,7 @@ flowchart LR
 | Multi-file scan | Yes (directory) | Yes (upload up to 10) |
 | Human-readable report | Yes | Yes |
 | Policy bundle registry | Yes | No |
+| Policy evaluation (OPA bundles) | Yes | No |
 
 ## Architecture (High-Level)
 
@@ -146,13 +149,16 @@ Legend: <span style="color: green">✅ Delivered</span> • <span style="color: 
 | Dockerized MCP + REST API | <span style="color: green">✅ Delivered (0.2.x)</span> |  |  |  |
 | CLI-first install | <span style="color: green">✅ Delivered (0.2.x)</span> |  |  |  |
 | Docker Compose local stack (API + UI + registry) | <span style="color: green">✅ Delivered (0.2.x)</span> |  |  |  |
-| GitHub Action pre-apply / PR checks | <span style="color: orange">🚧 Planned</span> |  |  |  |
+| GitHub Action pre-apply / PR checks | <span style="color: green">✅ Delivered (0.2.x)</span> |  |  |  |
 | Azure DevOps / Pipeline extension | <span style="color: orange">🚧 Planned</span> |  |  |  |
 | Policy layering model (base → env → app) | <span style="color: orange">🚧 Planned</span> |  |  |  |
 | Policy metadata + rich failure messages |  | <span style="color: orange">🚧 Planned</span> |  |  |
 | Drift-prevention rules before apply |  | <span style="color: orange">🚧 Planned</span> |  |  |
 | Central guardrail registry |  | <span style="color: orange">🚧 Planned</span> |  |  |
 | Policy versioning + audit trail |  | <span style="color: orange">🚧 Planned</span> |  |  |
+| Homebrew package (macOS) |  | <span style="color: orange">🚧 Planned</span> |  |  |
+| Chocolatey package (Windows) |  | <span style="color: orange">🚧 Planned</span> |  |  |
+| Linux install script (curl \| bash) |  | <span style="color: orange">🚧 Planned</span> |  |  |
 | Contributor governance + public roadmap |  |  | <span style="color: orange">🚧 Planned</span> |  |
 | Reference implementations across tools |  |  | <span style="color: orange">🚧 Planned</span> |  |
 | Cross-provider invariant enforcement |  |  | <span style="color: orange">🚧 Planned</span> |  |
@@ -209,6 +215,9 @@ terraform-guardrail generate aws aws_s3_bucket --name demo
 # list policy bundles
 terraform-guardrail policy list
 
+# registry API
+terraform-guardrail registry-api
+
 # MCP server (stdio)
 terraform-guardrail mcp
 
@@ -222,7 +231,7 @@ terraform-guardrail web
 pip install terraform-guardrail
 ```
 
-PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 0.2.9)
+PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 0.2.10)
 
 ## CLI examples
 
@@ -235,6 +244,12 @@ terraform-guardrail scan ./examples --state ./examples/sample.tfstate
 
 # enable schema-aware validation (requires terraform CLI + initialized workspace)
 terraform-guardrail scan ./examples --schema
+
+# evaluate OPA policy bundle (requires opa CLI)
+terraform-guardrail scan ./examples --policy-bundle baseline
+
+# fail CI on medium+ findings
+terraform-guardrail scan ./examples --fail-on medium
 ```
 
 ## Web UI
@@ -288,13 +303,13 @@ curl -X POST http://localhost:8080/scan \\
 Pull the published container image (built on release tags):
 
 ```bash
-docker pull ghcr.io/huzefaaa2/terraform-guardrail:v0.2.9
+docker pull ghcr.io/huzefaaa2/terraform-guardrail:v0.2.10
 ```
 
 Run it:
 
 ```bash
-docker run --rm -p 8080:8080 ghcr.io/huzefaaa2/terraform-guardrail:v0.2.9
+docker run --rm -p 8080:8080 ghcr.io/huzefaaa2/terraform-guardrail:v0.2.10
 ```
 
 ## Docker Compose Stack (Local Dev)
@@ -316,6 +331,7 @@ Service URLs:
 - API: http://localhost:8080
 - Streamlit UI: http://localhost:8501
 - Policy registry (static): http://localhost:8081
+- Policy registry API: http://localhost:8090
 - Prometheus (analytics profile): http://localhost:9090
 - Grafana (analytics profile): http://localhost:3000 (admin / guardrail)
 
@@ -330,25 +346,60 @@ terraform-guardrail policy list
 terraform-guardrail policy fetch baseline --destination ./policies
 ```
 
+Policy evaluation runs only when `--policy-bundle` is provided. If a bundle includes verification
+settings (public key + scope), the OPA CLI validates bundle signatures before evaluation.
+
+Registry API (Compose): `GET /bundles`, `GET /bundles/{id}/versions`, `GET /audit`.
+
 ```mermaid
 flowchart LR
     subgraph ComposeStack[Docker Compose Stack]
         UI([Streamlit UI])
         API([REST API])
         REG[(Policy Registry)]
+        REGAPI([Registry API])
         PROM[[Prometheus]]
         GRAF[[Grafana]]
     end
     UI --> API
     API -.-> REG
+    REGAPI -.-> REG
     API --> PROM
     PROM --> GRAF
 
     classDef core fill:#e8f5e9,stroke:#2e7d32,stroke-width:1px,color:#1b5e20;
     classDef optional fill:#fff3e0,stroke:#ef6c00,stroke-width:1px,color:#e65100;
-    class UI,API,REG core;
+    class UI,API,REG,REGAPI core;
     class PROM,GRAF optional;
 ```
+
+## GitHub Action (Pre-apply / PR checks)
+
+Use the built-in action to scan Terraform changes on pull requests:
+
+```yaml
+name: Guardrail
+
+on:
+  pull_request:
+    paths:
+      - "**/*.tf"
+      - "**/*.tfvars"
+      - "**/*.hcl"
+      - "**/*.tfstate"
+
+jobs:
+  guardrail:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/guardrail
+        with:
+          path: .
+          fail_on: medium
+```
+
+Set `policy_bundle` and `policy_registry` inputs to enable OPA policy bundles.
 
 ## Release Links
 
@@ -386,8 +437,8 @@ make changelog
 ### Release Helpers
 
 ```bash
-make release-dry VERSION=0.2.9
-make version-bump VERSION=0.2.9
+make release-dry VERSION=0.2.10
+make version-bump VERSION=0.2.10
 ```
 
 ## MCP tools (current)

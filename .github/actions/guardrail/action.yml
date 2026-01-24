@@ -1,0 +1,67 @@
+name: "Terraform Guardrail MCP"
+description: "Run Terraform Guardrail scans in CI for pre-apply checks."
+inputs:
+  path:
+    description: "Path to Terraform files or directory"
+    default: "."
+  state:
+    description: "Optional path to a .tfstate file"
+    default: ""
+  schema:
+    description: "Enable schema-aware validation (true/false)"
+    default: "false"
+  fail_on:
+    description: "Fail if findings at/above severity: low, medium, high"
+    default: "high"
+  policy_bundle:
+    description: "Policy bundle ID to evaluate"
+    default: ""
+  policy_registry:
+    description: "Policy registry URL"
+    default: ""
+  policy_query:
+    description: "OPA query override"
+    default: ""
+  install_source:
+    description: "Install source: pypi or repo"
+    default: "pypi"
+  python_version:
+    description: "Python version for the action"
+    default: "3.11"
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python_version }}
+    - name: Install Terraform Guardrail
+      shell: bash
+      run: |
+        if [ "${{ inputs.install_source }}" = "repo" ]; then
+          python -m pip install -e ".[dev]"
+        else
+          python -m pip install terraform-guardrail
+        fi
+    - name: Run Guardrail scan
+      shell: bash
+      run: |
+        args=(scan "${{ inputs.path }}")
+        if [ -n "${{ inputs.state }}" ]; then
+          args+=(--state "${{ inputs.state }}")
+        fi
+        if [ "${{ inputs.schema }}" = "true" ]; then
+          args+=(--schema)
+        fi
+        if [ -n "${{ inputs.policy_bundle }}" ]; then
+          args+=(--policy-bundle "${{ inputs.policy_bundle }}")
+        fi
+        if [ -n "${{ inputs.policy_registry }}" ]; then
+          args+=(--policy-registry "${{ inputs.policy_registry }}")
+        fi
+        if [ -n "${{ inputs.policy_query }}" ]; then
+          args+=(--policy-query "${{ inputs.policy_query }}")
+        fi
+        if [ -n "${{ inputs.fail_on }}" ]; then
+          args+=(--fail-on "${{ inputs.fail_on }}")
+        fi
+        terraform-guardrail "${args[@]}"

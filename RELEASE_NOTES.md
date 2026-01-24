@@ -1,15 +1,16 @@
-# v0.2.9
+# v0.2.10
 
 ## Highlights
-- OPA bundle support in the policy registry with CLI + API access.
-- Registry now serves signed bundle artifacts for guardrail packs.
+- OPA policy evaluation wired into scans with optional signature verification.
+- Minimal policy registry API with versioning + audit history.
+- GitHub Action for pre-apply / PR checks.
 
 ## Added
-- Policy registry module with bundle listing and download support.
-- `/policy-bundles` API endpoints for listing bundles.
-- CLI commands for policy bundle list and fetch.
-- OPA bundle artifacts for the baseline guardrail pack.
-- Extended Docker Compose documentation for OPA bundles.
+- Policy evaluation path (`--policy-bundle`) and fail-on severity control.
+- Registry API service and endpoints for bundles, versions, and audit.
+- GitHub Action workflow + composite action.
+- Roadmap additions for Homebrew/Chocolatey/Linux installers.
 
 ## Changed
-- Version bump to `0.2.9`.
+- Registry format now supports versions + entrypoints.
+- Version bump to `0.2.10`.

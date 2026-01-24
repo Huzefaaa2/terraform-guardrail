@@ -28,6 +28,19 @@ services:
     volumes:
       - ./ops/policy-registry:/usr/share/nginx/html:ro
 
+  policy-registry-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: terraform-guardrail-registry:local
+    command: ["terraform-guardrail", "registry-api", "--host", "0.0.0.0", "--port", "8090"]
+    ports:
+      - "8090:8090"
+    environment:
+      - GUARDRAIL_REGISTRY_DATA_DIR=/registry
+    volumes:
+      - ./ops/policy-registry:/registry:ro
+
   prometheus:
     image: prom/prometheus:latest
     profiles: ["analytics"]

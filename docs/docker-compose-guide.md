@@ -27,6 +27,7 @@ This brings up:
 - **REST API** at `http://localhost:8080`
 - **Streamlit UI** at `http://localhost:8501`
 - **Policy registry (static)** at `http://localhost:8081`
+- **Policy registry API** at `http://localhost:8090`
 
 ## Enable analytics (optional)
 
@@ -71,6 +72,16 @@ and versioned. It exposes:
 
 This is the foundation for the future policy registry service.
 
+### policy-registry-api
+
+Minimal FastAPI service that exposes bundle metadata, versions, and audit history:
+
+- `GET /bundles`
+- `GET /bundles/{bundle_id}`
+- `GET /bundles/{bundle_id}/versions`
+- `GET /audit`
+- `GET /bundles/{bundle_id}/audit`
+
 ### prometheus + grafana (analytics profile)
 
 Prometheus scrapes `/metrics` from the API and Grafana visualizes trends such as request volume
@@ -103,6 +114,12 @@ terraform-guardrail policy fetch baseline --destination ./policies
 - The policy registry volume can be replaced with your own policy packs.
 - Bundles use the OPA bundle format (tar.gz with `.manifest` and `policies/`).
 - Use the analytics profile only when you need observability.
+
+## Bundle signature verification
+
+If a bundle entry includes a `verification` block (public key + scope), Guardrail will call the
+`opa` CLI to verify signatures before evaluation. Add verification settings in `registry.json`
+and ensure the OPA binary is installed on the host or in the CI runner.
 
 ## Troubleshooting
 

@@ -1,13 +1,20 @@
 {
-  "version": "0.2",
+  "version": "0.3",
   "bundles": [
     {
       "id": "baseline",
       "title": "Baseline guardrails",
       "description": "Starter guardrails for secrets, schema usage, and hygiene.",
-      "version": "0.1.0",
-      "url": "/bundles/baseline.tar.gz",
-      "sha256": "543ddf0ca35854d7569e5bb39a5480303b3007c49ff1c170a8a2191e2a334c67"
+      "entrypoint": "data.guardrail.baseline.deny",
+      "latest": "0.1.0",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "url": "/bundles/baseline.tar.gz",
+          "sha256": "2de23c901c465cd78e92e2cd0d2d2594813328268fc2e771ff4d1c8199077704",
+          "published_at": "2026-01-24"
+        }
+      ]
     }
   ],
   "packs": [

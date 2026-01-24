@@ -1,0 +1,13 @@
+{
+  "events": [
+    {
+      "id": "evt-001",
+      "bundle_id": "baseline",
+      "version": "0.1.0",
+      "action": "publish",
+      "actor": "platform-team",
+      "timestamp": "2026-01-24T18:30:00Z",
+      "notes": "Initial baseline bundle published."
+    }
+  ]
+}

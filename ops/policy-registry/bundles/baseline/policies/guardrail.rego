@@ -2,7 +2,18 @@ package guardrail.baseline
 
 default allow = true
 
-deny[msg] {
-  input.resource_type == "aws_iam_access_key"
-  msg := "IAM access keys must be stored as ephemeral values."
+deny[output] {
+  file := input.files[_]
+  var_block := file.hcl.variable[_]
+  some name
+  attrs := var_block[name]
+  attrs.sensitive == true
+  not attrs.ephemeral
+
+  output := {
+    "message": sprintf("Variable %s should be marked ephemeral.", [name]),
+    "severity": "medium",
+    "rule_id": "OPA001",
+    "path": file.path
+  }
 }

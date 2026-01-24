@@ -36,17 +36,19 @@ flowchart LR
         UI([Streamlit UI])
         API([REST API])
         REG[(Policy Registry)]
+        REGAPI([Registry API])
         PROM[[Prometheus]]
         GRAF[[Grafana]]
     end
     UI --> API
     API -.-> REG
+    REGAPI -.-> REG
     API --> PROM
     PROM --> GRAF
 
     classDef core fill:#e8f5e9,stroke:#2e7d32,stroke-width:1px,color:#1b5e20;
     classDef optional fill:#fff3e0,stroke:#ef6c00,stroke-width:1px,color:#e65100;
-    class UI,API,REG core;
+    class UI,API,REG,REGAPI core;
     class PROM,GRAF optional;
 ```
 

@@ -34,6 +34,9 @@ class ScanRequest(BaseModel):
     path: str
     state_path: str | None = None
     use_schema: bool = False
+    policy_bundle: str | None = None
+    policy_registry: str | None = None
+    policy_query: str | None = None
 
 
 class ProviderRequest(BaseModel):
@@ -47,7 +50,7 @@ class SnippetRequest(BaseModel):
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="Terraform Guardrail MCP API", version="0.2.9")
+    app = FastAPI(title="Terraform Guardrail MCP API", version="0.2.10")
 
     @app.middleware("http")
     async def record_metrics(request, call_next):  # type: ignore[no-untyped-def]
@@ -75,7 +78,14 @@ def create_app() -> FastAPI:
         path = Path(request.path)
         state_path = Path(request.state_path) if request.state_path else None
         try:
-            report = scan_path(path, state_path=state_path, use_schema=request.use_schema)
+            report = scan_path(
+                path,
+                state_path=state_path,
+                use_schema=request.use_schema,
+                policy_bundle=request.policy_bundle,
+                policy_registry=request.policy_registry,
+                policy_query=request.policy_query,
+            )
         except Exception as exc:  # noqa: BLE001
             raise HTTPException(status_code=400, detail=str(exc)) from exc
         return report.model_dump()

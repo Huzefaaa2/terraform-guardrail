@@ -1,0 +1,19 @@
+name: Guardrail
+
+on:
+  pull_request:
+    paths:
+      - "**/*.tf"
+      - "**/*.tfvars"
+      - "**/*.hcl"
+      - "**/*.tfstate"
+
+jobs:
+  guardrail:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/guardrail
+        with:
+          path: .
+          fail_on: medium

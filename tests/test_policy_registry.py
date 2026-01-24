@@ -7,6 +7,7 @@ from typing import Any
 import pytest
 
 from terraform_guardrail.policy_registry import (
+    BundleVerification,
     PolicyBundle,
     PolicyRegistryError,
     download_bundle,
@@ -40,9 +41,15 @@ def test_list_policy_bundles(monkeypatch) -> None:
                         "id": "baseline",
                         "title": "Baseline",
                         "description": "Test bundle",
-                        "version": "0.1.0",
-                        "url": "/bundles/baseline.tar.gz",
-                        "sha256": "abc",
+                        "entrypoint": "data.guardrail.baseline.deny",
+                        "latest": "0.1.0",
+                        "versions": [
+                            {
+                                "version": "0.1.0",
+                                "url": "/bundles/baseline.tar.gz",
+                                "sha256": "abc",
+                            }
+                        ],
                     }
                 ]
             },
@@ -51,6 +58,7 @@ def test_list_policy_bundles(monkeypatch) -> None:
     monkeypatch.setattr("terraform_guardrail.policy_registry.requests.get", fake_get)
     bundles = list_policy_bundles("http://registry.local")
     assert bundles[0].url == "http://registry.local/bundles/baseline.tar.gz"
+    assert bundles[0].entrypoint == "data.guardrail.baseline.deny"
 
 
 def test_download_bundle(monkeypatch, tmp_path) -> None:
@@ -92,5 +100,31 @@ def test_download_bundle_checksum_mismatch(monkeypatch, tmp_path) -> None:
         url="http://registry.local/bundles/baseline.tar.gz",
         sha256="deadbeef",
     )
+    with pytest.raises(PolicyRegistryError):
+        download_bundle(bundle, tmp_path)
+
+
+def test_download_bundle_signature_requires_opa(monkeypatch, tmp_path) -> None:
+    bundle_bytes = io.BytesIO()
+    with tarfile.open(fileobj=bundle_bytes, mode="w:gz"):
+        pass
+    content = bundle_bytes.getvalue()
+
+    def fake_get(url: str, timeout: int = 30) -> FakeResponse:
+        return FakeResponse(200, content=content)
+
+    monkeypatch.setattr("terraform_guardrail.policy_registry.requests.get", fake_get)
+    monkeypatch.setattr("terraform_guardrail.policy_registry.shutil.which", lambda _: None)
+
+    bundle = PolicyBundle(
+        bundle_id="baseline",
+        title="Baseline",
+        description="Test bundle",
+        version="0.1.0",
+        url="http://registry.local/bundles/baseline.tar.gz",
+        sha256=None,
+        verification=BundleVerification(public_key="---BEGIN---"),
+    )
+
     with pytest.raises(PolicyRegistryError):
         download_bundle(bundle, tmp_path)

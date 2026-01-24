@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.10] - 2026-01-24
+
+### Added
+- OPA policy evaluation for scans with bundle support and signature verification hooks.
+- Policy registry API with bundle versions and audit history.
+- GitHub Action for pre-apply / PR checks.
+- Roadmap entries for Homebrew/Chocolatey/Linux installers.
+
+### Changed
+- Registry index format now supports versions + entrypoints.
+
 ## [0.2.9] - 2026-01-24
 
 ### Added

@@ -25,6 +25,7 @@ flowchart LR
 - [Diagrams](Diagrams.md)
 - [Comparison with Other Tools](Comparison.md)
 - [CLI Usage](CLI-Usage.md)
+- [GitHub Action](GitHub-Action.md)
 - [MCP Server](MCP-Server.md)
 - [Compliance Rules](Compliance-Rules.md)
 - [Streamlit Deployment](Streamlit-Deployment.md)
@@ -35,11 +36,12 @@ flowchart LR
 
 ## Latest Release
 
-- Version: 0.2.9
+- Version: 0.2.10
 - Container image: https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail
 - Supported providers: AWS, Azure, GCP, Kubernetes, Helm, OCI, Vault, Alicloud, vSphere
 - Local stack: Docker Compose (API + UI + policy registry, optional analytics)
 - Policy registry: OPA bundles published under `/bundles/*.tar.gz`
+- Policy evaluation available via CLI when OPA is installed
 
 ## Feature Matrix
 

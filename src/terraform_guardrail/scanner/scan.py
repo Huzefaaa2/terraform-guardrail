@@ -1,12 +1,18 @@
 from __future__ import annotations
 
 import json
+import os
 from collections.abc import Iterable
 from pathlib import Path
 
 import hcl2
 
 from terraform_guardrail.scanner.models import Finding, ScanReport, ScanSummary
+from terraform_guardrail.scanner.policy_eval import (
+    PolicyEvalError,
+    PolicyInputFile,
+    evaluate_policy_bundle,
+)
 from terraform_guardrail.scanner.rules import RULES, SENSITIVE_ASSIGN_RE, SENSITIVE_NAME_RE
 from terraform_guardrail.schema import (
     SchemaError,
@@ -22,6 +28,9 @@ def scan_path(
     path: Path | str,
     state_path: Path | str | None = None,
     use_schema: bool = False,
+    policy_bundle: str | None = None,
+    policy_registry: str | None = None,
+    policy_query: str | None = None,
 ) -> ScanReport:
     path = Path(path)
     state_path = Path(state_path) if state_path else None
@@ -37,18 +46,47 @@ def scan_path(
     report = ScanReport.empty(path)
     findings: list[Finding] = []
     scanned_files = 0
+    policy_inputs: list[PolicyInputFile] = []
+    policy_state: dict | None = None
 
     paths = _expand_paths(path)
     for file_path in paths:
         if file_path.suffix not in TERRAFORM_EXTS:
             continue
         scanned_files += 1
-        findings.extend(_scan_hcl_file(file_path, schema))
+        file_findings, hcl_data = _scan_hcl_file(file_path, schema)
+        findings.extend(file_findings)
+        if hcl_data is not None:
+            policy_inputs.append(PolicyInputFile(path=str(file_path), hcl=hcl_data))
 
     if state_path:
         if not state_path.exists():
             raise FileNotFoundError(f"State file not found: {state_path}")
-        findings.extend(_scan_state_file(state_path))
+        state_findings, state_data = _scan_state_file(state_path)
+        findings.extend(state_findings)
+        policy_state = state_data
+
+    bundle_id = policy_bundle or os.getenv("GUARDRAIL_POLICY_BUNDLE_ID")
+    if bundle_id:
+        try:
+            findings.extend(
+                evaluate_policy_bundle(
+                    bundle_id=bundle_id,
+                    registry_url=policy_registry,
+                    files=policy_inputs,
+                    state=policy_state,
+                    policy_query=policy_query,
+                )
+            )
+        except PolicyEvalError as exc:
+            findings.append(
+                Finding(
+                    rule_id="OPA_EVAL",
+                    severity="low",
+                    message=f"Policy evaluation failed: {exc}",
+                    path=str(path),
+                )
+            )
 
     report.findings = findings
     report.summary = _build_summary(scanned_files, findings)
@@ -61,7 +99,7 @@ def _expand_paths(path: Path) -> Iterable[Path]:
     return [path]
 
 
-def _scan_hcl_file(path: Path, schema: dict | None) -> list[Finding]:
+def _scan_hcl_file(path: Path, schema: dict | None) -> tuple[list[Finding], dict | None]:
     findings: list[Finding] = []
     content = path.read_text(encoding="utf-8")
 
@@ -91,7 +129,7 @@ def _scan_hcl_file(path: Path, schema: dict | None) -> list[Finding]:
                 path=str(path),
             )
         )
-        return findings
+        return findings, None
 
     variables = data.get("variable", [])
     for block in variables:
@@ -125,10 +163,10 @@ def _scan_hcl_file(path: Path, schema: dict | None) -> list[Finding]:
     if schema:
         findings.extend(_schema_findings(data, schema, path))
 
-    return findings
+    return findings, data
 
 
-def _scan_state_file(path: Path) -> list[Finding]:
+def _scan_state_file(path: Path) -> tuple[list[Finding], dict | None]:
     findings: list[Finding] = []
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -141,7 +179,7 @@ def _scan_state_file(path: Path) -> list[Finding]:
                 path=str(path),
             )
         )
-        return findings
+        return findings, None
 
     for resource in data.get("resources", []):
         for instance in resource.get("instances", []) or []:
@@ -166,7 +204,7 @@ def _scan_state_file(path: Path) -> list[Finding]:
                         )
                     )
 
-    return findings
+    return findings, data
 
 
 def _schema_findings(hcl_data: dict, schema: dict, path: Path) -> list[Finding]:
