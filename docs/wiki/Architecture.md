@@ -53,8 +53,8 @@ flowchart LR
     DEV --> UI[Streamlit UI]
     DEV --> API[REST API]
     DEV --> MCP[MCP for AI Assistants]
-    DEV --> CI[GitHub Action (planned)]
-    DEV --> ADO[Azure DevOps (planned)]
+    DEV --> CI[GitHub Action]
+    DEV --> ADO[Azure DevOps]
     CLI --> GUARDRAIL
     UI --> GUARDRAIL
     API --> GUARDRAIL
