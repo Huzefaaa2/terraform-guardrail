@@ -11,6 +11,7 @@ from rich.json import JSON
 from terraform_guardrail.generator import generate_snippet
 from terraform_guardrail.mcp.server import run_stdio
 from terraform_guardrail.scanner.scan import scan_path
+from terraform_guardrail.api.app import create_app as create_api_app
 from terraform_guardrail.web.app import create_app
 
 app = typer.Typer(add_completion=False)
@@ -72,6 +73,16 @@ def web(
     import uvicorn
 
     uvicorn.run(create_app(), host=host, port=port)
+
+
+@app.command()
+def api(
+    host: Annotated[str, typer.Option(help="Bind host")] = "127.0.0.1",
+    port: Annotated[int, typer.Option(help="Bind port")] = 8080,
+) -> None:
+    import uvicorn
+
+    uvicorn.run(create_api_app(), host=host, port=port)
 
 
 def main() -> None:

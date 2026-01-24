@@ -148,6 +148,30 @@ Live app: https://terraform-guardrail.streamlit.app/
 3. Set the main file path to `streamlit_app.py`.
 4. Deploy (Streamlit will install from `requirements.txt`).
 
+## REST API (Docker)
+
+Build and run the API server:
+
+```bash
+docker build -t terraform-guardrail .
+docker run --rm -p 8080:8080 terraform-guardrail
+```
+
+API endpoints:
+
+- `GET /health`
+- `POST /scan`
+- `POST /provider-metadata`
+- `POST /generate-snippet`
+
+Example request:
+
+```bash
+curl -X POST http://localhost:8080/scan \\
+  -H "Content-Type: application/json" \\
+  -d '{"path":"./examples","use_schema":false}'
+```
+
 ## Release Links
 
 - PyPI: https://pypi.org/project/terraform-guardrail/
