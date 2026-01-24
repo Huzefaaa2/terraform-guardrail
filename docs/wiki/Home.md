@@ -15,7 +15,8 @@ compliance rules, and deployment guides for the CLI, MCP server, and Streamlit U
 - [Release Process](Release-Process.md)
 - [Diagrams](Diagrams.md)
 - Supported providers: AWS, Azure, GCP, Kubernetes, Helm, OCI, Vault, Alicloud, vSphere
- - Latest version: 0.2.5
+ - Latest version: 0.2.6
+ - Container image: https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail
 
 ## Feature Matrix
 

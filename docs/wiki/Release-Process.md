@@ -35,3 +35,9 @@ Setup:
 - Push a tag like `v0.2.1` to trigger the workflow.
 
 The workflow reads `RELEASE_NOTES.md` for release body content.
+
+## Container Image
+
+On tag pushes, a separate workflow builds and publishes a container image to GHCR:
+
+- https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail

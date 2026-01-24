@@ -1,11 +1,12 @@
-# v0.2.5
+# v0.2.6
 
 ## Highlights
-- PyPI description aligned with updated README.
-- Removed Mermaid blocks from PyPI view with direct diagram links.
+- Docker image publishing on release tags (GHCR).
+- REST API is now container-ready for CI/CD adoption.
 
 ## Added
-- Architecture diagram links for PyPI readers.
+- GitHub Action to build and push container images.
+- Release table with history in `RELEASE.md`.
 
 ## Changed
-- Version bump to `0.2.5`.
+- Version bump to `0.2.6`.

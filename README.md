@@ -114,7 +114,7 @@ terraform-guardrail web
 pip install terraform-guardrail
 ```
 
-PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 0.2.5)
+PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 0.2.6)
 
 ## CLI examples
 
@@ -172,10 +172,26 @@ curl -X POST http://localhost:8080/scan \\
   -d '{"path":"./examples","use_schema":false}'
 ```
 
+## Container Image
+
+Pull the published container image (built on release tags):
+
+```bash
+docker pull ghcr.io/huzefaaa2/terraform-guardrail:v0.2.6
+```
+
+Run it:
+
+```bash
+docker run --rm -p 8080:8080 ghcr.io/huzefaaa2/terraform-guardrail:v0.2.6
+```
+
 ## Release Links
 
 - PyPI: https://pypi.org/project/terraform-guardrail/
 - GitHub Releases: https://github.com/Huzefaaa2/terraform-guardrail/releases
+- Container Image: https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail
+- Release history: `RELEASE.md`
 
 ## Deployment Guide
 

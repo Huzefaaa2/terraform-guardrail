@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.6] - 2026-01-01
+
+### Added
+- GHCR container image publishing on release tags.
+- `RELEASE.md` with a release summary table.
+
+### Changed
+- README now includes container pull/run instructions.
+
 ## [0.2.5] - 2026-01-01
 
 ### Added
