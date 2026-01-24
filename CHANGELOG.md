@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.8] - 2026-01-24
+
+### Added
+- Docker Compose stack for API, Streamlit UI, and policy registry.
+- Optional analytics profile with Prometheus + Grafana.
+- `/metrics` endpoint for Prometheus scraping.
+
+### Changed
+- Documentation updated for the compose stack and new diagrams.
+
 ## [0.2.7] - 2026-01-24
 
 ### Added

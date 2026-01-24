@@ -28,15 +28,17 @@ flowchart LR
 - [MCP Server](MCP-Server.md)
 - [Compliance Rules](Compliance-Rules.md)
 - [Streamlit Deployment](Streamlit-Deployment.md)
+- [Docker Compose Stack](Docker-Compose.md)
 - [Live Streamlit App](https://terraform-guardrail.streamlit.app/)
 - [PyPI Package](https://pypi.org/project/terraform-guardrail/)
 - [Release Process](Release-Process.md)
 
 ## Latest Release
 
-- Version: 0.2.7
+- Version: 0.2.8
 - Container image: https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail
 - Supported providers: AWS, Azure, GCP, Kubernetes, Helm, OCI, Vault, Alicloud, vSphere
+- Local stack: Docker Compose (API + UI + policy registry, optional analytics)
 
 ## Feature Matrix
 

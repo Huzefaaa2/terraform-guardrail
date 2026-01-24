@@ -1,14 +1,28 @@
 from __future__ import annotations
 
+import time
 from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import Response
+from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 from pydantic import BaseModel
 
 from terraform_guardrail.generator import generate_snippet
 from terraform_guardrail.registry_client import RegistryError, get_provider_metadata
 from terraform_guardrail.scanner.scan import scan_path
+
+REQUEST_COUNT = Counter(
+    "guardrail_requests_total",
+    "Total API requests",
+    ["path", "method", "status"],
+)
+REQUEST_LATENCY = Histogram(
+    "guardrail_request_duration_seconds",
+    "API request latency in seconds",
+    ["path"],
+)
 
 
 class ScanRequest(BaseModel):
@@ -28,11 +42,28 @@ class SnippetRequest(BaseModel):
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="Terraform Guardrail MCP API", version="0.2.5")
+    app = FastAPI(title="Terraform Guardrail MCP API", version="0.2.8")
+
+    @app.middleware("http")
+    async def record_metrics(request, call_next):  # type: ignore[no-untyped-def]
+        start = time.monotonic()
+        response = await call_next(request)
+        duration = time.monotonic() - start
+        REQUEST_COUNT.labels(
+            request.url.path,
+            request.method,
+            str(response.status_code),
+        ).inc()
+        REQUEST_LATENCY.labels(request.url.path).observe(duration)
+        return response
 
     @app.get("/health")
     def health() -> dict[str, str]:
         return {"status": "ok"}
+
+    @app.get("/metrics")
+    def metrics() -> Response:
+        return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
     @app.post("/scan")
     def scan(request: ScanRequest) -> dict[str, Any]:

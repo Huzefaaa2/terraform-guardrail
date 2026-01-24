@@ -54,6 +54,7 @@ flowchart LR
 - MCP tools for scan, metadata, and snippet generation
 - Streamlit and web UI for instant reporting
 - Dockerized REST API for CI/CD adoption
+- Docker Compose dev stack (API + UI + policy registry, optional analytics)
 
 ## Supported Providers
 
@@ -142,6 +143,7 @@ Legend: <span style="color: green">✅ Delivered</span> • <span style="color: 
 | --- | --- | --- | --- | --- |
 | Dockerized MCP + REST API | <span style="color: green">✅ Delivered (0.2.x)</span> |  |  |  |
 | CLI-first install | <span style="color: green">✅ Delivered (0.2.x)</span> |  |  |  |
+| Docker Compose local stack (API + UI + registry) | <span style="color: green">✅ Delivered (0.2.x)</span> |  |  |  |
 | GitHub Action pre-apply / PR checks | <span style="color: orange">🚧 Planned</span> |  |  |  |
 | Azure DevOps / Pipeline extension | <span style="color: orange">🚧 Planned</span> |  |  |  |
 | Policy layering model (base → env → app) | <span style="color: orange">🚧 Planned</span> |  |  |  |
@@ -215,7 +217,7 @@ terraform-guardrail web
 pip install terraform-guardrail
 ```
 
-PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 0.2.7)
+PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 0.2.8)
 
 ## CLI examples
 
@@ -261,6 +263,7 @@ docker run --rm -p 8080:8080 terraform-guardrail
 API endpoints:
 
 - `GET /health`
+- `GET /metrics`
 - `POST /scan`
 - `POST /provider-metadata`
 - `POST /generate-snippet`
@@ -278,13 +281,55 @@ curl -X POST http://localhost:8080/scan \\
 Pull the published container image (built on release tags):
 
 ```bash
-docker pull ghcr.io/huzefaaa2/terraform-guardrail:v0.2.7
+docker pull ghcr.io/huzefaaa2/terraform-guardrail:v0.2.8
 ```
 
 Run it:
 
 ```bash
-docker run --rm -p 8080:8080 ghcr.io/huzefaaa2/terraform-guardrail:v0.2.7
+docker run --rm -p 8080:8080 ghcr.io/huzefaaa2/terraform-guardrail:v0.2.8
+```
+
+## Docker Compose Stack (Local Dev)
+
+Bring up API + Streamlit UI + policy registry:
+
+```bash
+docker compose up --build
+```
+
+Enable optional analytics (Prometheus + Grafana):
+
+```bash
+docker compose --profile analytics up --build
+```
+
+Service URLs:
+
+- API: http://localhost:8080
+- Streamlit UI: http://localhost:8501
+- Policy registry (static): http://localhost:8081
+- Prometheus (analytics profile): http://localhost:9090
+- Grafana (analytics profile): http://localhost:3000 (admin / guardrail)
+
+```mermaid
+flowchart LR
+    subgraph ComposeStack[Docker Compose Stack]
+        UI([Streamlit UI])
+        API([REST API])
+        REG[(Policy Registry)]
+        PROM[[Prometheus]]
+        GRAF[[Grafana]]
+    end
+    UI --> API
+    API -.-> REG
+    API --> PROM
+    PROM --> GRAF
+
+    classDef core fill:#e8f5e9,stroke:#2e7d32,stroke-width:1px,color:#1b5e20;
+    classDef optional fill:#fff3e0,stroke:#ef6c00,stroke-width:1px,color:#e65100;
+    class UI,API,REG core;
+    class PROM,GRAF optional;
 ```
 
 ## Release Links
@@ -323,8 +368,8 @@ make changelog
 ### Release Helpers
 
 ```bash
-make release-dry VERSION=0.2.7
-make version-bump VERSION=0.2.7
+make release-dry VERSION=0.2.8
+make version-bump VERSION=0.2.8
 ```
 
 ## MCP tools (current)

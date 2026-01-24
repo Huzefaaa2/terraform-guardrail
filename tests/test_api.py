@@ -14,6 +14,13 @@ def test_health_endpoint() -> None:
     assert response.json() == {"status": "ok"}
 
 
+def test_metrics_endpoint() -> None:
+    client = TestClient(create_app())
+    response = client.get("/metrics")
+    assert response.status_code == 200
+    assert "guardrail_requests_total" in response.text
+
+
 def test_generate_snippet_endpoint() -> None:
     client = TestClient(create_app())
     response = client.post(

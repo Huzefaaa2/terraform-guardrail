@@ -1,10 +1,14 @@
-# v0.2.7
+# v0.2.8
 
 ## Highlights
-- GHCR container publishing fixed and validated on tag releases.
+- Docker Compose stack for API, Streamlit UI, and policy registry.
+- Optional analytics profile with Prometheus + Grafana.
 
 ## Added
-- Manual workflow dispatch support for CI and container workflows.
+- `/metrics` endpoint for Prometheus scraping.
+- Streamlit Dockerfile for the UI container.
+- Policy registry stub assets for local policy pack hosting.
+- Compose documentation in README and Wiki.
 
 ## Changed
-- Version bump to `0.2.7`.
+- Version bump to `0.2.8`.

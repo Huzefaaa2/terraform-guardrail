@@ -2,6 +2,8 @@
 
 | Version | Date (UTC) | Highlights |
 | --- | --- | --- |
+| 0.2.8 | 2026-01-24 | Docker Compose stack (API + UI + policy registry) and optional analytics |
+| 0.2.7 | 2026-01-24 | GHCR publishing fixes, manual workflow dispatch |
 | 0.2.6 | 2026-01-01 | Docker image publishing, REST API container workflow, release table added |
 | 0.2.5 | 2026-01-01 | PyPI-friendly README update, diagram links for PyPI |
 | 0.2.4 | 2026-01-01 | Multi-file Streamlit scan, CSV export with file metadata |
