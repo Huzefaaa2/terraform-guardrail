@@ -1,0 +1,9 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: guardrail-api
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - guardrail-api:8080

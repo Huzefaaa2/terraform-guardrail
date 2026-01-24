@@ -1,0 +1,50 @@
+name: terraform-guardrail
+
+services:
+  guardrail-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: terraform-guardrail-api:local
+    ports:
+      - "8080:8080"
+    environment:
+      - GUARDRAIL_POLICY_REGISTRY_URL=http://policy-registry:80
+
+  guardrail-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit
+    image: terraform-guardrail-ui:local
+    ports:
+      - "8501:8501"
+    depends_on:
+      - guardrail-api
+
+  policy-registry:
+    image: nginx:alpine
+    ports:
+      - "8081:80"
+    volumes:
+      - ./ops/policy-registry:/usr/share/nginx/html:ro
+
+  prometheus:
+    image: prom/prometheus:latest
+    profiles: ["analytics"]
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./ops/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+
+  grafana:
+    image: grafana/grafana:latest
+    profiles: ["analytics"]
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=guardrail
+    volumes:
+      - ./ops/grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus

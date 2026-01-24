@@ -1,0 +1,11 @@
+{
+  "version": "0.1",
+  "packs": [
+    {
+      "id": "baseline",
+      "title": "Baseline guardrails",
+      "description": "Starter guardrails for secrets, schema usage, and hygiene.",
+      "path": "/packs/baseline/README.md"
+    }
+  ]
+}
