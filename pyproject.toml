@@ -34,6 +34,7 @@ dev = [
   "pytest>=8.0",
   "ruff>=0.3",
   "git-cliff>=2.4.0",
+  "httpx>=0.27",
 ]
 
 [project.scripts]
