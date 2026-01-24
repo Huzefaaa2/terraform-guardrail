@@ -312,6 +312,8 @@ Service URLs:
 - Prometheus (analytics profile): http://localhost:9090
 - Grafana (analytics profile): http://localhost:3000 (admin / guardrail)
 
+More details: `docs/docker-compose-guide.md`.
+
 ```mermaid
 flowchart LR
     subgraph ComposeStack[Docker Compose Stack]

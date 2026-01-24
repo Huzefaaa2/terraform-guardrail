@@ -4,6 +4,9 @@ Terraform Guardrail MCP ships with a local Docker Compose stack that brings up t
 Streamlit UI, and a lightweight policy registry. Optional analytics (Prometheus + Grafana) can be
 enabled via Compose profiles.
 
+For a deeper guide, see the repository document:
+https://github.com/Huzefaaa2/terraform-guardrail/blob/main/docs/docker-compose-guide.md
+
 ## Start the stack
 
 ```bash
