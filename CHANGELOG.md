@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.7] - 2026-01-24
+
+### Added
+- Manual workflow dispatch support for CI and container workflows.
+
+### Changed
+- GHCR image tags now use lowercase owner.
+
 ## [0.2.6] - 2026-01-01
 
 ### Added

@@ -1,12 +1,10 @@
-# v0.2.6
+# v0.2.7
 
 ## Highlights
-- Docker image publishing on release tags (GHCR).
-- REST API is now container-ready for CI/CD adoption.
+- GHCR container publishing fixed and validated on tag releases.
 
 ## Added
-- GitHub Action to build and push container images.
-- Release table with history in `RELEASE.md`.
+- Manual workflow dispatch support for CI and container workflows.
 
 ## Changed
-- Version bump to `0.2.6`.
+- Version bump to `0.2.7`.
