@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.9] - 2026-01-24
+
+### Added
+- OPA bundle support for the policy registry with CLI + API access.
+- Registry bundle artifacts for baseline guardrails.
+
+### Changed
+- Policy registry documentation now covers OPA bundles.
+
 ## [0.2.8] - 2026-01-24
 
 ### Added

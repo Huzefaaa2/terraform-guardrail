@@ -14,7 +14,7 @@ pip install -e ".[dev]"
 pip install terraform-guardrail
 ```
 
-PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 0.2.8)
+PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 0.2.9)
 
 ## Scan
 
@@ -29,4 +29,11 @@ terraform-guardrail scan ./examples --schema
 ```bash
 terraform-guardrail generate aws aws_s3_bucket --name demo
 terraform-guardrail generate azure azurerm_storage_account --name demo
+```
+
+## Policy registry (OPA bundles)
+
+```bash
+terraform-guardrail policy list
+terraform-guardrail policy fetch baseline --destination ./policies
 ```

@@ -62,11 +62,12 @@ scanner logic as the CLI and API.
 
 ### policy-registry
 
-A static policy registry stub (served by Nginx) that demonstrates how policy packs can be hosted
+A static policy registry stub (served by Nginx) that demonstrates how OPA bundles can be hosted
 and versioned. It exposes:
 
 - `/registry.json` – pack index
-- `/packs/baseline/README.md` – sample policy pack
+- `/bundles/baseline.tar.gz` – sample OPA bundle
+- `/packs/baseline/README.md` – legacy doc pack
 
 This is the foundation for the future policy registry service.
 
@@ -89,10 +90,18 @@ and latency.
 2. Post a scan request to `/scan` with the file path or mounted workspace.
 3. Use the JSON response in your pipeline checks.
 
+### Pull policy bundles locally
+
+```bash
+terraform-guardrail policy list
+terraform-guardrail policy fetch baseline --destination ./policies
+```
+
 ## Configuration notes
 
 - Change ports in `docker-compose.yml` if you have conflicts.
 - The policy registry volume can be replaced with your own policy packs.
+- Bundles use the OPA bundle format (tar.gz with `.manifest` and `policies/`).
 - Use the analytics profile only when you need observability.
 
 ## Troubleshooting

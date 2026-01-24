@@ -11,10 +11,18 @@ from rich.json import JSON
 from terraform_guardrail.api.app import create_app as create_api_app
 from terraform_guardrail.generator import generate_snippet
 from terraform_guardrail.mcp.server import run_stdio
+from terraform_guardrail.policy_registry import (
+    PolicyRegistryError,
+    download_bundle,
+    get_policy_bundle,
+    list_policy_bundles,
+)
 from terraform_guardrail.scanner.scan import scan_path
 from terraform_guardrail.web.app import create_app
 
 app = typer.Typer(add_completion=False)
+policy_app = typer.Typer(help="Policy registry commands.")
+app.add_typer(policy_app, name="policy")
 console = Console()
 
 
@@ -83,6 +91,36 @@ def api(
     import uvicorn
 
     uvicorn.run(create_api_app(), host=host, port=port)
+
+
+@policy_app.command("list")
+def list_policies(
+    registry: Annotated[str | None, typer.Option(help="Policy registry URL")] = None,
+) -> None:
+    try:
+        bundles = list_policy_bundles(registry)
+    except PolicyRegistryError as exc:
+        console.print(f"Policy registry error: {exc}")
+        raise typer.Exit(code=1) from exc
+    for bundle in bundles:
+        console.print(f"- {bundle.bundle_id} ({bundle.version or 'unknown'}) {bundle.title}")
+
+
+@policy_app.command("fetch")
+def fetch_policy(
+    bundle_id: Annotated[str, typer.Argument(help="Bundle ID to download")],
+    destination: Annotated[
+        Path, typer.Option(help="Destination directory for the bundle")
+    ] = Path("./policies"),
+    registry: Annotated[str | None, typer.Option(help="Policy registry URL")] = None,
+) -> None:
+    try:
+        bundle = get_policy_bundle(bundle_id, registry)
+        bundle_path = download_bundle(bundle, destination)
+    except PolicyRegistryError as exc:
+        console.print(f"Policy registry error: {exc}")
+        raise typer.Exit(code=1) from exc
+    console.print(f"Bundle downloaded to {bundle_path}")
 
 
 def main() -> None:

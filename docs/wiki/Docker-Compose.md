@@ -30,4 +30,12 @@ docker compose --profile analytics up --build
 ## Notes
 
 - The policy registry is a static stub used to demonstrate policy pack hosting.
+- The registry now publishes OPA bundles under `/bundles/*.tar.gz`.
 - The API exposes `/metrics` for Prometheus scraping.
+
+## Bundle CLI
+
+```bash
+terraform-guardrail policy list
+terraform-guardrail policy fetch baseline --destination ./policies
+```

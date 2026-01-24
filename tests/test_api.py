@@ -5,6 +5,7 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 
 from terraform_guardrail.api.app import create_app
+from terraform_guardrail.policy_registry import PolicyBundle
 
 
 def test_health_endpoint() -> None:
@@ -48,6 +49,50 @@ def test_provider_metadata_endpoint(monkeypatch) -> None:
     response = client.post("/provider-metadata", json={"provider": "aws"})
     assert response.status_code == 200
     assert response.json()["latest_version"] == "1.2.3"
+
+
+def test_policy_bundles_endpoint(monkeypatch) -> None:
+    client = TestClient(create_app())
+
+    def fake_list() -> list[PolicyBundle]:
+        return [
+            PolicyBundle(
+                bundle_id="baseline",
+                title="Baseline",
+                description="Test bundle",
+                version="0.1.0",
+                url="http://registry.local/bundles/baseline.tar.gz",
+                sha256="abc",
+            )
+        ]
+
+    monkeypatch.setattr("terraform_guardrail.api.app.list_policy_bundles", fake_list)
+
+    response = client.get("/policy-bundles")
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["bundles"][0]["id"] == "baseline"
+
+
+def test_policy_bundle_endpoint(monkeypatch) -> None:
+    client = TestClient(create_app())
+
+    def fake_get(bundle_id: str) -> PolicyBundle:
+        assert bundle_id == "baseline"
+        return PolicyBundle(
+            bundle_id="baseline",
+            title="Baseline",
+            description="Test bundle",
+            version="0.1.0",
+            url="http://registry.local/bundles/baseline.tar.gz",
+            sha256="abc",
+        )
+
+    monkeypatch.setattr("terraform_guardrail.api.app.get_policy_bundle", fake_get)
+
+    response = client.get("/policy-bundles/baseline")
+    assert response.status_code == 200
+    assert response.json()["id"] == "baseline"
 
 
 def test_scan_endpoint(tmp_path: Path) -> None:

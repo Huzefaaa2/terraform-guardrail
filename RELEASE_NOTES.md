@@ -1,14 +1,15 @@
-# v0.2.8
+# v0.2.9
 
 ## Highlights
-- Docker Compose stack for API, Streamlit UI, and policy registry.
-- Optional analytics profile with Prometheus + Grafana.
+- OPA bundle support in the policy registry with CLI + API access.
+- Registry now serves signed bundle artifacts for guardrail packs.
 
 ## Added
-- `/metrics` endpoint for Prometheus scraping.
-- Streamlit Dockerfile for the UI container.
-- Policy registry stub assets for local policy pack hosting.
-- Compose documentation in README and Wiki.
+- Policy registry module with bundle listing and download support.
+- `/policy-bundles` API endpoints for listing bundles.
+- CLI commands for policy bundle list and fetch.
+- OPA bundle artifacts for the baseline guardrail pack.
+- Extended Docker Compose documentation for OPA bundles.
 
 ## Changed
-- Version bump to `0.2.8`.
+- Version bump to `0.2.9`.

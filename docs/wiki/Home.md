@@ -35,10 +35,11 @@ flowchart LR
 
 ## Latest Release
 
-- Version: 0.2.8
+- Version: 0.2.9
 - Container image: https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail
 - Supported providers: AWS, Azure, GCP, Kubernetes, Helm, OCI, Vault, Alicloud, vSphere
 - Local stack: Docker Compose (API + UI + policy registry, optional analytics)
+- Policy registry: OPA bundles published under `/bundles/*.tar.gz`
 
 ## Feature Matrix
 

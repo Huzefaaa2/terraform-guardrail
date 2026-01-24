@@ -55,6 +55,7 @@ flowchart LR
 - Streamlit and web UI for instant reporting
 - Dockerized REST API for CI/CD adoption
 - Docker Compose dev stack (API + UI + policy registry, optional analytics)
+- OPA bundle-ready policy registry for guardrail packs
 
 ## Supported Providers
 
@@ -80,6 +81,7 @@ flowchart LR
 | Snippet generation | Yes | No |
 | Multi-file scan | Yes (directory) | Yes (upload up to 10) |
 | Human-readable report | Yes | Yes |
+| Policy bundle registry | Yes | No |
 
 ## Architecture (High-Level)
 
@@ -204,6 +206,9 @@ terraform-guardrail scan examples
 # snippet generation
 terraform-guardrail generate aws aws_s3_bucket --name demo
 
+# list policy bundles
+terraform-guardrail policy list
+
 # MCP server (stdio)
 terraform-guardrail mcp
 
@@ -217,7 +222,7 @@ terraform-guardrail web
 pip install terraform-guardrail
 ```
 
-PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 0.2.8)
+PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 0.2.9)
 
 ## CLI examples
 
@@ -266,6 +271,8 @@ API endpoints:
 - `GET /metrics`
 - `POST /scan`
 - `POST /provider-metadata`
+- `GET /policy-bundles`
+- `GET /policy-bundles/{bundle_id}`
 - `POST /generate-snippet`
 
 Example request:
@@ -281,13 +288,13 @@ curl -X POST http://localhost:8080/scan \\
 Pull the published container image (built on release tags):
 
 ```bash
-docker pull ghcr.io/huzefaaa2/terraform-guardrail:v0.2.8
+docker pull ghcr.io/huzefaaa2/terraform-guardrail:v0.2.9
 ```
 
 Run it:
 
 ```bash
-docker run --rm -p 8080:8080 ghcr.io/huzefaaa2/terraform-guardrail:v0.2.8
+docker run --rm -p 8080:8080 ghcr.io/huzefaaa2/terraform-guardrail:v0.2.9
 ```
 
 ## Docker Compose Stack (Local Dev)
@@ -313,6 +320,15 @@ Service URLs:
 - Grafana (analytics profile): http://localhost:3000 (admin / guardrail)
 
 More details: `docs/docker-compose-guide.md`.
+
+## Policy Registry (OPA Bundles)
+
+The local policy registry exposes OPA bundles for guardrail packs. Fetch bundles with the CLI:
+
+```bash
+terraform-guardrail policy list
+terraform-guardrail policy fetch baseline --destination ./policies
+```
 
 ```mermaid
 flowchart LR
@@ -370,8 +386,8 @@ make changelog
 ### Release Helpers
 
 ```bash
-make release-dry VERSION=0.2.8
-make version-bump VERSION=0.2.8
+make release-dry VERSION=0.2.9
+make version-bump VERSION=0.2.9
 ```
 
 ## MCP tools (current)

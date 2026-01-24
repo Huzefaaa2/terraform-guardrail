@@ -10,6 +10,11 @@ from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_
 from pydantic import BaseModel
 
 from terraform_guardrail.generator import generate_snippet
+from terraform_guardrail.policy_registry import (
+    PolicyRegistryError,
+    get_policy_bundle,
+    list_policy_bundles,
+)
 from terraform_guardrail.registry_client import RegistryError, get_provider_metadata
 from terraform_guardrail.scanner.scan import scan_path
 
@@ -42,7 +47,7 @@ class SnippetRequest(BaseModel):
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="Terraform Guardrail MCP API", version="0.2.8")
+    app = FastAPI(title="Terraform Guardrail MCP API", version="0.2.9")
 
     @app.middleware("http")
     async def record_metrics(request, call_next):  # type: ignore[no-untyped-def]
@@ -81,6 +86,22 @@ def create_app() -> FastAPI:
             return get_provider_metadata(request.provider)
         except RegistryError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.get("/policy-bundles")
+    def policy_bundles() -> dict[str, Any]:
+        try:
+            bundles = list_policy_bundles()
+        except PolicyRegistryError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        return {"bundles": [bundle.to_dict() for bundle in bundles]}
+
+    @app.get("/policy-bundles/{bundle_id}")
+    def policy_bundle(bundle_id: str) -> dict[str, Any]:
+        try:
+            bundle = get_policy_bundle(bundle_id)
+        except PolicyRegistryError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        return bundle.to_dict()
 
     @app.post("/generate-snippet")
     def snippet(request: SnippetRequest) -> dict[str, Any]:

@@ -1,10 +1,20 @@
 {
-  "version": "0.1",
-  "packs": [
+  "version": "0.2",
+  "bundles": [
     {
       "id": "baseline",
       "title": "Baseline guardrails",
       "description": "Starter guardrails for secrets, schema usage, and hygiene.",
+      "version": "0.1.0",
+      "url": "/bundles/baseline.tar.gz",
+      "sha256": "543ddf0ca35854d7569e5bb39a5480303b3007c49ff1c170a8a2191e2a334c67"
+    }
+  ],
+  "packs": [
+    {
+      "id": "baseline",
+      "title": "Baseline guardrails (legacy)",
+      "description": "Legacy pack reference for documentation browsing.",
       "path": "/packs/baseline/README.md"
     }
   ]
