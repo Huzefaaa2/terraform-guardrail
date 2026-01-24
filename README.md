@@ -83,31 +83,42 @@ flowchart LR
 ## Architecture (High-Level)
 
 ```mermaid
-flowchart LR
+flowchart TB
     subgraph Interfaces
-        CLI[CLI]
-        MCP[MCP Server]
-        WEB[Web UI]
-        API[REST API]
+        CLI([CLI])
+        MCP([MCP Server])
+        WEB([Web UI])
+        API([REST API])
+        STL([Streamlit App])
     end
 
     subgraph Core
-        SCAN[Compliance Engine]
-        GEN[Snippet Generator]
-        POLICY[Policy Layering]
+        SCAN((Compliance Engine))
+        GEN[[Snippet Generator]]
+        POLICY{Policy Layering}
     end
 
-    REG[Terraform Registry]
-    TF[Terraform CLI]
+    subgraph Integrations
+        TF[/Terraform CLI/]
+        REG[(Terraform Registry)]
+    end
 
     CLI --> SCAN
     WEB --> SCAN
     API --> SCAN
+    STL --> SCAN
     MCP --> SCAN
     MCP --> GEN
-    SCAN --> TF
+    SCAN --> POLICY --> TF
     GEN --> REG
-    SCAN --> POLICY
+
+    classDef interface fill:#e3f2fd,stroke:#1e88e5,stroke-width:1px,color:#0d47a1;
+    classDef core fill:#e8f5e9,stroke:#2e7d32,stroke-width:1px,color:#1b5e20;
+    classDef integration fill:#fff3e0,stroke:#ef6c00,stroke-width:1px,color:#e65100;
+
+    class CLI,MCP,WEB,API,STL interface;
+    class SCAN,GEN,POLICY core;
+    class TF,REG integration;
 ```
 
 ## Architecture (Detailed Flow)
