@@ -28,16 +28,40 @@ jobs:
         if: ${{ steps.gate.outputs.skip != 'true' }}
         with:
           python-version: "3.11"
-      - name: Build sdist and formula
+      - name: Resolve PyPI sdist hash
+        if: ${{ steps.gate.outputs.skip != 'true' }}
+        id: pypi
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          export TAG
+          SHA256=$(python - <<'PY'
+          import json
+          import os
+          import time
+          import urllib.request
+
+          version = os.environ["TAG"]
+          url = f"https://pypi.org/pypi/terraform-guardrail/{version}/json"
+          for _ in range(30):
+              try:
+                  with urllib.request.urlopen(url) as r:
+                      data = json.load(r)
+                  sdists = [f for f in data.get("urls", []) if f.get("packagetype") == "sdist"]
+                  if sdists:
+                      print(sdists[0]["digests"]["sha256"])
+                      raise SystemExit(0)
+              except Exception:
+                  time.sleep(10)
+          raise SystemExit("Timed out waiting for PyPI sdist metadata")
+          PY
+          )
+          echo "sha256=$SHA256" >> "$GITHUB_OUTPUT"
+      - name: Build formula
         if: ${{ steps.gate.outputs.skip != 'true' }}
         run: |
-          python -m pip install --upgrade build
-          python -m build --sdist
           TAG="${GITHUB_REF_NAME#v}"
-          SDIST="dist/terraform_guardrail-${TAG}.tar.gz"
-          SHA256=$(sha256sum "$SDIST" | awk '{print $1}')
           mkdir -p dist/packaging/homebrew
-          sed "s/{{VERSION}}/${TAG}/g; s/{{SHA256}}/${SHA256}/g" \
+          sed "s/{{VERSION}}/${TAG}/g; s/{{SHA256}}/${{ steps.pypi.outputs.sha256 }}/g" \
             packaging/homebrew/terraform-guardrail.rb.in \
             > dist/packaging/homebrew/terraform-guardrail.rb
       - name: Checkout tap repository
