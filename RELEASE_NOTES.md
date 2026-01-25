@@ -1,17 +1,7 @@
-# v1.0.0
+# v1.0.1
 
 ## Highlights
-- TerraGuard branding across UI and API.
-- New registry service container image workflow.
-- Homebrew and Chocolatey publishing workflows enabled.
-- OPA install caching in the GitHub Action.
-
-## Added
-- `Dockerfile.registry` + registry image workflow for GHCR.
-- Homebrew tap publish workflow and Chocolatey publish workflow.
-- OPA binary cache support with `opa_version` input in the action.
+- Fix Homebrew/Chocolatey workflow gating so secrets are handled safely.
 
 ## Changed
-- README/Wiki install and packaging guidance updated for one-liner installs.
-- Packaging templates updated with TerraGuard branding.
-- API title now reflects TerraGuard branding.
+- Publishing workflows now skip gracefully when secrets are missing.

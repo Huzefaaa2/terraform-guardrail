@@ -2,6 +2,7 @@
 
 | Version | Date (UTC) | Highlights |
 | --- | --- | --- |
+| 1.0.1 | 2026-01-25 | Fix Homebrew/Chocolatey workflow gating |
 | 1.0.0 | 2026-01-25 | TerraGuard branding, registry image, Homebrew/Chocolatey workflows |
 | 0.2.11 | 2026-01-24 | Packaging workflow + signed bundles + install docs |
 | 0.2.10 | 2026-01-24 | OPA policy evaluation, registry API, GitHub Action |
