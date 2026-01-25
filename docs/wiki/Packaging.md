@@ -1,18 +1,27 @@
 # Packaging & Installers
 
-Terraform Guardrail MCP generates packaging artifacts on release tags:
+Terraform Guardrail MCP (TerraGuard) generates packaging artifacts on release tags:
 
 - Homebrew formula
 - Chocolatey nuspec
 - Linux install script (`curl | bash`)
 
-These are published as GitHub Release assets.
+These are published as GitHub Release assets. Publishing workflows will push Homebrew and
+Chocolatey when the required secrets are configured:
+
+- `HOMEBREW_TAP_REPO` (for example `Huzefaaa2/homebrew-tap`)
+- `HOMEBREW_TAP_TOKEN`
+- `CHOCO_API_KEY`
 
 ## Homebrew (macOS)
 
 Release asset: `terraform-guardrail.rb`
 
-Future: publish a Homebrew tap for `brew install terraform-guardrail`.
+Once the tap is published:
+
+```bash
+brew install Huzefaaa2/tap/terraform-guardrail
+```
 
 ## Chocolatey (Windows)
 
@@ -21,7 +30,11 @@ Release assets:
 - `terraform-guardrail.nuspec`
 - `chocolateyinstall.ps1`
 
-Future: publish to Chocolatey for `choco install terraform-guardrail`.
+Once published:
+
+```powershell
+choco install terraform-guardrail
+```
 
 ## Linux
 

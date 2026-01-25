@@ -1,7 +1,7 @@
 class TerraformGuardrail < Formula
   include Language::Python::Virtualenv
 
-  desc "Terraform Guardrail MCP governance control plane"
+  desc "Terraform Guardrail MCP (TerraGuard) governance control plane"
   homepage "https://github.com/Huzefaaa2/terraform-guardrail"
   url "https://files.pythonhosted.org/packages/source/t/terraform-guardrail/terraform_guardrail-{{VERSION}}.tar.gz"
   sha256 "{{SHA256}}"

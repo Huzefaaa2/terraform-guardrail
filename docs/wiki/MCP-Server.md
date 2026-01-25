@@ -1,6 +1,6 @@
 # MCP Server
 
-Terraform Guardrail MCP exposes tools for scan, metadata, and snippet generation via stdio.
+Terraform Guardrail MCP (TerraGuard) exposes tools for scan, metadata, and snippet generation via stdio.
 
 ## Start
 

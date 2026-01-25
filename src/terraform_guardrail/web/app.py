@@ -16,7 +16,7 @@ STATIC_DIR = Path(__file__).parent / "static"
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="Terraform Guardrail MCP")
+    app = FastAPI(title="Terraform Guardrail MCP (TerraGuard)")
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
     templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 

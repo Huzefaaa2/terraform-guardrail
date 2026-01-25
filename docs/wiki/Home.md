@@ -1,10 +1,24 @@
-# Terraform Guardrail MCP Wiki
+# Terraform Guardrail MCP (TerraGuard) Wiki
 
-Terraform Guardrail MCP (Model Context Protocol) is a governance control plane for Infrastructure as
+Terraform Guardrail MCP (TerraGuard) (Model Context Protocol) is a governance control plane for Infrastructure as
 Code. It runs outside Terraform, exposes provider context, and enforces guardrails that prevent bad
 state before apply.
 
-## Terraform-Guardrail MCP
+## Quick Install
+
+```bash
+pip install terraform-guardrail
+```
+
+```bash
+brew install Huzefaaa2/tap/terraform-guardrail
+```
+
+```powershell
+choco install terraform-guardrail
+```
+
+## Terraform-Guardrail MCP (TerraGuard)
 
 **Making Infrastructure Governance Executable**
 
@@ -97,7 +111,7 @@ Non-negotiable safety floor, composable freedom above it. Guardrails live outsid
 ```mermaid
 flowchart LR
     USER[Platform + Product Teams] --> CHANNELS[CLI • Streamlit • REST API • MCP]
-    CHANNELS --> GUARDRAIL[Terraform Guardrail MCP]
+    CHANNELS --> GUARDRAIL[Terraform Guardrail MCP (TerraGuard)]
     GUARDRAIL --> REPORTS[Readable Guidance + Evidence]
     GUARDRAIL --> TERRAFORM[Safer Terraform Applies]
 ```

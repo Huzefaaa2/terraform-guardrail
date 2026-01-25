@@ -14,9 +14,9 @@ REPO_URL = "https://github.com/Huzefaaa2/terraform-guardrail"
 WIKI_URL = "https://github.com/Huzefaaa2/terraform-guardrail/wiki"
 LINKEDIN_URL = "https://www.linkedin.com/in/huzefaaa"
 
-st.set_page_config(page_title="Terraform Guardrail MCP", page_icon="🛡️", layout="wide")
+st.set_page_config(page_title="Terraform Guardrail MCP (TerraGuard)", page_icon="🛡️", layout="wide")
 
-st.title("Terraform Guardrail MCP")
+st.title("Terraform Guardrail MCP (TerraGuard)")
 st.caption("MCP-backed Terraform assistant with ephemeral-values compliance.")
 
 st.markdown("### What it checks")

@@ -1,8 +1,8 @@
-# Terraform Guardrail MCP
+# Terraform Guardrail MCP (TerraGuard)
 
 [![CI](https://github.com/Huzefaaa2/terraform-guardrail/actions/workflows/ci.yml/badge.svg)](https://github.com/Huzefaaa2/terraform-guardrail/actions/workflows/ci.yml)
 
-Terraform Guardrail MCP (Model Context Protocol) is a governance control plane for Infrastructure as
+Terraform Guardrail MCP (TerraGuard) (Model Context Protocol) is a governance control plane for Infrastructure as
 Code. It runs outside Terraform and gives AI assistants and platform teams real provider context,
 policy intelligence, and auditable guardrails so every change is safer by default. The result is a
 cleaner state, fewer failures, and a shorter path from idea to production.
@@ -13,7 +13,7 @@ and produces human-readable reports that make decisions obvious and defensible.
 
 Live app: https://terraform-guardrail.streamlit.app/
 
-## Terraform-Guardrail MCP
+## Terraform-Guardrail MCP (TerraGuard)
 
 **Making Infrastructure Governance Executable**
 
@@ -106,7 +106,7 @@ Non-negotiable safety floor, composable freedom above it. Guardrails live outsid
 ```mermaid
 flowchart LR
     USER[Platform + Product Teams] --> CHANNELS[CLI • Streamlit • REST API • MCP]
-    CHANNELS --> GUARDRAIL[Terraform Guardrail MCP]
+    CHANNELS --> GUARDRAIL[Terraform Guardrail MCP (TerraGuard)]
     GUARDRAIL --> REPORTS[Readable Guidance + Evidence]
     GUARDRAIL --> TERRAFORM[Safer Terraform Applies]
 ```
@@ -251,7 +251,7 @@ Legend: <span style="color: green">✅ Delivered</span> • <span style="color: 
 
 ## Comparison with Other Tools
 
-Terraform Guardrail MCP takes a fundamentally different approach to IaC governance than traditional
+Terraform Guardrail MCP (TerraGuard) takes a fundamentally different approach to IaC governance than traditional
 scanning or linting tools. Guardrail is delivered as a Model Context Protocol (MCP) server with a
 CLI and web UI. It runs outside Terraform, exposing provider metadata, scanning configs and state
 for sensitive values, and producing human-readable reports. Its rules engine focuses on secret
@@ -317,21 +317,20 @@ pip install terraform-guardrail
 
 PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 0.2.11)
 
-## Installer Options (Preview)
+## Installer Options
 
-These packaging artifacts are generated on releases and published as GitHub Release assets.
+Packaging artifacts are generated on release tags. Homebrew and Chocolatey publishes are enabled
+when the release secrets are configured.
 
 ### Homebrew (macOS)
 
 ```bash
-# forthcoming tap; formula published as a release asset
-brew install terraform-guardrail
+brew install Huzefaaa2/tap/terraform-guardrail
 ```
 
 ### Chocolatey (Windows)
 
 ```powershell
-# forthcoming Chocolatey package
 choco install terraform-guardrail
 ```
 
@@ -413,13 +412,20 @@ curl -X POST http://localhost:8080/scan \\
 Pull the published container image (built on release tags):
 
 ```bash
-docker pull ghcr.io/huzefaaa2/terraform-guardrail:v0.2.11
+docker pull ghcr.io/huzefaaa2/terraform-guardrail:latest
 ```
 
 Run it:
 
 ```bash
-docker run --rm -p 8080:8080 ghcr.io/huzefaaa2/terraform-guardrail:v0.2.11
+docker run --rm -p 8080:8080 ghcr.io/huzefaaa2/terraform-guardrail:latest
+```
+
+Registry API image:
+
+```bash
+docker pull ghcr.io/huzefaaa2/terraform-guardrail-registry:latest
+docker run --rm -p 8090:8090 ghcr.io/huzefaaa2/terraform-guardrail-registry:latest
 ```
 
 ## Docker Compose Stack (Local Dev)

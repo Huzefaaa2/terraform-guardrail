@@ -5,7 +5,7 @@
 ```mermaid
 flowchart LR
     USER[Platform + Product Teams] --> CHANNELS[CLI • Streamlit • REST API • MCP]
-    CHANNELS --> GUARDRAIL[Terraform Guardrail MCP]
+    CHANNELS --> GUARDRAIL[Terraform Guardrail MCP (TerraGuard)]
     GUARDRAIL --> REPORTS[Readable Guidance + Evidence]
     GUARDRAIL --> TERRAFORM[Safer Terraform Applies]
 ```

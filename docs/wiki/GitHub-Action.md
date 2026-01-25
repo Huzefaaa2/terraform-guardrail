@@ -1,6 +1,6 @@
 # GitHub Action (Pre-apply / PR checks)
 
-Terraform Guardrail MCP ships with a composite GitHub Action that runs scans on pull requests.
+Terraform Guardrail MCP (TerraGuard) ships with a composite GitHub Action that runs scans on pull requests.
 
 ## Workflow example
 
@@ -41,9 +41,10 @@ jobs:
 - `policy_bundle`: bundle ID to evaluate
 - `policy_registry`: registry URL
 - `policy_query`: override OPA query
+- `opa_version`: OPA version (`latest` or `v0.63.0`)
 - `install_source`: `pypi` (default) or `repo`
 - `python_version`: Python version for runner
 
 Policy bundle evaluation requires the `opa` CLI in the runner.
 
-When `policy_bundle` is set, the action installs OPA automatically.
+When `policy_bundle` is set, the action installs OPA automatically and caches the binary per runner OS/version.

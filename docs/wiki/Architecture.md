@@ -1,6 +1,6 @@
 # Architecture
 
-Terraform Guardrail MCP is organized into interfaces, a compliance core, and provider integrations.
+Terraform Guardrail MCP (TerraGuard) is organized into interfaces, a compliance core, and provider integrations.
 
 ## High-Level Architecture
 

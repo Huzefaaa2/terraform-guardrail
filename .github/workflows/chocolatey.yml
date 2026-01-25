@@ -1,0 +1,31 @@
+name: Chocolatey Publish
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  publish:
+    if: ${{ secrets.CHOCO_API_KEY != '' }}
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Chocolatey package
+        shell: powershell
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart("v")
+          $dest = "dist/packaging/chocolatey"
+          New-Item -ItemType Directory -Force -Path "$dest/tools" | Out-Null
+          (Get-Content packaging/chocolatey/terraform-guardrail.nuspec.in) `
+            -replace "{{VERSION}}", $version | `
+            Set-Content "$dest/terraform-guardrail.nuspec"
+          Copy-Item packaging/chocolatey/tools/chocolateyinstall.ps1 "$dest/tools/chocolateyinstall.ps1" -Force
+          choco pack "$dest/terraform-guardrail.nuspec" --outputdirectory "$dest"
+      - name: Publish to Chocolatey
+        shell: powershell
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart("v")
+          $package = "dist/packaging/chocolatey/terraform-guardrail.$version.nupkg"
+          choco push $package --source https://push.chocolatey.org/ --api-key "${{ secrets.CHOCO_API_KEY }}"

@@ -1,0 +1,50 @@
+name: Homebrew Tap Publish
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  publish:
+    if: ${{ secrets.HOMEBREW_TAP_REPO != '' && secrets.HOMEBREW_TAP_TOKEN != '' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Build sdist and formula
+        run: |
+          python -m pip install --upgrade build
+          python -m build --sdist
+          TAG="${GITHUB_REF_NAME#v}"
+          SDIST="dist/terraform_guardrail-${TAG}.tar.gz"
+          SHA256=$(sha256sum "$SDIST" | awk '{print $1}')
+          mkdir -p dist/packaging/homebrew
+          sed "s/{{VERSION}}/${TAG}/g; s/{{SHA256}}/${SHA256}/g" \
+            packaging/homebrew/terraform-guardrail.rb.in \
+            > dist/packaging/homebrew/terraform-guardrail.rb
+      - name: Checkout tap repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.HOMEBREW_TAP_REPO }}
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          path: tap
+      - name: Update formula
+        run: |
+          mkdir -p tap/Formula
+          cp dist/packaging/homebrew/terraform-guardrail.rb tap/Formula/terraform-guardrail.rb
+          cd tap
+          git add Formula/terraform-guardrail.rb
+          if git diff --cached --quiet; then
+            echo "No formula changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "terraform-guardrail ${GITHUB_REF_NAME}"
+          git push

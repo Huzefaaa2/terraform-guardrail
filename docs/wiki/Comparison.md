@@ -1,6 +1,6 @@
 # Comparison with Other Tools
 
-Terraform Guardrail MCP takes a fundamentally different approach to IaC governance than traditional
+Terraform Guardrail MCP (TerraGuard) takes a fundamentally different approach to IaC governance than traditional
 scanning or linting tools. Guardrail is delivered as a Model Context Protocol (MCP) server with a
 CLI and web UI. It runs outside Terraform, exposing provider metadata, scanning configs and state
 for sensitive values, and producing human-readable reports. Its rules engine focuses on secret

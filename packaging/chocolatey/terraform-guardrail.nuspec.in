@@ -3,12 +3,12 @@
   <metadata>
     <id>terraform-guardrail</id>
     <version>{{VERSION}}</version>
-    <title>Terraform Guardrail MCP</title>
+    <title>Terraform Guardrail MCP (TerraGuard)</title>
     <authors>Huzefa Husain</authors>
     <projectUrl>https://github.com/Huzefaaa2/terraform-guardrail</projectUrl>
     <licenseUrl>https://github.com/Huzefaaa2/terraform-guardrail/blob/main/LICENSE</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Terraform Guardrail MCP governance control plane for Terraform.</description>
+    <description>Terraform Guardrail MCP (TerraGuard) governance control plane for Terraform.</description>
     <tags>terraform mcp governance security compliance</tags>
   </metadata>
   <files>

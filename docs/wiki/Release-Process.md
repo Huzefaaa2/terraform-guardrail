@@ -41,3 +41,20 @@ The workflow reads `RELEASE_NOTES.md` for release body content.
 On tag pushes, a separate workflow builds and publishes a container image to GHCR:
 
 - https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail
+
+## Registry Service Image
+
+The registry API has its own container workflow and publishes:
+
+- https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail-registry
+
+## Homebrew Tap
+
+The `Homebrew Tap Publish` workflow updates the formula repository when these secrets are set:
+
+- `HOMEBREW_TAP_REPO` (for example `Huzefaaa2/homebrew-tap`)
+- `HOMEBREW_TAP_TOKEN`
+
+## Chocolatey Publish
+
+The `Chocolatey Publish` workflow pushes a package when `CHOCO_API_KEY` is configured.
