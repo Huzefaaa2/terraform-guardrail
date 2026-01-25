@@ -10,6 +10,9 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Terraform Guardrail MCP (TerraGuard) governance control plane for Terraform.</description>
     <tags>terraform mcp governance security compliance</tags>
+    <dependencies>
+      <dependency id="python" version="[3.11,4.0)" />
+    </dependencies>
   </metadata>
   <files>
     <file src="tools/**" target="tools" />

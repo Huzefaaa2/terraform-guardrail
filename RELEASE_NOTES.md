@@ -1,12 +1,10 @@
-# v1.0.2
+# v1.0.3
 
 ## Highlights
-- CLI now supports a real `--version` flag.
-- Web UI ships a favicon to avoid 404s.
+- Chocolatey install now ensures Python is available.
 
 ## Added
-- Version callback in CLI root command.
-- Favicon asset and routing for the web UI.
+- Chocolatey dependency on Python 3.11+.
 
 ## Changed
-- Package data includes PNG assets.
+- Chocolatey install script installs/locates Python before pip install.
