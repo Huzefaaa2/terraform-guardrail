@@ -2,6 +2,7 @@
 
 | Version | Date (UTC) | Highlights |
 | --- | --- | --- |
+| 1.0.4 | 2026-01-25 | Chocolatey metadata aligned with review guidance |
 | 1.0.3 | 2026-01-25 | Chocolatey install fix (Python dependency) |
 | 1.0.2 | 2026-01-25 | CLI --version flag + web UI favicon |
 | 1.0.1 | 2026-01-25 | Fix Homebrew/Chocolatey workflow gating |

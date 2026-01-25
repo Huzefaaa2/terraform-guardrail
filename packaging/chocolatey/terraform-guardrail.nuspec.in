@@ -5,10 +5,18 @@
     <version>{{VERSION}}</version>
     <title>Terraform Guardrail MCP (TerraGuard)</title>
     <authors>Huzefa Husain</authors>
+    <owners>Huzefa Husain</owners>
+    <summary>Terraform Guardrail MCP (TerraGuard) governance control plane for Terraform.</summary>
     <projectUrl>https://github.com/Huzefaaa2/terraform-guardrail</projectUrl>
+    <packageSourceUrl>https://github.com/Huzefaaa2/terraform-guardrail/tree/main/packaging/chocolatey</packageSourceUrl>
+    <projectSourceUrl>https://github.com/Huzefaaa2/terraform-guardrail</projectSourceUrl>
+    <docsUrl>https://github.com/Huzefaaa2/terraform-guardrail/wiki</docsUrl>
+    <bugTrackerUrl>https://github.com/Huzefaaa2/terraform-guardrail/issues</bugTrackerUrl>
     <licenseUrl>https://github.com/Huzefaaa2/terraform-guardrail/blob/main/LICENSE</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Terraform Guardrail MCP (TerraGuard) governance control plane for Terraform.</description>
+    <releaseNotes>https://github.com/Huzefaaa2/terraform-guardrail/blob/main/RELEASE_NOTES.md</releaseNotes>
+    <iconUrl>https://raw.githubusercontent.com/Huzefaaa2/terraform-guardrail/main/src/terraform_guardrail/web/static/favicon.png</iconUrl>
     <tags>terraform mcp governance security compliance</tags>
     <dependencies>
       <dependency id="python" version="[3.11,4.0)" />

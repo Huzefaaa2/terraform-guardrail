@@ -1,10 +1,10 @@
-# v1.0.3
+# v1.0.4
 
 ## Highlights
-- Chocolatey install now ensures Python is available.
+- Chocolatey package metadata updated for review guidelines.
 
 ## Added
-- Chocolatey dependency on Python 3.11+.
+- Chocolatey metadata: summary, release notes, icon, docs, source URLs.
 
 ## Changed
-- Chocolatey install script installs/locates Python before pip install.
+- Packaging metadata aligned with Chocolatey review guidelines.

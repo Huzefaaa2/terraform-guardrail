@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.4] - 2026-01-25
+
+### Added
+- Chocolatey metadata fields (summary, release notes, icon, docs, source URLs).
+
+### Changed
+- Packaging metadata aligned with Chocolatey review guidance.
+
 ## [1.0.3] - 2026-01-25
 
 ### Added
