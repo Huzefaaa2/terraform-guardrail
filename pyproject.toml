@@ -46,7 +46,7 @@ package-dir = {"" = "src"}
 include-package-data = true
 
 [tool.setuptools.package-data]
-terraform_guardrail = ["web/templates/*.html", "web/static/*.css"]
+terraform_guardrail = ["web/templates/*.html", "web/static/*.css", "web/static/*.png"]
 
 [tool.ruff]
 line-length = 100

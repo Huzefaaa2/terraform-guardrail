@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Annotated
 
 from fastapi import FastAPI, File, Request, UploadFile
-from fastapi.responses import HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -13,6 +13,7 @@ from terraform_guardrail.scanner.scan import scan_path
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 STATIC_DIR = Path(__file__).parent / "static"
+FAVICON_PATH = STATIC_DIR / "favicon.png"
 
 
 def create_app() -> FastAPI:
@@ -25,6 +26,10 @@ def create_app() -> FastAPI:
         return templates.TemplateResponse(
             "index.html", {"request": request, "report": None, "error": None}
         )
+
+    @app.get("/favicon.ico", include_in_schema=False)
+    def favicon() -> FileResponse:
+        return FileResponse(FAVICON_PATH, media_type="image/png")
 
     @app.post("/scan", response_class=HTMLResponse)
     async def scan(

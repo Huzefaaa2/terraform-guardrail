@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib.metadata
 import json
 from pathlib import Path
 from typing import Annotated
@@ -25,6 +26,27 @@ app = typer.Typer(add_completion=False)
 policy_app = typer.Typer(help="Policy registry commands.")
 app.add_typer(policy_app, name="policy")
 console = Console()
+
+
+def _version_callback(value: bool) -> None:
+    if value:
+        typer.echo(importlib.metadata.version("terraform-guardrail"))
+        raise typer.Exit()
+
+
+@app.callback()
+def _root(
+    version: Annotated[
+        bool,
+        typer.Option(
+            "--version",
+            callback=_version_callback,
+            is_eager=True,
+            help="Show version and exit.",
+        ),
+    ] = False,
+) -> None:
+    """Terraform Guardrail MCP CLI."""
 
 
 @app.command()
