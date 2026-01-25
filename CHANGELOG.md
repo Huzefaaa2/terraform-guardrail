@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0] - 2026-01-25
+
+### Added
+- Registry API container image workflow and Dockerfile.
+- Homebrew tap and Chocolatey publish workflows.
+- OPA caching support for the GitHub Action.
+
+### Changed
+- TerraGuard branding across UI/API surfaces.
+- Installer documentation updated for one-liner installs.
+
 ## [0.2.11] - 2026-01-24
 
 ### Added

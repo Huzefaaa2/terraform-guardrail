@@ -1,14 +1,17 @@
-# v0.2.11
+# v1.0.0
 
 ## Highlights
-- Packaging workflow for Homebrew/Chocolatey/Linux install artifacts.
-- Signed bundle example with public key and registry metadata.
+- TerraGuard branding across UI and API.
+- New registry service container image workflow.
+- Homebrew and Chocolatey publishing workflows enabled.
+- OPA install caching in the GitHub Action.
 
 ## Added
-- Packaging templates and release workflow artifacts.
-- Linux installer script and packaging docs.
-- GitHub Action now auto-installs OPA when policy bundles are enabled.
+- `Dockerfile.registry` + registry image workflow for GHCR.
+- Homebrew tap publish workflow and Chocolatey publish workflow.
+- OPA binary cache support with `opa_version` input in the action.
 
 ## Changed
-- README/Wiki updates for new governance overview + install options.
-- Version bump to `0.2.11`.
+- README/Wiki install and packaging guidance updated for one-liner installs.
+- Packaging templates updated with TerraGuard branding.
+- API title now reflects TerraGuard branding.

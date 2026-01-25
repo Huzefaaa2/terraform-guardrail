@@ -315,7 +315,7 @@ terraform-guardrail web
 pip install terraform-guardrail
 ```
 
-PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 0.2.11)
+PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 1.0.0)
 
 ## Installer Options
 
@@ -566,8 +566,8 @@ make changelog
 ### Release Helpers
 
 ```bash
-make release-dry VERSION=0.2.11
-make version-bump VERSION=0.2.11
+make release-dry VERSION=1.0.0
+make version-bump VERSION=1.0.0
 ```
 
 ## MCP tools (current)

@@ -2,6 +2,7 @@
 
 | Version | Date (UTC) | Highlights |
 | --- | --- | --- |
+| 1.0.0 | 2026-01-25 | TerraGuard branding, registry image, Homebrew/Chocolatey workflows |
 | 0.2.11 | 2026-01-24 | Packaging workflow + signed bundles + install docs |
 | 0.2.10 | 2026-01-24 | OPA policy evaluation, registry API, GitHub Action |
 | 0.2.9 | 2026-01-24 | OPA bundle support in policy registry, CLI + API endpoints |
