@@ -20,10 +20,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Start local policy registry
+        run: |
+          python -m http.server 8081 --directory ops/policy-registry &
       - uses: ./.github/actions/guardrail
         with:
           path: .
           fail_on: medium
+          install_source: repo
+          policy_bundle: baseline-signed
+          policy_registry: http://localhost:8081
 ```
 
 ## Inputs
@@ -39,3 +45,5 @@ jobs:
 - `python_version`: Python version for runner
 
 Policy bundle evaluation requires the `opa` CLI in the runner.
+
+When `policy_bundle` is set, the action installs OPA automatically.

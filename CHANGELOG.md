@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.11] - 2026-01-24
+
+### Added
+- Packaging workflow + release artifacts for Homebrew/Chocolatey/Linux installs.
+- Signed bundle example with public key metadata.
+- Packaging documentation.
+
+### Changed
+- GitHub Action auto-installs OPA when policy bundles are enabled.
+- README and Wiki updated with governance narrative and installer options.
+
 ## [0.2.10] - 2026-01-24
 
 ### Added

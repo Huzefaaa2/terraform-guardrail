@@ -1,16 +1,14 @@
-# v0.2.10
+# v0.2.11
 
 ## Highlights
-- OPA policy evaluation wired into scans with optional signature verification.
-- Minimal policy registry API with versioning + audit history.
-- GitHub Action for pre-apply / PR checks.
+- Packaging workflow for Homebrew/Chocolatey/Linux install artifacts.
+- Signed bundle example with public key and registry metadata.
 
 ## Added
-- Policy evaluation path (`--policy-bundle`) and fail-on severity control.
-- Registry API service and endpoints for bundles, versions, and audit.
-- GitHub Action workflow + composite action.
-- Roadmap additions for Homebrew/Chocolatey/Linux installers.
+- Packaging templates and release workflow artifacts.
+- Linux installer script and packaging docs.
+- GitHub Action now auto-installs OPA when policy bundles are enabled.
 
 ## Changed
-- Registry format now supports versions + entrypoints.
-- Version bump to `0.2.10`.
+- README/Wiki updates for new governance overview + install options.
+- Version bump to `0.2.11`.

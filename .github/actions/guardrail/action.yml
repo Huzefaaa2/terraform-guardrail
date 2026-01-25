@@ -42,6 +42,17 @@ runs:
         else
           python -m pip install terraform-guardrail
         fi
+    - name: Install OPA
+      if: ${{ inputs.policy_bundle != '' }}
+      shell: bash
+      run: |
+        ARCH="$(uname -m)"
+        case "$ARCH" in
+          x86_64) ARCH="amd64" ;;
+          aarch64|arm64) ARCH="arm64" ;;
+        esac
+        curl -sSL -o /usr/local/bin/opa "https://openpolicyagent.org/downloads/latest/opa_linux_${ARCH}"
+        chmod +x /usr/local/bin/opa
     - name: Run Guardrail scan
       shell: bash
       run: |

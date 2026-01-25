@@ -14,7 +14,7 @@ pip install -e ".[dev]"
 pip install terraform-guardrail
 ```
 
-PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 0.2.10)
+PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 0.2.11)
 
 ## Scan
 
@@ -38,6 +38,7 @@ terraform-guardrail generate azure azurerm_storage_account --name demo
 ```bash
 terraform-guardrail policy list
 terraform-guardrail policy fetch baseline --destination ./policies
+terraform-guardrail policy fetch baseline-signed --destination ./policies
 ```
 
 Policy bundle evaluation requires the `opa` CLI on your PATH.

@@ -1,0 +1,47 @@
+name: Packaging
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  packaging:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Build sdist
+        run: |
+          python -m pip install --upgrade build
+          python -m build --sdist
+      - name: Generate packaging artifacts
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          SDIST="dist/terraform_guardrail-${TAG}.tar.gz"
+          SHA256=$(sha256sum "$SDIST" | awk '{print $1}')
+
+          mkdir -p dist/packaging/homebrew dist/packaging/chocolatey/tools dist/packaging/scripts
+
+          sed "s/{{VERSION}}/${TAG}/g; s/{{SHA256}}/${SHA256}/g" \
+            packaging/homebrew/terraform-guardrail.rb.in \
+            > dist/packaging/homebrew/terraform-guardrail.rb
+
+          sed "s/{{VERSION}}/${TAG}/g" \
+            packaging/chocolatey/terraform-guardrail.nuspec.in \
+            > dist/packaging/chocolatey/terraform-guardrail.nuspec
+
+          cp packaging/chocolatey/tools/chocolateyinstall.ps1 dist/packaging/chocolatey/tools/
+          cp scripts/install.sh dist/packaging/scripts/
+      - name: Upload packaging assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/packaging/homebrew/terraform-guardrail.rb
+            dist/packaging/chocolatey/terraform-guardrail.nuspec
+            dist/packaging/chocolatey/tools/chocolateyinstall.ps1
+            dist/packaging/scripts/install.sh

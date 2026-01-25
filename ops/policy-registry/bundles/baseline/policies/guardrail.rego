@@ -2,7 +2,7 @@ package guardrail.baseline
 
 default allow = true
 
-deny[output] {
+deny contains output if {
   file := input.files[_]
   var_block := file.hcl.variable[_]
   some name
@@ -14,6 +14,6 @@ deny[output] {
     "message": sprintf("Variable %s should be marked ephemeral.", [name]),
     "severity": "medium",
     "rule_id": "OPA001",
-    "path": file.path
+    "path": file.path,
   }
 }

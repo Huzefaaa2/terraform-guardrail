@@ -13,7 +13,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Start local policy registry
+        run: |
+          python -m http.server 8081 --directory ops/policy-registry &
       - uses: ./.github/actions/guardrail
         with:
           path: .
           fail_on: medium
+          install_source: repo
+          policy_bundle: baseline-signed
+          policy_registry: http://localhost:8081

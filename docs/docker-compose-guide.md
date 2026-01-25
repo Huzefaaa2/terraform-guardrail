@@ -106,6 +106,7 @@ and latency.
 ```bash
 terraform-guardrail policy list
 terraform-guardrail policy fetch baseline --destination ./policies
+terraform-guardrail policy fetch baseline-signed --destination ./policies
 ```
 
 ## Configuration notes
@@ -120,6 +121,11 @@ terraform-guardrail policy fetch baseline --destination ./policies
 If a bundle entry includes a `verification` block (public key + scope), Guardrail will call the
 `opa` CLI to verify signatures before evaluation. Add verification settings in `registry.json`
 and ensure the OPA binary is installed on the host or in the CI runner.
+
+Signed bundle example:
+
+- Bundle ID: `baseline-signed`
+- Public key served at: `http://localhost:8081/keys/guardrail.pub`
 
 ## Troubleshooting
 

@@ -102,7 +102,7 @@ def list_policy_bundles(registry_url: str | None = None) -> list[PolicyBundle]:
         url = selected_version.get("url") or bundle.get("url")
         if not all([bundle_id, title, description, url]):
             continue
-        verification = _parse_verification(bundle.get("verification"))
+        verification = _parse_verification(bundle.get("verification"), base_url)
         parsed.append(
             PolicyBundle(
                 bundle_id=bundle_id,
@@ -150,12 +150,15 @@ def _select_bundle_version(bundle: dict[str, Any]) -> dict[str, Any]:
     return {}
 
 
-def _parse_verification(data: Any) -> BundleVerification | None:
+def _parse_verification(data: Any, base_url: str) -> BundleVerification | None:
     if not isinstance(data, dict):
         return None
+    public_key_url = data.get("public_key_url")
+    if public_key_url and not public_key_url.startswith(("http://", "https://")):
+        public_key_url = urljoin(base_url, public_key_url.lstrip("/"))
     return BundleVerification(
         public_key=data.get("public_key"),
-        public_key_url=data.get("public_key_url"),
+        public_key_url=public_key_url,
         public_key_path=data.get("public_key_path"),
         key_id=data.get("key_id"),
         scope=data.get("scope"),
