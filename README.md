@@ -2,10 +2,11 @@
 
 [![CI](https://github.com/Huzefaaa2/terraform-guardrail/actions/workflows/ci.yml/badge.svg)](https://github.com/Huzefaaa2/terraform-guardrail/actions/workflows/ci.yml)
 
-Terraform Guardrail MCP (TerraGuard) (Model Context Protocol) is a governance control plane for Infrastructure as
-Code. It runs outside Terraform and gives AI assistants and platform teams real provider context,
-policy intelligence, and auditable guardrails so every change is safer by default. The result is a
-cleaner state, fewer failures, and a shorter path from idea to production.
+Terraform Guardrail MCP (TerraGuard) (Model Context Protocol) is an enterprise-grade IaC governance
+and guardrail platform that enforces architectural intent, compliance, and platform standards
+directly inside CI/CD. It runs outside Terraform and gives AI assistants and platform teams real
+provider context, policy intelligence, and auditable guardrails so every change is safer by default.
+The result is a cleaner state, fewer failures, and a shorter path from idea to production.
 
 This product is built for teams shipping infrastructure at scale who need speed without sacrificing
 safety. Guardrail enforces non-negotiable platform invariants, allows composable product constraints,
@@ -32,7 +33,8 @@ Despite using Terraform and security scanners, enterprises still face:
 
 ## What Terraform-Guardrail MCP Is
 
-Terraform-Guardrail MCP is a governance control plane for Terraform.
+Terraform-Guardrail MCP is an enterprise-grade IaC governance and guardrail platform for Terraform
+that enforces architectural intent, compliance, and platform standards directly in CI/CD.
 
 It:
 
@@ -234,6 +236,7 @@ Legend: <span style="color: green">✅ Delivered</span> • <span style="color: 
 | CLI-first install | <span style="color: green">✅ Delivered (0.2.x)</span> |  |  |  |
 | Docker Compose local stack (API + UI + registry) | <span style="color: green">✅ Delivered (0.2.x)</span> |  |  |  |
 | GitHub Action pre-apply / PR checks | <span style="color: green">✅ Delivered (0.2.x)</span> |  |  |  |
+| GitLab CI templates | <span style="color: orange">🚧 Planned</span> |  |  |  |
 | Azure DevOps / Pipeline extension | <span style="color: orange">🚧 Planned</span> |  |  |  |
 | Policy layering model (base → env → app) | <span style="color: orange">🚧 Planned</span> |  |  |  |
 | Central guardrail registry | <span style="color: green">✅ Delivered (1.0.x)</span> |  |  |  |

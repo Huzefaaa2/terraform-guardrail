@@ -11,6 +11,7 @@ Legend: <span style="color: green">✅ Delivered</span> • <span style="color: 
 | CLI-first install | <span style="color: green">✅ Delivered (0.2.x)</span> |  |  |  |
 | Docker Compose local stack (API + UI + registry) | <span style="color: green">✅ Delivered (0.2.x)</span> |  |  |  |
 | GitHub Action pre-apply / PR checks | <span style="color: green">✅ Delivered (0.2.x)</span> |  |  |  |
+| GitLab CI templates | <span style="color: orange">🚧 Planned</span> |  |  |  |
 | Azure DevOps / Pipeline extension | <span style="color: orange">🚧 Planned</span> |  |  |  |
 | Policy layering model (base → env → app) | <span style="color: orange">🚧 Planned</span> |  |  |  |
 | Central guardrail registry | <span style="color: green">✅ Delivered (1.0.x)</span> |  |  |  |
