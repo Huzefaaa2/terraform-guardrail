@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "terraform-guardrail"
-version = "1.0.1"
+version = "1.0.2"
 description = "MCP-backed Terraform assistant with ephemeral-values compliance."
 readme = "README.md"
 requires-python = ">=3.10"

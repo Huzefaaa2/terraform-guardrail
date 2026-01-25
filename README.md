@@ -316,7 +316,7 @@ terraform-guardrail web
 pip install terraform-guardrail
 ```
 
-PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 1.0.1)
+PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 1.0.2)
 
 ## Installer Options
 
@@ -536,7 +536,7 @@ configured).
 - PyPI: https://pypi.org/project/terraform-guardrail/
 - GitHub Releases: https://github.com/Huzefaaa2/terraform-guardrail/releases
 - Container Image: https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail
-- Latest release: v1.0.1
+- Latest release: v1.0.2
 - Release history: `RELEASE.md`
 
 ## Deployment Guide
@@ -568,8 +568,8 @@ make changelog
 ### Release Helpers
 
 ```bash
-make release-dry VERSION=1.0.1
-make version-bump VERSION=1.0.1
+make release-dry VERSION=1.0.2
+make version-bump VERSION=1.0.2
 ```
 
 ## MCP tools (current)

@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.2] - 2026-01-25
+
+### Added
+- CLI `--version` flag.
+- Web UI favicon.
+
+### Changed
+- Package data now includes PNG assets.
+
 ## [1.0.1] - 2026-01-25
 
 ### Changed

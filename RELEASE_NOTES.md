@@ -1,7 +1,12 @@
-# v1.0.1
+# v1.0.2
 
 ## Highlights
-- Fix Homebrew/Chocolatey workflow gating so secrets are handled safely.
+- CLI now supports a real `--version` flag.
+- Web UI ships a favicon to avoid 404s.
+
+## Added
+- Version callback in CLI root command.
+- Favicon asset and routing for the web UI.
 
 ## Changed
-- Publishing workflows now skip gracefully when secrets are missing.
+- Package data includes PNG assets.
