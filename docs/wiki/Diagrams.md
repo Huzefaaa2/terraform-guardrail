@@ -4,8 +4,8 @@
 
 ```mermaid
 flowchart LR
-    USER[Platform + Product Teams] --> CHANNELS[CLI • Streamlit • REST API • MCP]
-    CHANNELS --> GUARDRAIL[Terraform Guardrail MCP (TerraGuard)]
+    USER[Platform + Product Teams] --> CHANNELS[CLI / Streamlit / REST API / MCP]
+    CHANNELS --> GUARDRAIL["Terraform Guardrail MCP (TerraGuard)"]
     GUARDRAIL --> REPORTS[Readable Guidance + Evidence]
     GUARDRAIL --> TERRAFORM[Safer Terraform Applies]
 ```
@@ -101,5 +101,5 @@ flowchart TB
     PARSE --> SCHEMA[Provider Schema + Metadata]
     SCHEMA --> RULES[Apply Guardrail Rules]
     RULES --> REPORT[Findings + Summary]
-    REPORT --> OUTPUTS[CLI JSON • UI • MCP • REST]
+    REPORT --> OUTPUTS[CLI JSON / UI / MCP / REST]
 ```

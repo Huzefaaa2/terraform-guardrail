@@ -105,8 +105,8 @@ Non-negotiable safety floor, composable freedom above it. Guardrails live outsid
 
 ```mermaid
 flowchart LR
-    USER[Platform + Product Teams] --> CHANNELS[CLI • Streamlit • REST API • MCP]
-    CHANNELS --> GUARDRAIL[Terraform Guardrail MCP (TerraGuard)]
+    USER[Platform + Product Teams] --> CHANNELS[CLI / Streamlit / REST API / MCP]
+    CHANNELS --> GUARDRAIL["Terraform Guardrail MCP (TerraGuard)"]
     GUARDRAIL --> REPORTS[Readable Guidance + Evidence]
     GUARDRAIL --> TERRAFORM[Safer Terraform Applies]
 ```
@@ -219,7 +219,7 @@ flowchart TB
     PARSE --> SCHEMA[Provider Schema + Metadata]
     SCHEMA --> RULES[Apply Guardrail Rules]
     RULES --> REPORT[Findings + Summary]
-    REPORT --> OUTPUTS[CLI JSON • UI • MCP • REST]
+    REPORT --> OUTPUTS[CLI JSON / UI / MCP / REST]
 ```
 
 Note: Mermaid diagrams render on GitHub and in the Wiki. PyPI will show the raw blocks.
@@ -238,11 +238,12 @@ Legend: <span style="color: green">✅ Delivered</span> • <span style="color: 
 | Policy layering model (base → env → app) | <span style="color: orange">🚧 Planned</span> |  |  |  |
 | Policy metadata + rich failure messages |  | <span style="color: orange">🚧 Planned</span> |  |  |
 | Drift-prevention rules before apply |  | <span style="color: orange">🚧 Planned</span> |  |  |
-| Central guardrail registry |  | <span style="color: orange">🚧 Planned</span> |  |  |
-| Policy versioning + audit trail |  | <span style="color: orange">🚧 Planned</span> |  |  |
-| Homebrew package (macOS) |  | <span style="color: orange">🚧 Planned</span> |  |  |
-| Chocolatey package (Windows) |  | <span style="color: orange">🚧 Planned</span> |  |  |
-| Linux install script (curl \| bash) |  | <span style="color: orange">🚧 Planned</span> |  |  |
+| Central guardrail registry | <span style="color: green">✅ Delivered (1.0.x)</span> |  |  |  |
+| Policy versioning + audit trail | <span style="color: green">✅ Delivered (1.0.x)</span> |  |  |  |
+| Registry service image (GHCR) | <span style="color: green">✅ Delivered (1.0.x)</span> |  |  |  |
+| Homebrew package (macOS) | <span style="color: green">✅ Delivered (1.0.x)</span> |  |  |  |
+| Chocolatey package (Windows) | <span style="color: green">✅ Delivered (1.0.x)</span> |  |  |  |
+| Linux install script (curl \| bash) | <span style="color: green">✅ Delivered (1.0.x)</span> |  |  |  |
 | Contributor governance + public roadmap |  |  | <span style="color: orange">🚧 Planned</span> |  |
 | Reference implementations across tools |  |  | <span style="color: orange">🚧 Planned</span> |  |
 | Cross-provider invariant enforcement |  |  | <span style="color: orange">🚧 Planned</span> |  |
@@ -535,6 +536,7 @@ configured).
 - PyPI: https://pypi.org/project/terraform-guardrail/
 - GitHub Releases: https://github.com/Huzefaaa2/terraform-guardrail/releases
 - Container Image: https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail
+- Latest release: v1.0.1
 - Release history: `RELEASE.md`
 
 ## Deployment Guide

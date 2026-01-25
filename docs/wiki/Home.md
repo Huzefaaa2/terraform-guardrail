@@ -110,8 +110,8 @@ Non-negotiable safety floor, composable freedom above it. Guardrails live outsid
 
 ```mermaid
 flowchart LR
-    USER[Platform + Product Teams] --> CHANNELS[CLI • Streamlit • REST API • MCP]
-    CHANNELS --> GUARDRAIL[Terraform Guardrail MCP (TerraGuard)]
+    USER[Platform + Product Teams] --> CHANNELS[CLI / Streamlit / REST API / MCP]
+    CHANNELS --> GUARDRAIL["Terraform Guardrail MCP (TerraGuard)"]
     GUARDRAIL --> REPORTS[Readable Guidance + Evidence]
     GUARDRAIL --> TERRAFORM[Safer Terraform Applies]
 ```
@@ -135,8 +135,9 @@ flowchart LR
 
 ## Latest Release
 
-- Version: 0.2.11
+- Version: 1.0.1
 - Container image: https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail
+- Registry image: https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail-registry
 - Supported providers: AWS, Azure, GCP, Kubernetes, Helm, OCI, Vault, Alicloud, vSphere
 - Local stack: Docker Compose (API + UI + policy registry, optional analytics)
 - Policy registry: OPA bundles published under `/bundles/*.tar.gz`

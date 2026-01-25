@@ -51,7 +51,7 @@ flowchart TB
     PARSE --> SCHEMA[Provider Schema + Metadata]
     SCHEMA --> RULES[Apply Guardrail Rules]
     RULES --> REPORT[Findings + Summary]
-    REPORT --> OUTPUTS[CLI JSON • UI • MCP • REST]
+    REPORT --> OUTPUTS[CLI JSON / UI / MCP / REST]
 ```
 
 ## Ways to Use Guardrail
