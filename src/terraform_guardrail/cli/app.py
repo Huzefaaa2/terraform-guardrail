@@ -210,7 +210,17 @@ def init_policy_bundle(
         encoding="utf-8",
     )
     (bundle_dir / "data.json").write_text(
-        '{\n  "guardrail": {\n    "allowed_regions": [],\n    "allowed_instance_types": []\n  }\n}\n',
+        "\n".join(
+            [
+                "{",
+                '  "guardrail": {',
+                '    "allowed_regions": [],',
+                '    "allowed_instance_types": []',
+                "  }",
+                "}",
+                "",
+            ]
+        ),
         encoding="utf-8",
     )
     (policies_dir / "guardrail.rego").write_text(
