@@ -11,7 +11,7 @@
         {
           "version": "0.2.0",
           "url": "/bundles/baseline.tar.gz",
-          "sha256": "cdb0c9fbf79b930729b5901075e014744a6ba9798e95b77401cbd1ebd3e0e546",
+          "sha256": "37946d2a0ee064b8982baacd0b1cbb314c7beb227b13dff8e1e729651091d769",
           "published_at": "2026-01-26"
         },
         {
@@ -27,12 +27,18 @@
       "title": "Baseline guardrails (signed)",
       "description": "Signed baseline guardrails with verification metadata.",
       "entrypoint": "data.guardrail.baseline.deny",
-      "latest": "0.1.0",
+      "latest": "0.2.0",
       "verification": {
         "public_key_url": "/keys/guardrail.pub",
         "key_id": "default"
       },
       "versions": [
+        {
+          "version": "0.2.0",
+          "url": "/bundles/baseline-signed.tar.gz",
+          "sha256": "e54e558e93a4f27178630a882f0fd5c1f2f91f733679561edb96377066becca1",
+          "published_at": "2026-01-26"
+        },
         {
           "version": "0.1.0",
           "url": "/bundles/baseline-signed.tar.gz",
