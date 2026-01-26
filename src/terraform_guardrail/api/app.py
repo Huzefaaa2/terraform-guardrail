@@ -35,6 +35,10 @@ class ScanRequest(BaseModel):
     state_path: str | None = None
     use_schema: bool = False
     policy_bundle: str | None = None
+    policy_layers: list[str] | None = None
+    policy_base: str | None = None
+    policy_env: str | None = None
+    policy_app: str | None = None
     policy_registry: str | None = None
     policy_query: str | None = None
 
@@ -83,6 +87,10 @@ def create_app() -> FastAPI:
                 state_path=state_path,
                 use_schema=request.use_schema,
                 policy_bundle=request.policy_bundle,
+                policy_layers=request.policy_layers,
+                policy_base=request.policy_base,
+                policy_env=request.policy_env,
+                policy_app=request.policy_app,
                 policy_registry=request.policy_registry,
                 policy_query=request.policy_query,
             )

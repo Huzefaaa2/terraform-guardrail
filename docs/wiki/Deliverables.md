@@ -41,7 +41,8 @@ Planned buildspec integration for policy gates in AWS CodePipeline. See
 <a name="policy-layering-model"></a>
 ## Policy layering model (base → env → app)
 
-Planned policy layering for platform invariants and product constraints.
+Layered policies for platform invariants (base), environment constraints, and app policies. See
+[Policy Layering](Policy-Layering.md).
 
 <a name="central-guardrail-registry"></a>
 ## Central guardrail registry

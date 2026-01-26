@@ -11,7 +11,7 @@ from terraform_guardrail.scanner.models import Finding, ScanReport, ScanSummary
 from terraform_guardrail.scanner.policy_eval import (
     PolicyEvalError,
     PolicyInputFile,
-    evaluate_policy_bundle,
+    evaluate_policy_layers,
 )
 from terraform_guardrail.scanner.rules import RULES, SENSITIVE_ASSIGN_RE, SENSITIVE_NAME_RE
 from terraform_guardrail.schema import (
@@ -29,6 +29,10 @@ def scan_path(
     state_path: Path | str | None = None,
     use_schema: bool = False,
     policy_bundle: str | None = None,
+    policy_layers: list[str] | None = None,
+    policy_base: str | None = None,
+    policy_env: str | None = None,
+    policy_app: str | None = None,
     policy_registry: str | None = None,
     policy_query: str | None = None,
 ) -> ScanReport:
@@ -66,12 +70,19 @@ def scan_path(
         findings.extend(state_findings)
         policy_state = state_data
 
-    bundle_id = policy_bundle or os.getenv("GUARDRAIL_POLICY_BUNDLE_ID")
-    if bundle_id:
+    bundle_ids, layer_names = _resolve_policy_layers(
+        policy_bundle=policy_bundle,
+        policy_layers=policy_layers,
+        policy_base=policy_base,
+        policy_env=policy_env,
+        policy_app=policy_app,
+    )
+    if bundle_ids:
         try:
             findings.extend(
-                evaluate_policy_bundle(
-                    bundle_id=bundle_id,
+                evaluate_policy_layers(
+                    bundle_ids=bundle_ids,
+                    layer_names=layer_names,
                     registry_url=policy_registry,
                     files=policy_inputs,
                     state=policy_state,
@@ -97,6 +108,71 @@ def _expand_paths(path: Path) -> Iterable[Path]:
     if path.is_dir():
         return path.rglob("*")
     return [path]
+
+
+def _resolve_policy_layers(
+    policy_bundle: str | None,
+    policy_layers: list[str] | None,
+    policy_base: str | None,
+    policy_env: str | None,
+    policy_app: str | None,
+) -> tuple[list[str], list[str]]:
+    layers: list[str] = []
+    layer_names: list[str] = []
+
+    if policy_base or policy_env or policy_app:
+        if policy_base:
+            layers.append(policy_base)
+            layer_names.append("base")
+        if policy_env:
+            layers.append(policy_env)
+            layer_names.append("env")
+        if policy_app:
+            layers.append(policy_app)
+            layer_names.append("app")
+        return layers, layer_names
+
+    if policy_layers:
+        for idx, bundle in enumerate(policy_layers):
+            if bundle:
+                layers.append(bundle)
+                layer_names.append(f"layer{idx + 1}")
+        if layers:
+            return layers, layer_names
+
+    env_base = os.getenv("GUARDRAIL_POLICY_BASE")
+    env_env = os.getenv("GUARDRAIL_POLICY_ENV")
+    env_app = os.getenv("GUARDRAIL_POLICY_APP")
+    if env_base or env_env or env_app:
+        if env_base:
+            layers.append(env_base)
+            layer_names.append("base")
+        if env_env:
+            layers.append(env_env)
+            layer_names.append("env")
+        if env_app:
+            layers.append(env_app)
+            layer_names.append("app")
+        return layers, layer_names
+
+    env_layers = os.getenv("GUARDRAIL_POLICY_LAYERS")
+    if env_layers:
+        for idx, bundle in enumerate(_split_policy_bundles(env_layers)):
+            layers.append(bundle)
+            layer_names.append(f"layer{idx + 1}")
+        return layers, layer_names
+
+    bundle_id = policy_bundle or os.getenv("GUARDRAIL_POLICY_BUNDLE_ID")
+    if bundle_id:
+        layers = _split_policy_bundles(bundle_id)
+        layer_names = [f"layer{idx + 1}" for idx in range(len(layers))]
+        return layers, layer_names
+
+    return [], []
+
+
+def _split_policy_bundles(value: str) -> list[str]:
+    return [item.strip() for item in value.split(",") if item.strip()]
 
 
 def _scan_hcl_file(path: Path, schema: dict | None) -> tuple[list[Finding], dict | None]:

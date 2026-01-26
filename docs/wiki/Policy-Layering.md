@@ -1,11 +1,37 @@
 # Policy Layering Model
 
-Planned layering model for guardrails:
+Policy layering lets you apply guardrails in a predictable order:
 
-1. Base platform invariants.
-2. Environment-specific constraints.
-3. Application-level policies.
+1. **Base**: platform invariants.
+2. **Env**: environment constraints (dev/stage/prod).
+3. **App**: application-specific policies.
+
+## CLI usage
+
+```bash
+terraform-guardrail scan infra \
+  --policy-base baseline \
+  --policy-env prod \
+  --policy-app payments
+```
+
+## API usage
+
+```json
+{
+  "path": "infra",
+  "policy_base": "baseline",
+  "policy_env": "prod",
+  "policy_app": "payments"
+}
+```
+
+## Environment variables
+
+- `GUARDRAIL_POLICY_BASE`
+- `GUARDRAIL_POLICY_ENV`
+- `GUARDRAIL_POLICY_APP`
 
 ## Status
 
-Planned.
+Delivered.

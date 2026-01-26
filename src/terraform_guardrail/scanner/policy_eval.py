@@ -68,7 +68,36 @@ def evaluate_policy_bundle(
         if result.returncode != 0:
             raise PolicyEvalError(result.stderr.strip())
 
-        return _parse_opa_output(result.stdout, bundle)
+    return _parse_opa_output(result.stdout, bundle)
+
+
+def evaluate_policy_layers(
+    bundle_ids: list[str],
+    registry_url: str | None,
+    files: list[PolicyInputFile],
+    state: dict[str, Any] | None,
+    policy_query: str | None = None,
+    layer_names: list[str] | None = None,
+) -> list[Finding]:
+    findings: list[Finding] = []
+    names = layer_names or []
+    for idx, bundle_id in enumerate(bundle_ids):
+        layer = names[idx] if idx < len(names) else None
+        layer_findings = evaluate_policy_bundle(
+            bundle_id=bundle_id,
+            registry_url=registry_url,
+            files=files,
+            state=state,
+            policy_query=policy_query,
+        )
+        for finding in layer_findings:
+            detail = finding.detail or {}
+            detail.setdefault("bundle", bundle_id)
+            if layer:
+                detail.setdefault("layer", layer)
+            finding.detail = detail
+        findings.extend(layer_findings)
+    return findings
 
 
 def _parse_opa_output(output: str, bundle: PolicyBundle) -> list[Finding]:

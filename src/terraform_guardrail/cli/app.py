@@ -56,6 +56,13 @@ def scan(
     format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
     schema: Annotated[bool, typer.Option(help="Enable schema-aware validation")] = False,
     policy_bundle: Annotated[str | None, typer.Option(help="Policy bundle ID to evaluate")] = None,
+    policy_layers: Annotated[
+        list[str] | None,
+        typer.Option(help="Ordered policy bundles for layering (repeatable)"),
+    ] = None,
+    policy_base: Annotated[str | None, typer.Option(help="Base policy bundle ID")] = None,
+    policy_env: Annotated[str | None, typer.Option(help="Environment policy bundle ID")] = None,
+    policy_app: Annotated[str | None, typer.Option(help="Application policy bundle ID")] = None,
     policy_registry: Annotated[str | None, typer.Option(help="Policy registry URL")] = None,
     policy_query: Annotated[str | None, typer.Option(help="OPA query override")] = None,
     fail_on: Annotated[
@@ -69,6 +76,10 @@ def scan(
             state_path=state,
             use_schema=schema,
             policy_bundle=policy_bundle,
+            policy_layers=policy_layers,
+            policy_base=policy_base,
+            policy_env=policy_env,
+            policy_app=policy_app,
             policy_registry=policy_registry,
             policy_query=policy_query,
         )
