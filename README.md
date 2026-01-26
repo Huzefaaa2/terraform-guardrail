@@ -809,4 +809,4 @@ make version-bump VERSION=1.0.4
 
 ## License
 
-MIT
+Business Source License (BSL) 1.1. See `LICENSE`.
