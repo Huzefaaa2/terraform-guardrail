@@ -9,11 +9,11 @@ description = "MCP-backed Terraform assistant with ephemeral-values compliance."
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [{ name = "Huzefa Husain" }]
-license = { text = "MIT" }
+license = { text = "BUSL-1.1" }
 keywords = ["terraform", "mcp", "iac", "security", "compliance"]
 classifiers = [
   "Programming Language :: Python :: 3",
-  "License :: OSI Approved :: MIT License",
+  "License :: Other/Proprietary License",
   "Operating System :: OS Independent",
 ]
 dependencies = [
