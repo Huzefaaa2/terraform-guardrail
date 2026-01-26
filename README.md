@@ -588,6 +588,7 @@ The template emits JSON, SARIF, and JUnit report artifacts by default. Disable a
 - Container Image: https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail
 - Latest release: v1.0.4
 - Release history: `RELEASE.md`
+- Enterprise Features: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Enterprise-Features
 
 ## Licensing
 
