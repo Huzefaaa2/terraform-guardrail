@@ -21,6 +21,10 @@ variables:
   TERRAFORM_GUARDRAIL_FORMAT: "pretty"
   TERRAFORM_GUARDRAIL_JSON_REPORT: "guardrail-report.json"
   TERRAFORM_GUARDRAIL_WRITE_REPORT: "true"
+  TERRAFORM_GUARDRAIL_SARIF_REPORT: "guardrail-report.sarif"
+  TERRAFORM_GUARDRAIL_JUNIT_REPORT: "guardrail-report.junit.xml"
+  TERRAFORM_GUARDRAIL_WRITE_SARIF: "true"
+  TERRAFORM_GUARDRAIL_WRITE_JUNIT: "true"
 ```
 
 ## Policy bundle evaluation (optional)
@@ -46,3 +50,7 @@ guardrail_scan:
 - `TERRAFORM_GUARDRAIL_POLICY_QUERY`: OPA query override.
 - `TERRAFORM_GUARDRAIL_JSON_REPORT`: JSON artifact filename.
 - `TERRAFORM_GUARDRAIL_WRITE_REPORT`: `true` to write the JSON report.
+- `TERRAFORM_GUARDRAIL_SARIF_REPORT`: SARIF artifact filename.
+- `TERRAFORM_GUARDRAIL_JUNIT_REPORT`: JUnit artifact filename.
+- `TERRAFORM_GUARDRAIL_WRITE_SARIF`: `true` to write the SARIF report.
+- `TERRAFORM_GUARDRAIL_WRITE_JUNIT`: `true` to write the JUnit report.

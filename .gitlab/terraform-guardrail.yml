@@ -13,7 +13,11 @@ variables:
   TERRAFORM_GUARDRAIL_POLICY_REGISTRY: ""
   TERRAFORM_GUARDRAIL_POLICY_QUERY: ""
   TERRAFORM_GUARDRAIL_JSON_REPORT: "guardrail-report.json"
+  TERRAFORM_GUARDRAIL_SARIF_REPORT: "guardrail-report.sarif"
+  TERRAFORM_GUARDRAIL_JUNIT_REPORT: "guardrail-report.junit.xml"
   TERRAFORM_GUARDRAIL_WRITE_REPORT: "true"
+  TERRAFORM_GUARDRAIL_WRITE_SARIF: "true"
+  TERRAFORM_GUARDRAIL_WRITE_JUNIT: "true"
 
 guardrail_scan:
   stage: test
@@ -49,8 +53,98 @@ guardrail_scan:
           --format "json" \
           --fail-on "${TERRAFORM_GUARDRAIL_FAIL_ON}" \
           ${args} > "${TERRAFORM_GUARDRAIL_JSON_REPORT}"
+        python - <<'PY'
+import json
+import os
+import xml.etree.ElementTree as ET
+
+json_path = os.getenv("TERRAFORM_GUARDRAIL_JSON_REPORT")
+sarif_path = os.getenv("TERRAFORM_GUARDRAIL_SARIF_REPORT")
+junit_path = os.getenv("TERRAFORM_GUARDRAIL_JUNIT_REPORT")
+write_sarif = os.getenv("TERRAFORM_GUARDRAIL_WRITE_SARIF", "false") == "true"
+write_junit = os.getenv("TERRAFORM_GUARDRAIL_WRITE_JUNIT", "false") == "true"
+
+with open(json_path, encoding="utf-8") as handle:
+    report = json.load(handle)
+
+def to_level(severity: str) -> str:
+    if severity == "high":
+        return "error"
+    if severity == "medium":
+        return "warning"
+    return "note"
+
+findings = report.get("findings", [])
+
+if write_sarif:
+    results = []
+    rules = {}
+    for finding in findings:
+        rule_id = finding.get("rule_id", "UNKNOWN")
+        rules.setdefault(rule_id, {"id": rule_id, "name": rule_id})
+        result = {
+            "ruleId": rule_id,
+            "level": to_level(finding.get("severity", "low")),
+            "message": {"text": finding.get("message", "")},
+        }
+        path = finding.get("path")
+        if path:
+            result["locations"] = [
+                {"physicalLocation": {"artifactLocation": {"uri": path}}}
+            ]
+        results.append(result)
+
+    sarif = {
+        "version": "2.1.0",
+        "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+        "runs": [
+            {
+                "tool": {
+                    "driver": {
+                        "name": "Terraform Guardrail MCP",
+                        "informationUri": "https://github.com/Huzefaaa2/terraform-guardrail",
+                        "rules": list(rules.values()),
+                    }
+                },
+                "results": results,
+            }
+        ],
+    }
+
+    with open(sarif_path, "w", encoding="utf-8") as handle:
+        json.dump(sarif, handle, indent=2)
+
+if write_junit:
+    testsuite = ET.Element("testsuite", name="terraform-guardrail")
+    testsuite.set("tests", str(len(findings)))
+    failures = sum(1 for f in findings if f.get("severity") in {"high", "medium"})
+    skipped = sum(1 for f in findings if f.get("severity") == "low")
+    testsuite.set("failures", str(failures))
+    testsuite.set("skipped", str(skipped))
+
+    for finding in findings:
+        rule_id = finding.get("rule_id", "UNKNOWN")
+        message = finding.get("message", "")
+        path = finding.get("path", "")
+        testcase = ET.SubElement(
+            testsuite, "testcase", classname=rule_id, name=message
+        )
+        detail = f"{message}"
+        if path:
+            detail = f"{message} ({path})"
+        if finding.get("severity") == "low":
+            ET.SubElement(testcase, "skipped", message=detail)
+        else:
+            failure = ET.SubElement(testcase, "failure", message=detail)
+            failure.text = detail
+
+    tree = ET.ElementTree(testsuite)
+    tree.write(junit_path, encoding="utf-8", xml_declaration=True)
+PY
       fi
   artifacts:
     when: always
     paths:
       - "${TERRAFORM_GUARDRAIL_JSON_REPORT}"
+      - "${TERRAFORM_GUARDRAIL_SARIF_REPORT}"
+      - "${TERRAFORM_GUARDRAIL_JUNIT_REPORT}"

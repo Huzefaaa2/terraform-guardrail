@@ -554,6 +554,10 @@ variables:
   TERRAFORM_GUARDRAIL_FORMAT: "pretty"
   TERRAFORM_GUARDRAIL_JSON_REPORT: "guardrail-report.json"
   TERRAFORM_GUARDRAIL_WRITE_REPORT: "true"
+  TERRAFORM_GUARDRAIL_SARIF_REPORT: "guardrail-report.sarif"
+  TERRAFORM_GUARDRAIL_JUNIT_REPORT: "guardrail-report.junit.xml"
+  TERRAFORM_GUARDRAIL_WRITE_SARIF: "true"
+  TERRAFORM_GUARDRAIL_WRITE_JUNIT: "true"
 ```
 
 Optional policy bundle evaluation:
@@ -567,8 +571,9 @@ guardrail_scan:
     TERRAFORM_GUARDRAIL_POLICY_REGISTRY: "http://localhost:8081"
 ```
 
-The template emits a JSON report artifact (`guardrail-report.json`) by default. Disable it with
-`TERRAFORM_GUARDRAIL_WRITE_REPORT: "false"`.
+The template emits JSON, SARIF, and JUnit report artifacts by default. Disable any of them with
+`TERRAFORM_GUARDRAIL_WRITE_REPORT`, `TERRAFORM_GUARDRAIL_WRITE_SARIF`, or
+`TERRAFORM_GUARDRAIL_WRITE_JUNIT`.
 
 ## Release Links
 
