@@ -32,6 +32,16 @@ jobs:
           policy_registry: http://localhost:8081
 ```
 
+### Local bundle example (no registry)
+
+```yaml
+      - uses: ./.github/actions/guardrail
+        with:
+          path: .
+          install_source: repo
+          policy_bundle_path: ./policies/my-bundle.tar.gz
+```
+
 ## Inputs
 
 - `path`: path to scan (default `.`)
@@ -39,6 +49,7 @@ jobs:
 - `schema`: enable schema validation (`true`/`false`)
 - `fail_on`: fail threshold (`low`, `medium`, `high`)
 - `policy_bundle`: bundle ID to evaluate
+- `policy_bundle_path`: local bundle path (`.tar.gz` or directory)
 - `policy_registry`: registry URL
 - `policy_query`: override OPA query
 - `opa_version`: OPA version (`latest` or `v0.63.0`)

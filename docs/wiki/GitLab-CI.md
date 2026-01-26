@@ -25,6 +25,8 @@ variables:
   TERRAFORM_GUARDRAIL_JUNIT_REPORT: "guardrail-report.junit.xml"
   TERRAFORM_GUARDRAIL_WRITE_SARIF: "true"
   TERRAFORM_GUARDRAIL_WRITE_JUNIT: "true"
+  # Optional local bundle path
+  TERRAFORM_GUARDRAIL_POLICY_BUNDLE_PATH: "./policies/my-bundle.tar.gz"
 ```
 
 ## Policy bundle evaluation (optional)
@@ -46,6 +48,7 @@ guardrail_scan:
 - `TERRAFORM_GUARDRAIL_SCHEMA`: `true` to enable schema validation.
 - `TERRAFORM_GUARDRAIL_STATE`: Optional `.tfstate` path.
 - `TERRAFORM_GUARDRAIL_POLICY_BUNDLE`: Bundle ID to evaluate.
+- `TERRAFORM_GUARDRAIL_POLICY_BUNDLE_PATH`: Local bundle path (`.tar.gz` or directory).
 - `TERRAFORM_GUARDRAIL_POLICY_REGISTRY`: Registry base URL.
 - `TERRAFORM_GUARDRAIL_POLICY_QUERY`: OPA query override.
 - `TERRAFORM_GUARDRAIL_JSON_REPORT`: JSON artifact filename.

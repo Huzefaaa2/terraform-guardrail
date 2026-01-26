@@ -84,6 +84,12 @@ Set `data.json`:
 opa build --bundle ./my-bundle --output my-bundle.tar.gz
 ```
 
+### 3a) Validate before use
+
+```bash
+terraform-guardrail policy validate ./my-bundle.tar.gz
+```
+
 ### 4) Evaluate locally
 
 ```bash
@@ -96,6 +102,21 @@ Host your bundle and register it in `registry.json`, then run:
 
 ```bash
 terraform-guardrail scan ./infra --policy-bundle my-bundle
+```
+
+### Local registry template
+
+Use the local registry template to host private bundles:
+
+```
+ops/policy-registry-template/
+```
+
+Start a local registry quickly:
+
+```bash
+cd ops/policy-registry-template
+python -m http.server 8081
 ```
 
 ## Notes

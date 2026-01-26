@@ -10,6 +10,7 @@ variables:
   TERRAFORM_GUARDRAIL_SCHEMA: "false"
   TERRAFORM_GUARDRAIL_STATE: ""
   TERRAFORM_GUARDRAIL_POLICY_BUNDLE: ""
+  TERRAFORM_GUARDRAIL_POLICY_BUNDLE_PATH: ""
   TERRAFORM_GUARDRAIL_POLICY_REGISTRY: ""
   TERRAFORM_GUARDRAIL_POLICY_QUERY: ""
   TERRAFORM_GUARDRAIL_JSON_REPORT: "guardrail-report.json"
@@ -37,6 +38,9 @@ guardrail_scan:
       fi
       if [ -n "${TERRAFORM_GUARDRAIL_POLICY_BUNDLE}" ]; then
         args="${args} --policy-bundle ${TERRAFORM_GUARDRAIL_POLICY_BUNDLE}"
+      fi
+      if [ -n "${TERRAFORM_GUARDRAIL_POLICY_BUNDLE_PATH}" ]; then
+        args="${args} --policy-bundle-path ${TERRAFORM_GUARDRAIL_POLICY_BUNDLE_PATH}"
       fi
       if [ -n "${TERRAFORM_GUARDRAIL_POLICY_REGISTRY}" ]; then
         args="${args} --policy-registry ${TERRAFORM_GUARDRAIL_POLICY_REGISTRY}"

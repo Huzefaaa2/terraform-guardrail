@@ -498,6 +498,7 @@ terraform-guardrail scan ./infra
 ```bash
 terraform-guardrail policy init --destination ./my-bundle --bundle-name guardrail
 opa build --bundle ./my-bundle --output my-bundle.tar.gz
+terraform-guardrail policy validate ./my-bundle.tar.gz
 terraform-guardrail scan ./infra --policy-bundle-path ./my-bundle.tar.gz
 ```
 

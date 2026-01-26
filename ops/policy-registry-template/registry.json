@@ -1,0 +1,20 @@
+{
+  "version": "0.3",
+  "bundles": [
+    {
+      "id": "my-baseline",
+      "title": "My Baseline Guardrails",
+      "description": "Private baseline policy bundle.",
+      "entrypoint": "data.guardrail.baseline.deny",
+      "latest": "0.1.0",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "url": "/bundles/my-baseline.tar.gz",
+          "sha256": "<replace-with-sha256>",
+          "published_at": "2026-01-26"
+        }
+      ]
+    }
+  ]
+}

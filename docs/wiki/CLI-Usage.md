@@ -41,6 +41,7 @@ terraform-guardrail policy list
 terraform-guardrail policy fetch baseline --destination ./policies
 terraform-guardrail policy fetch baseline-signed --destination ./policies
 terraform-guardrail policy init --destination ./my-bundle --bundle-name guardrail
+terraform-guardrail policy validate ./my-bundle.tar.gz
 ```
 
 Policy bundle evaluation requires the `opa` CLI on your PATH.

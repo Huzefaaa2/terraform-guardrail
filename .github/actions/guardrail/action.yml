@@ -16,6 +16,9 @@ inputs:
   policy_bundle:
     description: "Policy bundle ID to evaluate"
     default: ""
+  policy_bundle_path:
+    description: "Local policy bundle path (.tar.gz or directory)"
+    default: ""
   policy_registry:
     description: "Policy registry URL"
     default: ""
@@ -46,13 +49,13 @@ runs:
           python -m pip install terraform-guardrail
         fi
     - name: Cache OPA
-      if: ${{ inputs.policy_bundle != '' }}
+      if: ${{ inputs.policy_bundle != '' || inputs.policy_bundle_path != '' }}
       uses: actions/cache@v4
       with:
         path: ~/.cache/opa
         key: opa-${{ runner.os }}-${{ inputs.opa_version }}
     - name: Install OPA binary
-      if: ${{ inputs.policy_bundle != '' }}
+      if: ${{ inputs.policy_bundle != '' || inputs.policy_bundle_path != '' }}
       shell: bash
       run: |
         OPA_CACHE_DIR="$HOME/.cache/opa"
@@ -87,6 +90,9 @@ runs:
         fi
         if [ -n "${{ inputs.policy_bundle }}" ]; then
           args+=(--policy-bundle "${{ inputs.policy_bundle }}")
+        fi
+        if [ -n "${{ inputs.policy_bundle_path }}" ]; then
+          args+=(--policy-bundle-path "${{ inputs.policy_bundle_path }}")
         fi
         if [ -n "${{ inputs.policy_registry }}" ]; then
           args+=(--policy-registry "${{ inputs.policy_registry }}")

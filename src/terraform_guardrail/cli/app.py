@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import importlib.metadata
 import json
+import shutil
+import subprocess
+import tempfile
 from pathlib import Path
 from typing import Annotated
 
@@ -235,6 +238,34 @@ def init_policy_bundle(
         encoding="utf-8",
     )
     console.print(f"Policy bundle scaffold created at {bundle_dir}")
+
+
+@policy_app.command("validate")
+def validate_policy_bundle(
+    bundle_path: Annotated[Path, typer.Argument(help="Bundle path (.tar.gz or directory)")],
+) -> None:
+    if not bundle_path.exists():
+        console.print(f"Bundle not found: {bundle_path}")
+        raise typer.Exit(code=1)
+    opa_path = shutil.which("opa")
+    if not opa_path:
+        console.print("OPA CLI not found. Install OPA to validate bundles.")
+        raise typer.Exit(code=1)
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        tmp_path = Path(tmp_dir) / "validated.tar.gz"
+        cmd = [
+            opa_path,
+            "build",
+            "--bundle",
+            str(bundle_path),
+            "--output",
+            str(tmp_path),
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+        if result.returncode != 0:
+            console.print(f"Bundle validation failed: {result.stderr.strip()}")
+            raise typer.Exit(code=1)
+    console.print("Bundle validation succeeded.")
 
 
 @rules_app.command("list")

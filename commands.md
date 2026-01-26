@@ -91,6 +91,7 @@ Policy registry commands.
 terraform-guardrail policy list [--registry URL]
 terraform-guardrail policy fetch BUNDLE_ID [--destination PATH] [--registry URL]
 terraform-guardrail policy init [--destination PATH] [--bundle-name NAME]
+terraform-guardrail policy validate BUNDLE_PATH
 ```
 
 ## rules
