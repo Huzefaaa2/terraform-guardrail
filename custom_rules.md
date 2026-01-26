@@ -1,4 +1,4 @@
-# Custom Rules
+# Custom Rules (CLI + CI/CD)
 
 Terraform-Guardrail supports two customization paths:
 
@@ -16,7 +16,7 @@ export GUARDRAIL_BLOCKED_REGIONS="eastus2"
 export GUARDRAIL_ALLOWED_INSTANCE_TYPES="t3.medium,t3.large"
 export GUARDRAIL_ALLOWED_SKUS="Standard_D4s_v5,Standard_D8s_v5"
 
-tfguardrail scan ./infra
+terraform-guardrail scan ./infra
 ```
 
 These drive built-in rules:
@@ -78,15 +78,10 @@ Set `data.json`:
 }
 ```
 
-### 3) Build a bundle
+### 3) Build + validate
 
 ```bash
 opa build --bundle ./my-bundle --output my-bundle.tar.gz
-```
-
-### 3a) Validate before use
-
-```bash
 terraform-guardrail policy validate ./my-bundle.tar.gz
 ```
 
@@ -101,7 +96,8 @@ terraform-guardrail scan ./infra --policy-bundle-path ./my-bundle.tar.gz
 Host your bundle and register it in `registry.json`, then run:
 
 ```bash
-terraform-guardrail scan ./infra --policy-bundle my-bundle
+terraform-guardrail scan ./infra --policy-bundle my-bundle \
+  --policy-registry http://localhost:8081
 ```
 
 ## CI/CD usage
@@ -132,7 +128,7 @@ variables:
     policyBundlePath: "./policies/my-bundle.tar.gz"
 ```
 
-### Local registry template
+## Local policy registry template
 
 Use the local registry template to host private bundles:
 
@@ -145,6 +141,14 @@ Start a local registry quickly:
 ```bash
 cd ops/policy-registry-template
 python -m http.server 8081
+```
+
+Then:
+
+```bash
+terraform-guardrail scan ./infra \
+  --policy-bundle my-baseline \
+  --policy-registry http://localhost:8081
 ```
 
 ## Notes

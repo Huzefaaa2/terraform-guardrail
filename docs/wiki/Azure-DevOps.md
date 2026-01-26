@@ -23,6 +23,8 @@ steps:
       failOn: "high"
       policyBundle: "baseline-signed"
       policyRegistry: "http://localhost:8081"
+      # Optional local bundle path
+      policyBundlePath: "./policies/my-bundle.tar.gz"
 ```
 
 ## Reports
@@ -92,6 +94,7 @@ steps:
 - `schema`: enable schema validation
 - `failOn`: severity threshold (`low`, `medium`, `high`)
 - `policyBundle`: bundle ID
+- `policyBundlePath`: local bundle path (`.tar.gz` or directory)
 - `policyRegistry`: registry URL
 - `policyQuery`: OPA query override
 - `jsonReport`, `sarifReport`, `junitReport`: report filenames
