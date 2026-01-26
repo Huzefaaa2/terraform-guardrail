@@ -133,8 +133,8 @@ flowchart LR
 
     class USER actor;
     class CHANNELS channel;
-    class GUARDRAIL, POLICIES core;
-    class REPORTS, TERRAFORM output;
+    class GUARDRAIL,POLICIES core;
+    class REPORTS,TERRAFORM output;
 ```
 
 ## Quick links
