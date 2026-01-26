@@ -29,6 +29,21 @@ steps:
 
 The template generates and publishes JSON, SARIF, and JUnit outputs.
 
+## Marketplace extension scaffold
+
+The repository includes a Marketplace extension scaffold in `azure-devops-extension/` with a
+`Terraform Guardrail Scan` task. Build it using `tfx`:
+
+```bash
+cd azure-devops-extension/tasks/terraform-guardrail
+npm install
+cd ../../
+
+npm install -g tfx-cli
+tfx extension create --manifest-globs vss-extension.json
+tfx extension publish --manifest-globs vss-extension.json --token <ADO_PAT>
+```
+
 ## Parameters
 
 - `path`: path to scan (default `.`)

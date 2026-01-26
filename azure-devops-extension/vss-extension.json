@@ -1,0 +1,41 @@
+{
+  "manifestVersion": 1,
+  "id": "terraform-guardrail",
+  "name": "Terraform Guardrail MCP",
+  "publisher": "huzefaaa2",
+  "version": "0.1.0",
+  "description": "Terraform Guardrail scan task for Azure DevOps pipelines.",
+  "categories": [
+    "Azure Pipelines"
+  ],
+  "targets": [
+    {
+      "id": "Microsoft.VisualStudio.Services"
+    }
+  ],
+  "files": [
+    {
+      "path": "tasks/terraform-guardrail"
+    }
+  ],
+  "contributions": [
+    {
+      "id": "terraform-guardrail-task",
+      "type": "ms.vss-distributed-task.task",
+      "targets": [
+        "ms.vss-distributed-task.tasks"
+      ],
+      "properties": {
+        "name": "tasks/terraform-guardrail"
+      }
+    }
+  ],
+  "links": {
+    "getstarted": {
+      "uri": "https://github.com/Huzefaaa2/terraform-guardrail/wiki/Azure-DevOps"
+    },
+    "repository": {
+      "uri": "https://github.com/Huzefaaa2/terraform-guardrail"
+    }
+  }
+}

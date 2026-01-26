@@ -627,6 +627,11 @@ steps:
 The template publishes JSON, SARIF, and JUnit reports. Disable publishing with
 `publishReports: false`.
 
+## Azure DevOps Marketplace Extension
+
+The repo also includes a Marketplace extension scaffold in `azure-devops-extension/` with a
+`Terraform Guardrail Scan` task. Build it using `tfx` and publish from your ADO publisher account.
+
 ## Release Links
 
 - PyPI: https://pypi.org/project/terraform-guardrail/

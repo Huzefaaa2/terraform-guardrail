@@ -1,0 +1,106 @@
+{
+  "id": "9b7f7f2e-7a8c-4a34-9f1c-2b46a1f84218",
+  "name": "TerraformGuardrail",
+  "friendlyName": "Terraform Guardrail Scan",
+  "description": "Run Terraform Guardrail scans and produce JSON, SARIF, and JUnit reports.",
+  "author": "Huzefa Husain",
+  "helpMarkDown": "See the Terraform Guardrail docs for usage.",
+  "category": "Utility",
+  "visibility": [
+    "Build",
+    "Release"
+  ],
+  "runsOn": [
+    "Agent"
+  ],
+  "instanceNameFormat": "Terraform Guardrail Scan",
+  "inputs": [
+    {
+      "name": "path",
+      "type": "string",
+      "label": "Path to scan",
+      "defaultValue": ".",
+      "required": true
+    },
+    {
+      "name": "state",
+      "type": "string",
+      "label": "Optional .tfstate path",
+      "defaultValue": "",
+      "required": false
+    },
+    {
+      "name": "schema",
+      "type": "boolean",
+      "label": "Enable schema validation",
+      "defaultValue": false,
+      "required": false
+    },
+    {
+      "name": "failOn",
+      "type": "pickList",
+      "label": "Fail on severity",
+      "defaultValue": "medium",
+      "required": true,
+      "options": {
+        "low": "low",
+        "medium": "medium",
+        "high": "high"
+      }
+    },
+    {
+      "name": "policyBundle",
+      "type": "string",
+      "label": "Policy bundle ID",
+      "defaultValue": "",
+      "required": false
+    },
+    {
+      "name": "policyRegistry",
+      "type": "string",
+      "label": "Policy registry URL",
+      "defaultValue": "",
+      "required": false
+    },
+    {
+      "name": "policyQuery",
+      "type": "string",
+      "label": "OPA query override",
+      "defaultValue": "",
+      "required": false
+    },
+    {
+      "name": "python",
+      "type": "string",
+      "label": "Python executable",
+      "defaultValue": "python",
+      "required": true
+    },
+    {
+      "name": "jsonReport",
+      "type": "string",
+      "label": "JSON report filename",
+      "defaultValue": "guardrail-report.json",
+      "required": true
+    },
+    {
+      "name": "sarifReport",
+      "type": "string",
+      "label": "SARIF report filename",
+      "defaultValue": "guardrail-report.sarif",
+      "required": true
+    },
+    {
+      "name": "junitReport",
+      "type": "string",
+      "label": "JUnit report filename",
+      "defaultValue": "guardrail-report.junit.xml",
+      "required": true
+    }
+  ],
+  "execution": {
+    "Node16": {
+      "target": "index.js"
+    }
+  }
+}
