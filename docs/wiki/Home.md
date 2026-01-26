@@ -128,6 +128,7 @@ flowchart LR
 ## Quick links
 
 - [Roadmap](Roadmap.md)
+- [Deliverables Reference](Deliverables.md)
 - [Architecture](Architecture.md)
 - [Diagrams](Diagrams.md)
 - [Comparison with Other Tools](Comparison.md)
