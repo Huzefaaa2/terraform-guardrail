@@ -19,6 +19,13 @@ brew install Huzefaaa2/tap/terraform-guardrail
 choco install terraform-guardrail
 ```
 
+## Licensing
+
+Terraform-Guardrail is licensed under **Business Source License (BSL) 1.1** with a change
+date to Apache 2.0. Commercial usage requires explicit permission.
+
+- Licensing details: [Licensing](Licensing.md)
+
 ## Terraform-Guardrail MCP (TerraGuard)
 
 **Making Infrastructure Governance Executable**
@@ -127,6 +134,7 @@ flowchart LR
 - [CLI Usage](CLI-Usage.md)
 - [GitHub Action](GitHub-Action.md)
 - [Packaging](Packaging.md)
+- [Licensing](Licensing.md)
 - [MCP Server](MCP-Server.md)
 - [Compliance Rules](Compliance-Rules.md)
 - [Streamlit Deployment](Streamlit-Deployment.md)

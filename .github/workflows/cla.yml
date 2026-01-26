@@ -1,0 +1,28 @@
+name: Contributor License Agreement (CLA)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  cla-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check CLA signature settings
+        id: gate
+        shell: bash
+        run: |
+          if [ -z "${{ secrets.CLA_SIGNATURE_REPOSITORY }}" ] || [ -z "${{ secrets.CLA_GIST_TOKEN }}" ]; then
+            echo "CLA signature storage is not configured."
+            echo "Set CLA_SIGNATURE_REPOSITORY and CLA_GIST_TOKEN secrets."
+            exit 1
+          fi
+      - name: CLA Assistant
+        uses: cla-assistant/github-action@v2
+        with:
+          github-token: ${{ secrets.CLA_GIST_TOKEN }}
+          cla-path: "CLA.md"
+          signature-path: "terraform-guardrail-cla-signatures.json"
+          signature-repository: ${{ secrets.CLA_SIGNATURE_REPOSITORY }}
+          allowlist: |
+            dependabot[bot]
