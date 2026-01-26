@@ -24,7 +24,7 @@ choco install terraform-guardrail
 Terraform-Guardrail is licensed under **Business Source License (BSL) 1.1** with a change
 date to Apache 2.0. Commercial usage requires explicit permission.
 
-- Licensing details: [Licensing](Licensing.md)
+- Licensing details: [Licensing](Licensing)
 
 ## Terraform-Guardrail MCP (TerraGuard)
 
@@ -139,30 +139,30 @@ flowchart LR
 
 ## Quick links
 
-- [Roadmap](Roadmap.md)
-- [Deliverables Reference](Deliverables.md)
-- [Enterprise Implementation Plan](Implementation-Plan.md)
-- [Enterprise Features](Enterprise-Features.md)
-- [Examples](Examples.md)
-- [AWS Support](AWS-Support.md)
-- [AWS CodePipeline](AWS-CodePipeline.md)
-- [Architecture](Architecture.md)
-- [Diagrams](Diagrams.md)
-- [Comparison with Other Tools](Comparison.md)
-- [CLI Usage](CLI-Usage.md)
+- [Roadmap](Roadmap)
+- [Deliverables Reference](Deliverables)
+- [Enterprise Implementation Plan](Implementation-Plan)
+- [Enterprise Features](Enterprise-Features)
+- [Examples](Examples)
+- [AWS Support](AWS-Support)
+- [AWS CodePipeline](AWS-CodePipeline)
+- [Architecture](Architecture)
+- [Diagrams](Diagrams)
+- [Comparison with Other Tools](Comparison)
+- [CLI Usage](CLI-Usage)
 - [Command Reference](https://github.com/Huzefaaa2/terraform-guardrail/blob/main/commands.md)
-- [Custom Rules](Custom-Rules.md)
-- [GitHub Action](GitHub-Action.md)
-- [GitLab CI Templates](GitLab-CI.md)
-- [Packaging](Packaging.md)
-- [Licensing](Licensing.md)
-- [MCP Server](MCP-Server.md)
-- [Compliance Rules](Compliance-Rules.md)
-- [Streamlit Deployment](Streamlit-Deployment.md)
-- [Docker Compose Stack](Docker-Compose.md)
+- [Custom Rules](Custom-Rules)
+- [GitHub Action](GitHub-Action)
+- [GitLab CI Templates](GitLab-CI)
+- [Packaging](Packaging)
+- [Licensing](Licensing)
+- [MCP Server](MCP-Server)
+- [Compliance Rules](Compliance-Rules)
+- [Streamlit Deployment](Streamlit-Deployment)
+- [Docker Compose Stack](Docker-Compose)
 - [Live Streamlit App](https://terraform-guardrail.streamlit.app/)
 - [PyPI Package](https://pypi.org/project/terraform-guardrail/)
-- [Release Process](Release-Process.md)
+- [Release Process](Release-Process)
 
 ## Latest Release
 
