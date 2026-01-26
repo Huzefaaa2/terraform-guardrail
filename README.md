@@ -398,6 +398,17 @@ pip install terraform-guardrail
 
 PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 1.0.4)
 
+## Examples
+
+The `examples/` folder provides practical CI simulations:
+
+- `examples/fixtures/` includes good and bad Terraform inputs (`.tf`, `.tfvars`, `.hcl`, `.tfstate`).
+- `examples/gitlab-ci/` contains a GitLab template example and sample outputs.
+- `examples/github-actions/` contains a GitHub Actions workflow and sample outputs.
+
+Each example folder includes a `README.md` with steps and expected output formats (JSON, SARIF,
+JUnit, CSV).
+
 ## Installer Options
 
 Packaging artifacts are generated on release tags. Homebrew and Chocolatey publishes are enabled
