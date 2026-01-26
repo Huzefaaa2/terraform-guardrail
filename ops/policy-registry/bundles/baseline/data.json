@@ -1,0 +1,6 @@
+{
+  "guardrail": {
+    "allowed_regions": [],
+    "allowed_instance_types": []
+  }
+}

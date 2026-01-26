@@ -22,6 +22,9 @@ from terraform_guardrail.schema import (
 )
 
 TERRAFORM_EXTS = {".tf", ".tfvars", ".hcl"}
+PUBLIC_ACLS = {"public-read", "public-read-write"}
+PUBLIC_CIDRS = {"0.0.0.0/0", "::/0"}
+DEFAULT_REQUIRED_TAGS = ["owner", "environment", "cost_center"]
 
 
 def scan_path(
@@ -236,6 +239,8 @@ def _scan_hcl_file(path: Path, schema: dict | None) -> tuple[list[Finding], dict
                     )
                 )
 
+    findings.extend(_resource_findings(data, path))
+
     if schema:
         findings.extend(_schema_findings(data, schema, path))
 
@@ -304,6 +309,332 @@ def _schema_findings(hcl_data: dict, schema: dict, path: Path) -> list[Finding]:
                 )
             )
     return findings
+
+
+def _resource_findings(hcl_data: dict, path: Path) -> list[Finding]:
+    findings: list[Finding] = []
+    required_tags = _load_csv_env("GUARDRAIL_REQUIRED_TAGS") or DEFAULT_REQUIRED_TAGS
+    allowed_regions = _load_csv_env("GUARDRAIL_ALLOWED_REGIONS")
+    blocked_regions = _load_csv_env("GUARDRAIL_BLOCKED_REGIONS")
+    allowed_instance_types = _load_csv_env("GUARDRAIL_ALLOWED_INSTANCE_TYPES")
+    allowed_skus = _load_csv_env("GUARDRAIL_ALLOWED_SKUS")
+
+    for resource_type, name, attrs in _iter_resources(hcl_data):
+        resource_id = f"{resource_type}.{name}"
+
+        if resource_type == "aws_s3_bucket":
+            acl = _string_value(attrs.get("acl"))
+            if acl and acl.lower() in PUBLIC_ACLS:
+                findings.append(
+                    Finding(
+                        rule_id="TG006",
+                        severity="high",
+                        message=f"{RULES['TG006']}: {resource_id}",
+                        path=str(path),
+                        detail={"recommendation": "Remove public ACLs and use bucket policies."},
+                    )
+                )
+            if "server_side_encryption_configuration" not in attrs:
+                findings.append(
+                    Finding(
+                        rule_id="TG011",
+                        severity="medium",
+                        message=f"{RULES['TG011']}: {resource_id}",
+                        path=str(path),
+                        detail={"recommendation": "Enable default SSE with KMS or AES256."},
+                    )
+                )
+
+        if resource_type == "aws_s3_bucket_public_access_block":
+            if _s3_public_block_disabled(attrs):
+                findings.append(
+                    Finding(
+                        rule_id="TG007",
+                        severity="high",
+                        message=f"{RULES['TG007']}: {resource_id}",
+                        path=str(path),
+                        detail={"recommendation": "Enable all public access block flags."},
+                    )
+                )
+
+        if resource_type in {"aws_security_group", "aws_security_group_rule"}:
+            if _security_group_is_public(resource_type, attrs):
+                findings.append(
+                    Finding(
+                        rule_id="TG008",
+                        severity="high",
+                        message=f"{RULES['TG008']}: {resource_id}",
+                        path=str(path),
+                        detail={"recommendation": "Restrict ingress CIDRs to approved ranges."},
+                    )
+                )
+
+        if resource_type in {"aws_iam_policy", "aws_iam_role_policy"}:
+            if _iam_policy_is_wildcard(attrs):
+                findings.append(
+                    Finding(
+                        rule_id="TG009",
+                        severity="high",
+                        message=f"{RULES['TG009']}: {resource_id}",
+                        path=str(path),
+                        detail={"recommendation": "Scope IAM actions/resources explicitly."},
+                    )
+                )
+
+        if resource_type == "aws_instance":
+            if _truthy(attrs.get("associate_public_ip_address")):
+                findings.append(
+                    Finding(
+                        rule_id="TG010",
+                        severity="medium",
+                        message=f"{RULES['TG010']}: {resource_id}",
+                        path=str(path),
+                        detail={
+                            "recommendation": "Remove public IP association for private hosts."
+                        },
+                    )
+                )
+            if "subnet_id" not in attrs:
+                findings.append(
+                    Finding(
+                        rule_id="TG014",
+                        severity="low",
+                        message=f"{RULES['TG014']}: {resource_id}",
+                        path=str(path),
+                        detail={"recommendation": "Attach to an explicit subnet/VPC boundary."},
+                    )
+                )
+
+        if resource_type in {"aws_db_instance", "aws_rds_cluster"}:
+            if not _truthy(attrs.get("storage_encrypted")):
+                findings.append(
+                    Finding(
+                        rule_id="TG012",
+                        severity="medium",
+                        message=f"{RULES['TG012']}: {resource_id}",
+                        path=str(path),
+                        detail={"recommendation": "Enable storage_encrypted and KMS keys."},
+                    )
+                )
+            if _truthy(attrs.get("publicly_accessible")):
+                findings.append(
+                    Finding(
+                        rule_id="TG015",
+                        severity="high",
+                        message=f"{RULES['TG015']}: {resource_id}",
+                        path=str(path),
+                        detail={"recommendation": "Disable publicly_accessible for databases."},
+                    )
+                )
+
+        if resource_type in {"aws_lb_listener", "aws_alb_listener"}:
+            protocol = _string_value(attrs.get("protocol"))
+            if protocol and protocol.upper() == "HTTP":
+                findings.append(
+                    Finding(
+                        rule_id="TG013",
+                        severity="medium",
+                        message=f"{RULES['TG013']}: {resource_id}",
+                        path=str(path),
+                        detail={"recommendation": "Use HTTPS listeners with TLS certificates."},
+                    )
+                )
+
+        if resource_type == "aws_ebs_volume":
+            if not _truthy(attrs.get("encrypted")):
+                findings.append(
+                    Finding(
+                        rule_id="TG020",
+                        severity="medium",
+                        message=f"{RULES['TG020']}: {resource_id}",
+                        path=str(path),
+                        detail={"recommendation": "Enable encrypted volumes with KMS."},
+                    )
+                )
+
+        if resource_type == "azurerm_storage_account":
+            if _truthy(attrs.get("public_network_access_enabled")):
+                findings.append(
+                    Finding(
+                        rule_id="TG019",
+                        severity="medium",
+                        message=f"{RULES['TG019']}: {resource_id}",
+                        path=str(path),
+                        detail={
+                            "recommendation": (
+                                "Disable public network access or use private endpoints."
+                            )
+                        },
+                    )
+                )
+
+        missing_tags = _missing_required_tags(attrs, required_tags)
+        if missing_tags:
+            findings.append(
+                Finding(
+                    rule_id="TG016",
+                    severity="low",
+                    message=f"{RULES['TG016']}: {resource_id}",
+                    path=str(path),
+                    detail={"missing_tags": missing_tags},
+                )
+            )
+
+        if allowed_regions or blocked_regions:
+            for key in ("region", "location"):
+                value = _string_value(attrs.get(key))
+                if not value:
+                    continue
+                if allowed_regions and value not in allowed_regions:
+                    findings.append(
+                        Finding(
+                            rule_id="TG017",
+                            severity="medium",
+                            message=f"{RULES['TG017']}: {resource_id}",
+                            path=str(path),
+                            detail={"value": value, "allowed": allowed_regions},
+                        )
+                    )
+                    break
+                if blocked_regions and value in blocked_regions:
+                    findings.append(
+                        Finding(
+                            rule_id="TG017",
+                            severity="medium",
+                            message=f"{RULES['TG017']}: {resource_id}",
+                            path=str(path),
+                            detail={"value": value, "blocked": blocked_regions},
+                        )
+                    )
+                    break
+
+        if allowed_instance_types or allowed_skus:
+            instance_type = _string_value(attrs.get("instance_type"))
+            if (
+                instance_type
+                and allowed_instance_types
+                and instance_type not in allowed_instance_types
+            ):
+                findings.append(
+                    Finding(
+                        rule_id="TG018",
+                        severity="medium",
+                        message=f"{RULES['TG018']}: {resource_id}",
+                        path=str(path),
+                        detail={"value": instance_type, "allowed": allowed_instance_types},
+                    )
+                )
+            sku = _string_value(attrs.get("vm_size") or attrs.get("sku"))
+            if sku and allowed_skus and sku not in allowed_skus:
+                findings.append(
+                    Finding(
+                        rule_id="TG018",
+                        severity="medium",
+                        message=f"{RULES['TG018']}: {resource_id}",
+                        path=str(path),
+                        detail={"value": sku, "allowed": allowed_skus},
+                    )
+                )
+
+    return findings
+
+
+def _iter_resources(hcl_data: dict) -> Iterable[tuple[str, str, dict]]:
+    for block in hcl_data.get("resource", []) or []:
+        if not isinstance(block, dict):
+            continue
+        for resource_type, instances in block.items():
+            if not isinstance(instances, dict):
+                continue
+            for name, attrs in instances.items():
+                if isinstance(attrs, dict):
+                    yield resource_type, name, attrs
+
+
+def _as_list(value: object) -> list:
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return value
+    return [value]
+
+
+def _string_value(value: object) -> str | None:
+    if isinstance(value, str):
+        return value
+    return None
+
+
+def _truthy(value: object) -> bool:
+    if value is True:
+        return True
+    if isinstance(value, str):
+        return value.strip().lower() in {"true", "yes", "1", "enabled"}
+    return False
+
+
+def _load_csv_env(name: str) -> list[str]:
+    value = os.getenv(name, "")
+    if not value:
+        return []
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
+def _s3_public_block_disabled(attrs: dict) -> bool:
+    keys = [
+        "block_public_acls",
+        "block_public_policy",
+        "ignore_public_acls",
+        "restrict_public_buckets",
+    ]
+    for key in keys:
+        value = attrs.get(key)
+        if value is False or (isinstance(value, str) and value.lower() == "false"):
+            return True
+    return False
+
+
+def _security_group_is_public(resource_type: str, attrs: dict) -> bool:
+    if resource_type == "aws_security_group_rule":
+        if attrs.get("type") != "ingress":
+            return False
+        cidrs = _as_list(attrs.get("cidr_blocks")) + _as_list(attrs.get("ipv6_cidr_blocks"))
+        return any(str(cidr) in PUBLIC_CIDRS for cidr in cidrs)
+
+    for ingress in _as_list(attrs.get("ingress")):
+        if not isinstance(ingress, dict):
+            continue
+        cidrs = _as_list(ingress.get("cidr_blocks")) + _as_list(ingress.get("ipv6_cidr_blocks"))
+        if any(str(cidr) in PUBLIC_CIDRS for cidr in cidrs):
+            return True
+    return False
+
+
+def _iam_policy_is_wildcard(attrs: dict) -> bool:
+    policy = attrs.get("policy")
+    if isinstance(policy, str):
+        text = policy.replace(" ", "")
+        return "\"Action\":\"*\"" in text or "\"Resource\":\"*\"" in text
+    if isinstance(policy, dict):
+        statements = policy.get("Statement") or []
+        for statement in _as_list(statements):
+            if not isinstance(statement, dict):
+                continue
+            actions = _as_list(statement.get("Action"))
+            resources = _as_list(statement.get("Resource"))
+            if "*" in actions or "*" in resources:
+                return True
+    return False
+
+
+def _missing_required_tags(attrs: dict, required: list[str]) -> list[str]:
+    if not required:
+        return []
+    tags = attrs.get("tags")
+    if not isinstance(tags, dict):
+        tags = attrs.get("tags_all") if isinstance(attrs.get("tags_all"), dict) else {}
+    missing = [tag for tag in required if tag not in tags]
+    return missing
 
 
 def _build_summary(scanned_files: int, findings: list[Finding]) -> ScanSummary:
