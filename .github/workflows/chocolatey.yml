@@ -5,6 +5,11 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish (e.g. 1.0.4)"
+        required: false
+        default: ""
 
 jobs:
   publish:
@@ -26,7 +31,10 @@ jobs:
         if: ${{ steps.gate.outputs.skip != 'true' }}
         shell: powershell
         run: |
-          $version = "${{ github.ref_name }}".TrimStart("v")
+          $version = "${{ github.event.inputs.version }}"
+          if ([string]::IsNullOrWhiteSpace($version)) {
+            $version = "${{ github.ref_name }}".TrimStart("v")
+          }
           $dest = "dist/packaging/chocolatey"
           New-Item -ItemType Directory -Force -Path "$dest/tools" | Out-Null
           (Get-Content packaging/chocolatey/terraform-guardrail.nuspec.in) `
@@ -38,6 +46,9 @@ jobs:
         if: ${{ steps.gate.outputs.skip != 'true' }}
         shell: powershell
         run: |
-          $version = "${{ github.ref_name }}".TrimStart("v")
+          $version = "${{ github.event.inputs.version }}"
+          if ([string]::IsNullOrWhiteSpace($version)) {
+            $version = "${{ github.ref_name }}".TrimStart("v")
+          }
           $package = "dist/packaging/chocolatey/terraform-guardrail.$version.nupkg"
           choco push $package --source https://push.chocolatey.org/ --api-key "${{ secrets.CHOCO_API_KEY }}"

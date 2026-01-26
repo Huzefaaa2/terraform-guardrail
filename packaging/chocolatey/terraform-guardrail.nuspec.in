@@ -7,7 +7,7 @@
     <authors>Huzefa Husain</authors>
     <owners>Huzefa Husain</owners>
     <summary>Terraform Guardrail MCP (TerraGuard) governance control plane for Terraform.</summary>
-    <projectUrl>https://github.com/Huzefaaa2/terraform-guardrail</projectUrl>
+    <projectUrl>https://terraform-guardrail.streamlit.app/</projectUrl>
     <packageSourceUrl>https://github.com/Huzefaaa2/terraform-guardrail/tree/main/packaging/chocolatey</packageSourceUrl>
     <projectSourceUrl>https://github.com/Huzefaaa2/terraform-guardrail</projectSourceUrl>
     <docsUrl>https://github.com/Huzefaaa2/terraform-guardrail/wiki</docsUrl>

@@ -14,13 +14,7 @@ function Get-PythonExecutable {
 
 $pythonExe = Get-PythonExecutable
 if (-not $pythonExe) {
-    choco install python -y --no-progress
-    refreshenv
-    $pythonExe = Get-PythonExecutable
-}
-
-if (-not $pythonExe) {
-    throw "Python was not found after installation. Please install Python 3.11+."
+    throw "Python 3.11+ is required. Please install Python and retry."
 }
 
 if ($pythonExe -like "*\\py.exe") {
