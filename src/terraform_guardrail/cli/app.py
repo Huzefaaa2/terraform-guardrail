@@ -19,12 +19,15 @@ from terraform_guardrail.policy_registry import (
     list_policy_bundles,
 )
 from terraform_guardrail.registry_api import create_registry_app
+from terraform_guardrail.scanner.rules import RULES
 from terraform_guardrail.scanner.scan import scan_path
 from terraform_guardrail.web.app import create_app
 
 app = typer.Typer(add_completion=False)
 policy_app = typer.Typer(help="Policy registry commands.")
+rules_app = typer.Typer(help="Rule catalog commands.")
 app.add_typer(policy_app, name="policy")
+app.add_typer(rules_app, name="rules")
 console = Console()
 
 
@@ -182,6 +185,12 @@ def fetch_policy(
         console.print(f"Policy registry error: {exc}")
         raise typer.Exit(code=1) from exc
     console.print(f"Bundle downloaded to {bundle_path}")
+
+
+@rules_app.command("list")
+def list_rules() -> None:
+    for rule_id, message in sorted(RULES.items()):
+        console.print(f"- {rule_id}: {message}")
 
 
 def main() -> None:

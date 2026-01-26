@@ -436,6 +436,8 @@ Packaging details: `docs/packaging.md`.
 
 ## CLI examples
 
+Full CLI command reference: [commands.md](commands.md).
+
 ```bash
 # scan a directory
 terraform-guardrail scan ./examples --format json
