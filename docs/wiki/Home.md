@@ -130,6 +130,7 @@ flowchart LR
 - [Roadmap](Roadmap.md)
 - [Deliverables Reference](Deliverables.md)
 - [Enterprise Implementation Plan](Implementation-Plan.md)
+- [Enterprise Features](Enterprise-Features.md)
 - [Architecture](Architecture.md)
 - [Diagrams](Diagrams.md)
 - [Comparison with Other Tools](Comparison.md)
