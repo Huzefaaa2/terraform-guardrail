@@ -12,6 +12,8 @@ variables:
   TERRAFORM_GUARDRAIL_POLICY_BUNDLE: ""
   TERRAFORM_GUARDRAIL_POLICY_REGISTRY: ""
   TERRAFORM_GUARDRAIL_POLICY_QUERY: ""
+  TERRAFORM_GUARDRAIL_JSON_REPORT: "guardrail-report.json"
+  TERRAFORM_GUARDRAIL_WRITE_REPORT: "true"
 
 guardrail_scan:
   stage: test
@@ -42,3 +44,13 @@ guardrail_scan:
         --format "${TERRAFORM_GUARDRAIL_FORMAT}" \
         --fail-on "${TERRAFORM_GUARDRAIL_FAIL_ON}" \
         ${args}
+      if [ "${TERRAFORM_GUARDRAIL_WRITE_REPORT}" = "true" ]; then
+        terraform-guardrail scan "${TERRAFORM_GUARDRAIL_SCAN_PATH}" \
+          --format "json" \
+          --fail-on "${TERRAFORM_GUARDRAIL_FAIL_ON}" \
+          ${args} > "${TERRAFORM_GUARDRAIL_JSON_REPORT}"
+      fi
+  artifacts:
+    when: always
+    paths:
+      - "${TERRAFORM_GUARDRAIL_JSON_REPORT}"

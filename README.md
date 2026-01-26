@@ -552,6 +552,8 @@ variables:
   TERRAFORM_GUARDRAIL_SCAN_PATH: "infra"
   TERRAFORM_GUARDRAIL_FAIL_ON: "high"
   TERRAFORM_GUARDRAIL_FORMAT: "pretty"
+  TERRAFORM_GUARDRAIL_JSON_REPORT: "guardrail-report.json"
+  TERRAFORM_GUARDRAIL_WRITE_REPORT: "true"
 ```
 
 Optional policy bundle evaluation:
@@ -564,6 +566,9 @@ guardrail_scan:
     TERRAFORM_GUARDRAIL_POLICY_BUNDLE: "baseline-signed"
     TERRAFORM_GUARDRAIL_POLICY_REGISTRY: "http://localhost:8081"
 ```
+
+The template emits a JSON report artifact (`guardrail-report.json`) by default. Disable it with
+`TERRAFORM_GUARDRAIL_WRITE_REPORT: "false"`.
 
 ## Release Links
 

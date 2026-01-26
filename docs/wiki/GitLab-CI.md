@@ -19,6 +19,8 @@ variables:
   TERRAFORM_GUARDRAIL_SCAN_PATH: "infra"
   TERRAFORM_GUARDRAIL_FAIL_ON: "high"
   TERRAFORM_GUARDRAIL_FORMAT: "pretty"
+  TERRAFORM_GUARDRAIL_JSON_REPORT: "guardrail-report.json"
+  TERRAFORM_GUARDRAIL_WRITE_REPORT: "true"
 ```
 
 ## Policy bundle evaluation (optional)
@@ -42,3 +44,5 @@ guardrail_scan:
 - `TERRAFORM_GUARDRAIL_POLICY_BUNDLE`: Bundle ID to evaluate.
 - `TERRAFORM_GUARDRAIL_POLICY_REGISTRY`: Registry base URL.
 - `TERRAFORM_GUARDRAIL_POLICY_QUERY`: OPA query override.
+- `TERRAFORM_GUARDRAIL_JSON_REPORT`: JSON artifact filename.
+- `TERRAFORM_GUARDRAIL_WRITE_REPORT`: `true` to write the JSON report.
