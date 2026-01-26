@@ -15,5 +15,6 @@ https://terraform-guardrail.streamlit.app/
 
 1. Push the repo to GitHub.
 2. Create a Streamlit Cloud app.
-3. Main file: `streamlit_app.py`.
-4. Deploy (Streamlit installs dependencies from `requirements.txt`).
+3. Main file: [streamlit_app.py](https://github.com/Huzefaaa2/terraform-guardrail/blob/main/streamlit_app.py).
+4. Deploy (Streamlit installs dependencies from
+   [requirements.txt](https://github.com/Huzefaaa2/terraform-guardrail/blob/main/requirements.txt)).

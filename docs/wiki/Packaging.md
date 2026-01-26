@@ -15,7 +15,7 @@ Chocolatey when the required secrets are configured:
 
 ## Homebrew (macOS)
 
-Release asset: `terraform-guardrail.rb`
+Release asset: [terraform-guardrail.rb](https://github.com/Huzefaaa2/terraform-guardrail/releases/latest/download/terraform-guardrail.rb)
 
 Once the tap is published:
 
@@ -27,8 +27,8 @@ brew install Huzefaaa2/tap/terraform-guardrail
 
 Release assets:
 
-- `terraform-guardrail.nuspec`
-- `chocolateyinstall.ps1`
+- [terraform-guardrail.nuspec.in](https://github.com/Huzefaaa2/terraform-guardrail/blob/main/packaging/chocolatey/terraform-guardrail.nuspec.in)
+- [chocolateyinstall.ps1](https://github.com/Huzefaaa2/terraform-guardrail/blob/main/packaging/chocolatey/tools/chocolateyinstall.ps1)
 
 Once published:
 
@@ -38,7 +38,7 @@ choco install terraform-guardrail
 
 ## Linux
 
-Release asset: `install.sh`
+Release asset: [install.sh](https://github.com/Huzefaaa2/terraform-guardrail/releases/latest/download/install.sh)
 
 ```bash
 curl -sSL https://github.com/Huzefaaa2/terraform-guardrail/releases/latest/download/install.sh | bash

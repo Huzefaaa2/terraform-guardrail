@@ -2,7 +2,7 @@
 
 ## Version bump
 
-Update `version` in `pyproject.toml`.
+Update `version` in [pyproject.toml](https://github.com/Huzefaaa2/terraform-guardrail/blob/main/pyproject.toml).
 
 ## Tag and push
 
@@ -34,7 +34,8 @@ Setup:
 - Add repository secret `PYPI_API_TOKEN` with your PyPI API token.
 - Push a tag like `v0.2.1` to trigger the workflow.
 
-The workflow reads `RELEASE_NOTES.md` for release body content.
+The workflow reads [RELEASE_NOTES.md](https://github.com/Huzefaaa2/terraform-guardrail/blob/main/RELEASE_NOTES.md)
+for release body content.
 
 ## Container Image
 

@@ -135,10 +135,7 @@ variables:
 ### Local registry template
 
 Use the local registry template to host private bundles:
-
-```
-ops/policy-registry-template/
-```
+[ops/policy-registry-template/](https://github.com/Huzefaaa2/terraform-guardrail/tree/main/ops/policy-registry-template)
 
 Start a local registry quickly:
 

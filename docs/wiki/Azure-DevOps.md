@@ -5,7 +5,7 @@ pre-apply scans inside ADO pipelines.
 
 ## Template location
 
-`/.azure/terraform-guardrail.yml`
+[`/.azure/terraform-guardrail.yml`](https://github.com/Huzefaaa2/terraform-guardrail/blob/main/.azure/terraform-guardrail.yml)
 
 ## Usage
 
@@ -33,7 +33,9 @@ The template generates and publishes JSON, SARIF, and JUnit outputs.
 
 ## Marketplace extension scaffold
 
-The repository includes a Marketplace extension scaffold in `azure-devops-extension/` with a
+The repository includes a Marketplace extension scaffold in
+[`azure-devops-extension/`](https://github.com/Huzefaaa2/terraform-guardrail/tree/main/azure-devops-extension)
+with a
 `Terraform Guardrail Scan` task. Build it using `tfx`:
 
 ```bash
