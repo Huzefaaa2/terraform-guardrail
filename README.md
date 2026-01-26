@@ -294,8 +294,8 @@ Legend: <span style="color: green">✅ Delivered</span> • <span style="color: 
 | Linux install script (curl \| bash) | <span style="color: green">✅ Delivered (1.0.x)</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Packaging) |
 | GitLab CI templates | <span style="color: green">✅ Delivered (1.0.x)</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/GitLab-CI) |
 | Azure DevOps / Pipeline extension | <span style="color: green">✅ Delivered (1.0.x)</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Azure-DevOps) |
-| AWS CodePipeline + CodeBuild integration |  | <span style="color: orange">🚧 Planned</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/AWS-CodePipeline) |
 | Policy layering model (base → env → app) | <span style="color: green">✅ Delivered (1.0.x)</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Policy-Layering) |
+| AWS CodePipeline + CodeBuild integration |  | <span style="color: orange">🚧 Planned</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/AWS-CodePipeline) |
 | Policy authoring UI |  | <span style="color: orange">🚧 Planned</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Policy-Authoring-UI) |
 | Policy metadata + rich failure messages |  | <span style="color: orange">🚧 Planned</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Policy-Metadata) |
 | Drift-prevention rules before apply |  | <span style="color: orange">🚧 Planned</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Drift-Prevention) |
