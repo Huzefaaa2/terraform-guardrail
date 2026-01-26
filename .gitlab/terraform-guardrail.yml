@@ -1,0 +1,44 @@
+stages:
+  - test
+
+variables:
+  TERRAFORM_GUARDRAIL_IMAGE: "ghcr.io/huzefaaa2/terraform-guardrail"
+  TERRAFORM_GUARDRAIL_TAG: "v1.0.4"
+  TERRAFORM_GUARDRAIL_SCAN_PATH: "."
+  TERRAFORM_GUARDRAIL_FORMAT: "pretty"
+  TERRAFORM_GUARDRAIL_FAIL_ON: "medium"
+  TERRAFORM_GUARDRAIL_SCHEMA: "false"
+  TERRAFORM_GUARDRAIL_STATE: ""
+  TERRAFORM_GUARDRAIL_POLICY_BUNDLE: ""
+  TERRAFORM_GUARDRAIL_POLICY_REGISTRY: ""
+  TERRAFORM_GUARDRAIL_POLICY_QUERY: ""
+
+guardrail_scan:
+  stage: test
+  image: "${TERRAFORM_GUARDRAIL_IMAGE}:${TERRAFORM_GUARDRAIL_TAG}"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH'
+  script:
+    - |
+      set -eu
+      args=""
+      if [ "${TERRAFORM_GUARDRAIL_SCHEMA}" = "true" ]; then
+        args="${args} --schema"
+      fi
+      if [ -n "${TERRAFORM_GUARDRAIL_STATE}" ]; then
+        args="${args} --state ${TERRAFORM_GUARDRAIL_STATE}"
+      fi
+      if [ -n "${TERRAFORM_GUARDRAIL_POLICY_BUNDLE}" ]; then
+        args="${args} --policy-bundle ${TERRAFORM_GUARDRAIL_POLICY_BUNDLE}"
+      fi
+      if [ -n "${TERRAFORM_GUARDRAIL_POLICY_REGISTRY}" ]; then
+        args="${args} --policy-registry ${TERRAFORM_GUARDRAIL_POLICY_REGISTRY}"
+      fi
+      if [ -n "${TERRAFORM_GUARDRAIL_POLICY_QUERY}" ]; then
+        args="${args} --policy-query ${TERRAFORM_GUARDRAIL_POLICY_QUERY}"
+      fi
+      terraform-guardrail scan "${TERRAFORM_GUARDRAIL_SCAN_PATH}" \
+        --format "${TERRAFORM_GUARDRAIL_FORMAT}" \
+        --fail-on "${TERRAFORM_GUARDRAIL_FAIL_ON}" \
+        ${args}

@@ -534,6 +534,37 @@ jobs:
 When `policy_bundle` is set, the action installs OPA automatically and validates signatures (if
 configured).
 
+## GitLab CI Templates
+
+Include the shared template in your `.gitlab-ci.yml`:
+
+```yaml
+include:
+  - project: "Huzefaaa2/terraform-guardrail"
+    ref: "v1.0.4"
+    file: "/.gitlab/terraform-guardrail.yml"
+```
+
+Override variables as needed:
+
+```yaml
+variables:
+  TERRAFORM_GUARDRAIL_SCAN_PATH: "infra"
+  TERRAFORM_GUARDRAIL_FAIL_ON: "high"
+  TERRAFORM_GUARDRAIL_FORMAT: "pretty"
+```
+
+Optional policy bundle evaluation:
+
+```yaml
+guardrail_scan:
+  before_script:
+    - python -m http.server 8081 --directory ops/policy-registry &
+  variables:
+    TERRAFORM_GUARDRAIL_POLICY_BUNDLE: "baseline-signed"
+    TERRAFORM_GUARDRAIL_POLICY_REGISTRY: "http://localhost:8081"
+```
+
 ## Release Links
 
 - PyPI: https://pypi.org/project/terraform-guardrail/
