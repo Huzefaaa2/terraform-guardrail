@@ -20,10 +20,16 @@ Legend: <span style="color: green">✅ Delivered</span> • <span style="color: 
 | GitLab CI templates | <span style="color: green">✅ Delivered (1.0.x)</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/GitLab-CI) |
 | Azure DevOps / Pipeline extension | <span style="color: orange">🚧 Planned</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Azure-DevOps) |
 | Policy layering model (base → env → app) | <span style="color: orange">🚧 Planned</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Policy-Layering) |
+| Policy authoring UI |  | <span style="color: orange">🚧 Planned</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Policy-Authoring-UI) |
 | Policy metadata + rich failure messages |  | <span style="color: orange">🚧 Planned</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Policy-Metadata) |
 | Drift-prevention rules before apply |  | <span style="color: orange">🚧 Planned</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Drift-Prevention) |
+| Org-wide baselines |  | <span style="color: orange">🚧 Planned</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Org-Wide-Baselines) |
+| Group-level enforcement |  | <span style="color: orange">🚧 Planned</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Group-Level-Enforcement) |
+| Evidence export (SOC2 / ISO / PCI) |  | <span style="color: orange">🚧 Planned</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Evidence-Export) |
 | Contributor governance + public roadmap |  |  | <span style="color: orange">🚧 Planned</span> |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Governance) |
 | Reference implementations across tools |  |  | <span style="color: orange">🚧 Planned</span> |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Reference-Implementations) |
 | Cross-provider invariant enforcement |  |  | <span style="color: orange">🚧 Planned</span> |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Cross-Provider-Invariants) |
+| Guardrails-as-a-Service API |  |  | <span style="color: orange">🚧 Planned</span> |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Guardrails-as-a-Service) |
+| Enterprise policy packs |  |  | <span style="color: orange">🚧 Planned</span> |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Policy-Packs) |
 | Context-aware evaluation |  |  |  | <span style="color: orange">🚧 Planned</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Context-Aware-Evaluation) |
 | Suggested fixes + recommendations |  |  |  | <span style="color: orange">🚧 Planned</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Suggested-Fixes) |
