@@ -59,6 +59,10 @@ def scan(
     format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
     schema: Annotated[bool, typer.Option(help="Enable schema-aware validation")] = False,
     policy_bundle: Annotated[str | None, typer.Option(help="Policy bundle ID to evaluate")] = None,
+    policy_bundle_path: Annotated[
+        Path | None,
+        typer.Option(help="Local policy bundle path (.tar.gz or directory)"),
+    ] = None,
     policy_layers: Annotated[
         list[str] | None,
         typer.Option(help="Ordered policy bundles for layering (repeatable)"),
@@ -79,6 +83,7 @@ def scan(
             state_path=state,
             use_schema=schema,
             policy_bundle=policy_bundle,
+            policy_bundle_path=policy_bundle_path,
             policy_layers=policy_layers,
             policy_base=policy_base,
             policy_env=policy_env,
@@ -185,6 +190,51 @@ def fetch_policy(
         console.print(f"Policy registry error: {exc}")
         raise typer.Exit(code=1) from exc
     console.print(f"Bundle downloaded to {bundle_path}")
+
+
+@policy_app.command("init")
+def init_policy_bundle(
+    destination: Annotated[
+        Path, typer.Option(help="Destination directory for the new bundle")
+    ] = Path("./policy-bundle"),
+    bundle_name: Annotated[str, typer.Option(help="Policy package name")] = "guardrail",
+) -> None:
+    bundle_dir = destination
+    policies_dir = bundle_dir / "policies"
+    policies_dir.mkdir(parents=True, exist_ok=True)
+    (bundle_dir / ".manifest").write_text(
+        '{\n  "revision": "0.1.0",\n  "roots": ["guardrail"]\n}\n',
+        encoding="utf-8",
+    )
+    (bundle_dir / "data.json").write_text(
+        '{\n  "guardrail": {\n    "allowed_regions": [],\n    "allowed_instance_types": []\n  }\n}\n',
+        encoding="utf-8",
+    )
+    (policies_dir / "guardrail.rego").write_text(
+        "\n".join(
+            [
+                f"package {bundle_name}",
+                "",
+                "import rego.v1",
+                "",
+                "default allow = true",
+                "",
+                "deny contains output if {",
+                "  false",
+                "",
+                "  output := {",
+                "    \"message\": \"Example policy violation\",",
+                "    \"severity\": \"medium\",",
+                "    \"rule_id\": \"CUSTOM001\",",
+                "    \"path\": \"policy\",",
+                "  }",
+                "}",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    console.print(f"Policy bundle scaffold created at {bundle_dir}")
 
 
 @rules_app.command("list")

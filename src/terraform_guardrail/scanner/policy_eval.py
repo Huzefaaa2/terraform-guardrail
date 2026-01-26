@@ -78,9 +78,26 @@ def evaluate_policy_layers(
     state: dict[str, Any] | None,
     policy_query: str | None = None,
     layer_names: list[str] | None = None,
+    bundle_paths: list[Path] | None = None,
 ) -> list[Finding]:
     findings: list[Finding] = []
     names = layer_names or []
+    path_bundles = bundle_paths or []
+    for idx, bundle_path in enumerate(path_bundles):
+        layer = names[idx] if idx < len(names) else None
+        layer_findings = evaluate_policy_bundle_path(
+            bundle_path=bundle_path,
+            files=files,
+            state=state,
+            policy_query=policy_query,
+        )
+        for finding in layer_findings:
+            detail = finding.detail or {}
+            detail.setdefault("bundle_path", str(bundle_path))
+            if layer:
+                detail.setdefault("layer", layer)
+            finding.detail = detail
+        findings.extend(layer_findings)
     for idx, bundle_id in enumerate(bundle_ids):
         layer = names[idx] if idx < len(names) else None
         layer_findings = evaluate_policy_bundle(
@@ -98,6 +115,54 @@ def evaluate_policy_layers(
             finding.detail = detail
         findings.extend(layer_findings)
     return findings
+
+
+def evaluate_policy_bundle_path(
+    bundle_path: Path,
+    files: list[PolicyInputFile],
+    state: dict[str, Any] | None,
+    policy_query: str | None = None,
+) -> list[Finding]:
+    query = policy_query or DEFAULT_POLICY_QUERY
+    bundle = PolicyBundle(
+        bundle_id="local",
+        title="Local bundle",
+        description="Local policy bundle path",
+        version=None,
+        url=str(bundle_path),
+        sha256=None,
+        entrypoint=query,
+    )
+
+    opa_path = shutil.which("opa")
+    if not opa_path:
+        raise PolicyEvalError("OPA CLI not found. Install OPA to evaluate policy bundles.")
+
+    input_payload = {
+        "files": [{"path": file.path, "hcl": file.hcl} for file in files],
+        "state": state,
+    }
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        tmp_dir_path = Path(tmp_dir)
+        input_path = tmp_dir_path / "input.json"
+        input_path.write_text(json.dumps(input_payload), encoding="utf-8")
+
+        cmd = [
+            opa_path,
+            "eval",
+            "--format=json",
+            "--input",
+            str(input_path),
+            "--bundle",
+            str(bundle_path),
+            query,
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+        if result.returncode != 0:
+            raise PolicyEvalError(result.stderr.strip())
+
+    return _parse_opa_output(result.stdout, bundle)
 
 
 def _parse_opa_output(output: str, bundle: PolicyBundle) -> list[Finding]:

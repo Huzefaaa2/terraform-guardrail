@@ -32,6 +32,7 @@ def scan_path(
     state_path: Path | str | None = None,
     use_schema: bool = False,
     policy_bundle: str | None = None,
+    policy_bundle_path: Path | str | None = None,
     policy_layers: list[str] | None = None,
     policy_base: str | None = None,
     policy_env: str | None = None,
@@ -72,6 +73,37 @@ def scan_path(
         state_findings, state_data = _scan_state_file(state_path)
         findings.extend(state_findings)
         policy_state = state_data
+
+    if policy_bundle_path:
+        bundle_path = Path(policy_bundle_path)
+        if not bundle_path.exists():
+            raise FileNotFoundError(f"Policy bundle not found: {bundle_path}")
+        if policy_bundle or policy_layers or policy_base or policy_env or policy_app:
+            raise ValueError("Use --policy-bundle-path without other policy bundle flags.")
+        try:
+            findings.extend(
+                evaluate_policy_layers(
+                    bundle_ids=[],
+                    registry_url=policy_registry,
+                    files=policy_inputs,
+                    state=policy_state,
+                    policy_query=policy_query,
+                    layer_names=[],
+                    bundle_paths=[bundle_path],
+                )
+            )
+        except PolicyEvalError as exc:
+            findings.append(
+                Finding(
+                    rule_id="OPA_EVAL",
+                    severity="low",
+                    message=f"Policy evaluation failed: {exc}",
+                    path=str(path),
+                )
+            )
+        report.findings = findings
+        report.summary = _build_summary(scanned_files, findings)
+        return report
 
     bundle_ids, layer_names = _resolve_policy_layers(
         policy_bundle=policy_bundle,

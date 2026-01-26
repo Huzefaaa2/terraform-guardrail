@@ -151,6 +151,7 @@ flowchart LR
 - [Comparison with Other Tools](Comparison.md)
 - [CLI Usage](CLI-Usage.md)
 - [Command Reference](https://github.com/Huzefaaa2/terraform-guardrail/blob/main/commands.md)
+- [Custom Rules](Custom-Rules.md)
 - [GitHub Action](GitHub-Action.md)
 - [GitLab CI Templates](GitLab-CI.md)
 - [Packaging](Packaging.md)

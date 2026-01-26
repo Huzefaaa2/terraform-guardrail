@@ -22,6 +22,7 @@ Common options:
 - `--format pretty|json`
 - `--schema` Enable schema-aware validation
 - `--policy-bundle ID` Evaluate a single policy bundle
+- `--policy-bundle-path PATH` Evaluate a local bundle (`.tar.gz` or directory)
 - `--policy-layers ID --policy-layers ID ...` Ordered policy bundle layers
 - `--policy-base ID --policy-env ID --policy-app ID` Convenience layering flags
 - `--policy-registry URL` Registry base URL
@@ -33,6 +34,7 @@ Examples:
 terraform-guardrail scan ./infra --schema
 terraform-guardrail scan ./infra --state ./terraform.tfstate --format json
 terraform-guardrail scan ./infra --policy-bundle baseline
+terraform-guardrail scan ./infra --policy-bundle-path ./bundle.tar.gz
 terraform-guardrail scan ./infra --policy-base baseline --policy-env prod --policy-app payments
 ```
 
@@ -88,6 +90,7 @@ Policy registry commands.
 ```bash
 terraform-guardrail policy list [--registry URL]
 terraform-guardrail policy fetch BUNDLE_ID [--destination PATH] [--registry URL]
+terraform-guardrail policy init [--destination PATH] [--bundle-name NAME]
 ```
 
 ## rules

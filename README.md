@@ -482,6 +482,27 @@ See the full list on the wiki: https://github.com/Huzefaaa2/terraform-guardrail/
 | TG019 | Azure storage account public network access enabled | Medium |
 | TG020 | EBS volume not encrypted | Medium |
 
+## Custom Rules (Option A / Option B)
+
+**Option A — Environment knobs (no code):**
+
+```bash
+export GUARDRAIL_REQUIRED_TAGS="owner,environment,cost_center"
+export GUARDRAIL_ALLOWED_REGIONS="eastus,westus2"
+export GUARDRAIL_ALLOWED_INSTANCE_TYPES="t3.medium,t3.large"
+terraform-guardrail scan ./infra
+```
+
+**Option B — OPA policy bundles (recommended):**
+
+```bash
+terraform-guardrail policy init --destination ./my-bundle --bundle-name guardrail
+opa build --bundle ./my-bundle --output my-bundle.tar.gz
+terraform-guardrail scan ./infra --policy-bundle-path ./my-bundle.tar.gz
+```
+
+Full guide: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Custom-Rules
+
 ## Web UI
 
 Visit `http://127.0.0.1:8000` and upload a Terraform file to view a compliance report.
