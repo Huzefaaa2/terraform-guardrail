@@ -44,6 +44,13 @@ tfx extension create --manifest-globs vss-extension.json
 tfx extension publish --manifest-globs vss-extension.json --token <ADO_PAT>
 ```
 
+### GitHub Actions automation
+
+The repo ships a workflow that publishes the extension on tag pushes when secrets are set:
+
+- `ADO_PUBLISHER`
+- `ADO_EXT_PAT`
+
 ## Marketplace task usage
 
 After publishing the extension, add the task by name in your pipeline:

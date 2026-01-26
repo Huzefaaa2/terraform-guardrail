@@ -1,0 +1,54 @@
+name: Azure DevOps Extension
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Override extension version (defaults to tag)"
+        required: false
+        type: string
+
+jobs:
+  publish:
+    if: ${{ secrets.ADO_PUBLISHER != '' && secrets.ADO_EXT_PAT != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Set extension version
+        run: |
+          VERSION="${{ github.ref_name }}"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.version }}" ]; then
+            VERSION="${{ inputs.version }}"
+          fi
+          VERSION="${VERSION#v}"
+          jq ".version=\"${VERSION}\"" azure-devops-extension/vss-extension.json > /tmp/vss-extension.json
+          mv /tmp/vss-extension.json azure-devops-extension/vss-extension.json
+
+      - name: Install task dependencies
+        run: |
+          cd azure-devops-extension/tasks/terraform-guardrail
+          npm install
+
+      - name: Install tfx
+        run: npm install -g tfx-cli
+
+      - name: Create extension package
+        run: |
+          cd azure-devops-extension
+          tfx extension create --manifest-globs vss-extension.json
+
+      - name: Publish extension
+        run: |
+          cd azure-devops-extension
+          tfx extension publish \
+            --manifest-globs vss-extension.json \
+            --publisher "${{ secrets.ADO_PUBLISHER }}" \
+            --token "${{ secrets.ADO_EXT_PAT }}"

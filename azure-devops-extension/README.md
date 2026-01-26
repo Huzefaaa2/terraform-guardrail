@@ -23,3 +23,10 @@ tfx extension publish --manifest-globs vss-extension.json --token <ADO_PAT>
 ```
 
 Update `publisher` and `version` in `vss-extension.json` before publishing.
+
+## GitHub Actions automation
+
+Set these secrets to enable tag-based publishing:
+
+- `ADO_PUBLISHER`
+- `ADO_EXT_PAT`

@@ -647,6 +647,12 @@ steps:
       junitReport: "guardrail-report.junit.xml"
 ```
 
+Automation: the `Azure DevOps Extension` workflow publishes on tag pushes when the following
+secrets are set:
+
+- `ADO_PUBLISHER`
+- `ADO_EXT_PAT`
+
 ## Release Links
 
 - PyPI: https://pypi.org/project/terraform-guardrail/
