@@ -1,0 +1,66 @@
+{
+  "scanned_path": "examples/fixtures/terraform/bad",
+  "created_at": "2026-01-26T00:00:00Z",
+  "summary": {
+    "scanned_files": 3,
+    "findings": 6,
+    "high": 3,
+    "medium": 2,
+    "low": 1
+  },
+  "findings": [
+    {
+      "rule_id": "TG001",
+      "severity": "medium",
+      "message": "Sensitive variable without ephemeral=true: db_password",
+      "path": "examples/fixtures/terraform/bad/main.tf",
+      "detail": {
+        "recommendation": "Add ephemeral = true to this variable."
+      }
+    },
+    {
+      "rule_id": "TG002",
+      "severity": "high",
+      "message": "Hardcoded secret in Terraform config: db_password",
+      "path": "examples/fixtures/terraform/bad/secrets.tfvars",
+      "detail": {
+        "recommendation": "Avoid hardcoding secrets in tfvars."
+      }
+    },
+    {
+      "rule_id": "TG002",
+      "severity": "high",
+      "message": "Hardcoded secret in Terraform config: api_key",
+      "path": "examples/fixtures/terraform/bad/secrets.tfvars",
+      "detail": {
+        "recommendation": "Avoid hardcoding secrets in tfvars."
+      }
+    },
+    {
+      "rule_id": "TG004",
+      "severity": "low",
+      "message": "HCL parse error: Unexpected EOF",
+      "path": "examples/fixtures/terraform/bad/broken.hcl"
+    },
+    {
+      "rule_id": "TG005",
+      "severity": "medium",
+      "message": "Attribute not found in provider schema: aws_s3_bucket.invalid_attr",
+      "path": "examples/fixtures/terraform/bad/main.tf",
+      "detail": {
+        "recommendation": "Verify the attribute name against provider schema."
+      }
+    },
+    {
+      "rule_id": "TG003",
+      "severity": "high",
+      "message": "Sensitive-looking value stored in Terraform state: db_password",
+      "path": "examples/fixtures/state/bad.tfstate",
+      "detail": {
+        "resource": "example",
+        "recommendation": "Use ephemeral or write-only values to keep secrets out of state."
+      }
+    }
+  ],
+  "metadata": {}
+}

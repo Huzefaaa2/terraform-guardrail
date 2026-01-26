@@ -1,0 +1,7 @@
+file_name,scanned_at,rule_id,severity,message,path,detail
+main.tf,2026-01-26T00:00:00Z,TG001,medium,Sensitive variable without ephemeral=true: db_password,examples/fixtures/terraform/bad/main.tf,"Add ephemeral = true"
+secrets.tfvars,2026-01-26T00:00:00Z,TG002,high,Hardcoded secret in Terraform config: db_password,examples/fixtures/terraform/bad/secrets.tfvars,"Avoid hardcoding secrets"
+secrets.tfvars,2026-01-26T00:00:00Z,TG002,high,Hardcoded secret in Terraform config: api_key,examples/fixtures/terraform/bad/secrets.tfvars,"Avoid hardcoding secrets"
+broken.hcl,2026-01-26T00:00:00Z,TG004,low,HCL parse error: Unexpected EOF,examples/fixtures/terraform/bad/broken.hcl,"Fix invalid HCL"
+main.tf,2026-01-26T00:00:00Z,TG005,medium,Attribute not found in provider schema: aws_s3_bucket.invalid_attr,examples/fixtures/terraform/bad/main.tf,"Verify attribute name"
+bad.tfstate,2026-01-26T00:00:00Z,TG003,high,Sensitive-looking value stored in Terraform state: db_password,examples/fixtures/state/bad.tfstate,"Use ephemeral values"

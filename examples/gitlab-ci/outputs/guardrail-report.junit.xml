@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="terraform-guardrail" tests="6" failures="5" skipped="1">
+  <testcase classname="TG001" name="Sensitive variable without ephemeral=true: db_password">
+    <failure message="Sensitive variable without ephemeral=true: db_password (examples/fixtures/terraform/bad/main.tf)">Sensitive variable without ephemeral=true: db_password (examples/fixtures/terraform/bad/main.tf)</failure>
+  </testcase>
+  <testcase classname="TG002" name="Hardcoded secret in Terraform config: db_password">
+    <failure message="Hardcoded secret in Terraform config: db_password (examples/fixtures/terraform/bad/secrets.tfvars)">Hardcoded secret in Terraform config: db_password (examples/fixtures/terraform/bad/secrets.tfvars)</failure>
+  </testcase>
+  <testcase classname="TG002" name="Hardcoded secret in Terraform config: api_key">
+    <failure message="Hardcoded secret in Terraform config: api_key (examples/fixtures/terraform/bad/secrets.tfvars)">Hardcoded secret in Terraform config: api_key (examples/fixtures/terraform/bad/secrets.tfvars)</failure>
+  </testcase>
+  <testcase classname="TG004" name="HCL parse error: Unexpected EOF">
+    <skipped message="HCL parse error: Unexpected EOF (examples/fixtures/terraform/bad/broken.hcl)" />
+  </testcase>
+  <testcase classname="TG005" name="Attribute not found in provider schema: aws_s3_bucket.invalid_attr">
+    <failure message="Attribute not found in provider schema: aws_s3_bucket.invalid_attr (examples/fixtures/terraform/bad/main.tf)">Attribute not found in provider schema: aws_s3_bucket.invalid_attr (examples/fixtures/terraform/bad/main.tf)</failure>
+  </testcase>
+  <testcase classname="TG003" name="Sensitive-looking value stored in Terraform state: db_password">
+    <failure message="Sensitive-looking value stored in Terraform state: db_password (examples/fixtures/state/bad.tfstate)">Sensitive-looking value stored in Terraform state: db_password (examples/fixtures/state/bad.tfstate)</failure>
+  </testcase>
+</testsuite>

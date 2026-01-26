@@ -1,0 +1,22 @@
+include:
+  - project: "Huzefaaa2/terraform-guardrail"
+    ref: "v1.0.4"
+    file: "/.gitlab/terraform-guardrail.yml"
+
+variables:
+  TERRAFORM_GUARDRAIL_SCAN_PATH: "examples/fixtures/terraform/bad"
+  TERRAFORM_GUARDRAIL_FAIL_ON: "medium"
+  TERRAFORM_GUARDRAIL_FORMAT: "pretty"
+  TERRAFORM_GUARDRAIL_STATE: "examples/fixtures/state/bad.tfstate"
+  TERRAFORM_GUARDRAIL_SCHEMA: "true"
+  TERRAFORM_GUARDRAIL_JSON_REPORT: "guardrail-report.json"
+  TERRAFORM_GUARDRAIL_SARIF_REPORT: "guardrail-report.sarif"
+  TERRAFORM_GUARDRAIL_JUNIT_REPORT: "guardrail-report.junit.xml"
+
+# Optional: start a local registry if evaluating policy bundles
+# guardrail_scan:
+#   before_script:
+#     - python -m http.server 8081 --directory ops/policy-registry &
+#   variables:
+#     TERRAFORM_GUARDRAIL_POLICY_BUNDLE: "baseline-signed"
+#     TERRAFORM_GUARDRAIL_POLICY_REGISTRY: "http://localhost:8081"
