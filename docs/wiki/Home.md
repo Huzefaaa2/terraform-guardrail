@@ -113,16 +113,28 @@ It enables speed and safety — without trading one for the other.
 
 ## Design Principle
 
-Non-negotiable safety floor, composable freedom above it. Guardrails live outside Terraform.
+Non-negotiable safety floor, composable freedom above it. Guardrails live outside Terraform so
+platform teams can enforce baseline invariants while product teams retain agility.
 
 ## User Perspective (High-Level)
 
 ```mermaid
 flowchart LR
-    USER[Platform + Product Teams] --> CHANNELS[CLI / Streamlit / REST API / MCP]
-    CHANNELS --> GUARDRAIL["Terraform Guardrail MCP (TerraGuard)"]
-    GUARDRAIL --> REPORTS[Readable Guidance + Evidence]
+    USER[Platform + Product Teams] --> CHANNELS[CLI / UI / REST API / CI]
+    CHANNELS --> GUARDRAIL[TerraGuard Control Plane]
+    GUARDRAIL --> POLICIES[Baseline + Context Policies]
+    GUARDRAIL --> REPORTS[Guidance + Evidence]
     GUARDRAIL --> TERRAFORM[Safer Terraform Applies]
+
+    classDef actor fill:#e3f2fd,stroke:#1565c0,stroke-width:1px,color:#0d47a1;
+    classDef channel fill:#f3e5f5,stroke:#6a1b9a,stroke-width:1px,color:#4a148c;
+    classDef core fill:#e8f5e9,stroke:#2e7d32,stroke-width:1px,color:#1b5e20;
+    classDef output fill:#fff3e0,stroke:#ef6c00,stroke-width:1px,color:#e65100;
+
+    class USER actor;
+    class CHANNELS channel;
+    class GUARDRAIL, POLICIES core;
+    class REPORTS, TERRAFORM output;
 ```
 
 ## Quick links
