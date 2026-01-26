@@ -266,7 +266,7 @@ Legend: <span style="color: green">✅ Delivered</span> • <span style="color: 
 | Chocolatey package (Windows) | <span style="color: green">✅ Delivered (1.0.x)</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Packaging) |
 | Linux install script (curl \| bash) | <span style="color: green">✅ Delivered (1.0.x)</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Packaging) |
 | GitLab CI templates | <span style="color: green">✅ Delivered (1.0.x)</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/GitLab-CI) |
-| Azure DevOps / Pipeline extension | <span style="color: orange">🚧 Planned</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Azure-DevOps) |
+| Azure DevOps / Pipeline extension | <span style="color: green">✅ Delivered (1.0.x)</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Azure-DevOps) |
 | Policy layering model (base → env → app) | <span style="color: orange">🚧 Planned</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Policy-Layering) |
 | Policy authoring UI |  | <span style="color: orange">🚧 Planned</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Policy-Authoring-UI) |
 | Policy metadata + rich failure messages |  | <span style="color: orange">🚧 Planned</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Policy-Metadata) |
@@ -603,6 +603,29 @@ guardrail_scan:
 The template emits JSON, SARIF, and JUnit report artifacts by default. Disable any of them with
 `TERRAFORM_GUARDRAIL_WRITE_REPORT`, `TERRAFORM_GUARDRAIL_WRITE_SARIF`, or
 `TERRAFORM_GUARDRAIL_WRITE_JUNIT`.
+
+## Azure DevOps Pipelines
+
+Use the pipeline template in `/.azure/terraform-guardrail.yml`.
+
+```yaml
+trigger:
+  - main
+
+pool:
+  vmImage: "ubuntu-latest"
+
+steps:
+  - template: .azure/terraform-guardrail.yml
+    parameters:
+      path: "infra"
+      failOn: "high"
+      policyBundle: "baseline-signed"
+      policyRegistry: "http://localhost:8081"
+```
+
+The template publishes JSON, SARIF, and JUnit reports. Disable publishing with
+`publishReports: false`.
 
 ## Release Links
 
