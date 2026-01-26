@@ -143,6 +143,8 @@ flowchart LR
 - [Deliverables Reference](Deliverables.md)
 - [Enterprise Implementation Plan](Implementation-Plan.md)
 - [Enterprise Features](Enterprise-Features.md)
+- [AWS Support](AWS-Support.md)
+- [AWS CodePipeline](AWS-CodePipeline.md)
 - [Architecture](Architecture.md)
 - [Diagrams](Diagrams.md)
 - [Comparison with Other Tools](Comparison.md)

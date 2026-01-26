@@ -33,6 +33,11 @@ Shared template for GitLab pipelines. See [GitLab CI Templates](GitLab-CI.md).
 
 Planned Azure DevOps extension for pre-apply checks in ADO pipelines.
 
+## AWS CodePipeline + CodeBuild integration
+
+Planned buildspec integration for policy gates in AWS CodePipeline. See
+[AWS CodePipeline](AWS-CodePipeline.md).
+
 <a name="policy-layering-model"></a>
 ## Policy layering model (base → env → app)
 

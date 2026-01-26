@@ -180,6 +180,33 @@ flowchart TB
 - Alicloud
 - vSphere
 
+## ☁️ AWS Support
+
+Terraform-Guardrail provides **first-class support for AWS environments** and is designed to
+complement AWS-native governance services by enforcing **pre-deployment, IaC-aware guardrails**.
+
+Unlike AWS-native controls that operate post-deployment or at the account boundary,
+Terraform-Guardrail enforces architectural, security, and compliance policies **before Terraform
+apply**, directly inside CI/CD pipelines.
+
+### Supported AWS CI/CD integrations
+
+- **GitHub Actions** (primary AWS CI integration)
+- **GitLab CI** (widely used in regulated AWS enterprises)
+- **AWS CodePipeline + CodeBuild** (via buildspec integration)
+
+### AWS-specific capabilities
+
+- Pre-apply guardrail enforcement for Terraform targeting AWS
+- Account- and environment-aware policy evaluation
+- OU-aligned guardrails (designed to complement AWS Organizations)
+- Shift-left enforcement for Control Tower-aligned environments
+- Evidence generation for audits (SOC2, ISO, PCI)
+
+Terraform-Guardrail enables platform teams to define **organization-wide AWS standards** and
+ensure they are enforced consistently across accounts, pipelines, and teams — before infrastructure
+reaches AWS.
+
 ## Feature Matrix
 
 | Area | CLI | Web UI / Streamlit |
@@ -267,6 +294,7 @@ Legend: <span style="color: green">✅ Delivered</span> • <span style="color: 
 | Linux install script (curl \| bash) | <span style="color: green">✅ Delivered (1.0.x)</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Packaging) |
 | GitLab CI templates | <span style="color: green">✅ Delivered (1.0.x)</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/GitLab-CI) |
 | Azure DevOps / Pipeline extension | <span style="color: green">✅ Delivered (1.0.x)</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Azure-DevOps) |
+| AWS CodePipeline + CodeBuild integration |  | <span style="color: orange">🚧 Planned</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/AWS-CodePipeline) |
 | Policy layering model (base → env → app) | <span style="color: orange">🚧 Planned</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Policy-Layering) |
 | Policy authoring UI |  | <span style="color: orange">🚧 Planned</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Policy-Authoring-UI) |
 | Policy metadata + rich failure messages |  | <span style="color: orange">🚧 Planned</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Policy-Metadata) |
@@ -315,6 +343,26 @@ to validate schema usage, prevents secret leakage and drift before Terraform mut
 separates platform-owned safety floors from product-level constraints. In practice, teams often run
 TFLint or Checkov in their CI to catch coding errors while Guardrail serves as the last line of
 defense to enforce organizational guardrails and deliver contextual guidance.
+
+## Terraform-Guardrail vs AWS-native Governance Tools
+
+| Capability | Terraform-Guardrail | AWS Native Tools |
+| --- | --- | --- |
+| Terraform pre-apply enforcement | ✅ Yes | ❌ No |
+| CI/CD policy gate | ✅ Yes | ❌ No |
+| IaC-aware guardrails | ✅ Yes | ❌ No |
+| AWS Organizations awareness | 🚧 Planned | ⚠️ Account-level only |
+| Control Tower integration | 🚧 Companion mode | ⚠️ Platform-only |
+| Drift prevention (pre-deploy) | 🚧 Planned | ❌ Post-deploy only |
+| Policy versioning & audit trail | ✅ Yes | ❌ Limited |
+| Multi-cloud parity | ✅ Yes | ❌ AWS-only |
+| Evidence export for audits | 🚧 Planned | ⚠️ Fragmented |
+
+### Summary
+
+AWS-native governance tools are **post-deployment and infrastructure-centric**.  
+Terraform-Guardrail provides **pre-deployment, architecture-aware, IaC-native guardrails** that
+complement AWS governance rather than replace it.
 
 ## Quickstart
 

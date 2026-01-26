@@ -26,6 +26,7 @@ This index groups the enterprise-grade capabilities planned and delivered for Te
 - [GitHub Action](GitHub-Action.md)
 - [GitLab CI Templates](GitLab-CI.md)
 - [Azure DevOps Extension](Azure-DevOps.md)
+- [AWS CodePipeline](AWS-CodePipeline.md)
 
 ## Platform & Packaging
 

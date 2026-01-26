@@ -31,3 +31,23 @@ to validate schema usage, prevents secret leakage and drift before Terraform mut
 separates platform-owned safety floors from product-level constraints. In practice, teams often run
 TFLint or Checkov in their CI to catch coding errors while Guardrail serves as the last line of
 defense to enforce organizational guardrails and deliver contextual guidance.
+
+## Terraform-Guardrail vs AWS-native Governance Tools
+
+| Capability | Terraform-Guardrail | AWS Native Tools |
+| --- | --- | --- |
+| Terraform pre-apply enforcement | ✅ Yes | ❌ No |
+| CI/CD policy gate | ✅ Yes | ❌ No |
+| IaC-aware guardrails | ✅ Yes | ❌ No |
+| AWS Organizations awareness | 🚧 Planned | ⚠️ Account-level only |
+| Control Tower integration | 🚧 Companion mode | ⚠️ Platform-only |
+| Drift prevention (pre-deploy) | 🚧 Planned | ❌ Post-deploy only |
+| Policy versioning & audit trail | ✅ Yes | ❌ Limited |
+| Multi-cloud parity | ✅ Yes | ❌ AWS-only |
+| Evidence export for audits | 🚧 Planned | ⚠️ Fragmented |
+
+### Summary
+
+AWS-native governance tools are **post-deployment and infrastructure-centric**.  
+Terraform-Guardrail provides **pre-deployment, architecture-aware, IaC-native guardrails** that
+complement AWS governance rather than replace it.
