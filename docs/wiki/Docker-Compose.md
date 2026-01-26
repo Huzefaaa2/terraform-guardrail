@@ -31,11 +31,14 @@ docker compose --profile analytics up --build
 ## Notes
 
 - The policy registry is a static stub used to demonstrate policy pack hosting.
-- The registry now publishes OPA bundles under `/bundles/*.tar.gz`.
+- The registry now publishes OPA bundles under `/bundles/*.tar.gz`
+  (see sample bundles in the repo: https://github.com/Huzefaaa2/terraform-guardrail/tree/main/ops/policy-registry/bundles).
 - The registry API provides bundle versions and audit history.
 - The API exposes `/metrics` for Prometheus scraping.
 - Policy evaluation requires the `opa` CLI when bundles are enabled.
-- Signature verification is enabled when `registry.json` includes a verification block.
+- Signature verification is enabled when
+  [`registry.json`](https://github.com/Huzefaaa2/terraform-guardrail/blob/main/ops/policy-registry/registry.json)
+  includes a verification block.
 
 Registry API endpoints:
 

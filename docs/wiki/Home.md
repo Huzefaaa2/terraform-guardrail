@@ -171,7 +171,8 @@ flowchart LR
 - Registry image: https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail-registry
 - Supported providers: AWS, Azure, GCP, Kubernetes, Helm, OCI, Vault, Alicloud, vSphere
 - Local stack: Docker Compose (API + UI + policy registry, optional analytics)
-- Policy registry: OPA bundles published under `/bundles/*.tar.gz`
+- Policy registry: OPA bundles published under `/bundles/*.tar.gz` (registry path; sample bundles:
+  https://github.com/Huzefaaa2/terraform-guardrail/tree/main/ops/policy-registry/bundles)
 - Policy evaluation available via CLI when OPA is installed
 
 ## Feature Matrix

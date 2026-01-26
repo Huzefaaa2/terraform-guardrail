@@ -46,7 +46,9 @@ my-bundle/
 
 ### 2) Add a rule
 
-Edit `policies/guardrail.rego` and add a deny rule. Example: restrict Azure regions.
+Edit
+[`policies/guardrail.rego`](https://github.com/Huzefaaa2/terraform-guardrail/blob/main/ops/policy-registry/bundles/baseline/policies/guardrail.rego)
+and add a deny rule. Example: restrict Azure regions.
 
 ```rego
 import rego.v1
@@ -68,7 +70,8 @@ deny contains output if {
 }
 ```
 
-Set `data.json`:
+Set
+[`data.json`](https://github.com/Huzefaaa2/terraform-guardrail/blob/main/ops/policy-registry/bundles/baseline/data.json):
 
 ```json
 {
@@ -98,7 +101,9 @@ terraform-guardrail scan ./infra --policy-bundle-path ./my-bundle.tar.gz
 
 ### 5) Publish to registry (optional)
 
-Host your bundle and register it in `registry.json`, then run:
+Host your bundle and register it in
+[`registry.json`](https://github.com/Huzefaaa2/terraform-guardrail/blob/main/ops/policy-registry-template/registry.json),
+then run:
 
 ```bash
 terraform-guardrail scan ./infra --policy-bundle my-bundle

@@ -12,5 +12,5 @@ hands-on CI simulations and sample outputs.
 - [examples/github-actions/](https://github.com/Huzefaaa2/terraform-guardrail/tree/main/examples/github-actions)
   shows a GitHub Actions workflow example and sample outputs.
 
-Each folder includes a `README.md` with steps and expected output formats (JSON, SARIF, JUnit,
-CSV).
+Each folder includes a README with steps and expected output formats. Example:
+[examples/github-actions/README.md](https://github.com/Huzefaaa2/terraform-guardrail/blob/main/examples/github-actions/README.md).
