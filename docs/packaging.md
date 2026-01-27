@@ -38,6 +38,16 @@ Install with:
 choco install terraform-guardrail
 ```
 
+### Local testing
+
+When installing from a local package source (for example `dist/packaging/chocolatey`), include
+the community feed so the `python` dependency can resolve, or install Python ahead of time.
+
+```powershell
+# Local package + community feed for dependencies
+choco install terraform-guardrail --version $version -s "$dest;https://community.chocolatey.org/api/v2/" -y
+```
+
 ## Linux (curl | bash)
 
 We ship a simple installer:

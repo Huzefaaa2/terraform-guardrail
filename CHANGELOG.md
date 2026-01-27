@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.5] - 2026-01-27
+
+### Changed
+- Version bump for Chocolatey republish after local verification.
+- Documented local Chocolatey verification steps.
+
 ## [1.0.4] - 2026-01-25
 
 ### Added

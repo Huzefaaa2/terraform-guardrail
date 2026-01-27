@@ -1,10 +1,8 @@
-# v1.0.4
+# v1.0.5
 
 ## Highlights
-- Chocolatey package metadata updated for review guidelines.
-
-## Added
-- Chocolatey metadata: summary, release notes, icon, docs, source URLs.
+- Chocolatey release bump after local verification.
 
 ## Changed
-- Packaging metadata aligned with Chocolatey review guidelines.
+- Version updated to 1.0.5 for republish.
+- Chocolatey local verification guidance refreshed.

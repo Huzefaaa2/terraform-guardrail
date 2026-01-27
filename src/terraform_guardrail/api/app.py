@@ -54,7 +54,7 @@ class SnippetRequest(BaseModel):
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="Terraform Guardrail MCP (TerraGuard) API", version="1.0.4")
+    app = FastAPI(title="Terraform Guardrail MCP (TerraGuard) API", version="1.0.5")
 
     @app.middleware("http")
     async def record_metrics(request, call_next):  # type: ignore[no-untyped-def]

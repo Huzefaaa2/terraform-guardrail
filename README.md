@@ -397,7 +397,7 @@ terraform-guardrail web
 pip install terraform-guardrail
 ```
 
-PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 1.0.4)
+PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 1.0.5)
 
 ## Examples
 
@@ -698,7 +698,7 @@ Include the shared template in your `.gitlab-ci.yml`:
 ```yaml
 include:
   - project: "Huzefaaa2/terraform-guardrail"
-    ref: "v1.0.4"
+    ref: "v1.0.5"
     file: "/.gitlab/terraform-guardrail.yml"
 ```
 
@@ -786,7 +786,7 @@ secrets are set:
 - PyPI: https://pypi.org/project/terraform-guardrail/
 - GitHub Releases: https://github.com/Huzefaaa2/terraform-guardrail/releases
 - Container Image: https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail
-- Latest release: v1.0.4
+- Latest release: v1.0.5
 - Release history: `RELEASE.md`
 - Enterprise Features: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Enterprise-Features
 
@@ -860,8 +860,8 @@ make changelog
 ### Release Helpers
 
 ```bash
-make release-dry VERSION=1.0.4
-make version-bump VERSION=1.0.4
+make release-dry VERSION=1.0.5
+make version-bump VERSION=1.0.5
 ```
 
 ## MCP tools (current)
