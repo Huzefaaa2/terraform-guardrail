@@ -1,6 +1,6 @@
 # GitHub Action (Pre-apply / PR checks)
 
-Terraform Guardrail MCP (TerraGuard) ships with a composite GitHub Action that runs scans on pull requests.
+Terraform Guardrail Multi-Cloud Policy (MCP) (TerraGuard) ships with a composite GitHub Action that runs scans on pull requests.
 
 ## Workflow example
 

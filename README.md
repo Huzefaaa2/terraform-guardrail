@@ -1,8 +1,8 @@
-# Terraform Guardrail MCP (TerraGuard)
+# Terraform Guardrail Multi-Cloud Policy (MCP) (TerraGuard)
 
 [![CI](https://github.com/Huzefaaa2/terraform-guardrail/actions/workflows/ci.yml/badge.svg)](https://github.com/Huzefaaa2/terraform-guardrail/actions/workflows/ci.yml)
 
-Terraform Guardrail MCP (TerraGuard) (Model Context Protocol) is an enterprise-grade IaC governance
+Terraform Guardrail Multi-Cloud Policy (MCP) (TerraGuard) is an enterprise-grade IaC governance
 and guardrail platform that enforces architectural intent, compliance, and platform standards
 directly inside CI/CD. It runs outside Terraform and gives AI assistants and platform teams real
 provider context, policy intelligence, and auditable guardrails so every change is safer by default.
@@ -14,7 +14,7 @@ and produces human-readable reports that make decisions obvious and defensible.
 
 Live app: https://terraform-guardrail.streamlit.app/
 
-## Terraform-Guardrail MCP (TerraGuard)
+## Terraform-Guardrail Multi-Cloud Policy (MCP) (TerraGuard)
 
 **Making Infrastructure Governance Executable**
 
@@ -31,9 +31,9 @@ Despite using Terraform and security scanners, enterprises still face:
 👉 The issue is not lack of tools —  
 👉 The issue is lack of a governance distribution mechanism.
 
-## What Terraform-Guardrail MCP Is
+## What Terraform-Guardrail Multi-Cloud Policy (MCP) Is
 
-Terraform-Guardrail MCP is an enterprise-grade IaC governance and guardrail platform for Terraform
+Terraform-Guardrail Multi-Cloud Policy (MCP) is an enterprise-grade IaC governance and guardrail platform for Terraform
 that enforces architectural intent, compliance, and platform standards directly in CI/CD.
 
 It:
@@ -49,7 +49,7 @@ Governance becomes code, not documents.
 
 | Layer | Role |
 | --- | --- |
-| Terraform-Guardrail MCP | Governance & enforcement orchestration |
+| Terraform-Guardrail Multi-Cloud Policy (MCP) | Governance & enforcement orchestration |
 | Checkov / tfsec / Terrascan | Deep static security & compliance scanning |
 | OPA / Sentinel | Advanced & runtime policy enforcement |
 | CI/CD (GitLab/GitHub) | Execution & control point |
@@ -94,7 +94,7 @@ With it:
 
 ## Bottom Line (Executive Takeaway)
 
-Terraform-Guardrail MCP turns infrastructure governance  
+Terraform-Guardrail Multi-Cloud Policy (MCP) turns infrastructure governance  
 from guidelines into guarantees.
 
 It enables speed and safety — without trading one for the other.
@@ -132,7 +132,7 @@ flowchart TB
     DEV[Developer] --> CLI[CLI]
     DEV --> UI[Web UI]
     DEV --> API[REST API]
-    DEV --> MCP[MCP]
+    DEV --> MCP[Multi-Cloud Policy (MCP)]
     DEV --> GHA[GitHub Action]
     DEV --> GL[GitLab CI]
     DEV --> ADO[Azure DevOps]
@@ -160,7 +160,7 @@ flowchart TB
 - Secret hygiene checks across `.tf`, `.tfvars`, and `.tfstate`
 - Schema-aware validation with Terraform CLI integration
 - Provider metadata lookup via Terraform Registry
-- MCP tools for scan, metadata, and snippet generation
+- Multi-Cloud Policy (MCP) tools for scan, metadata, and snippet generation
 - Streamlit and web UI for instant reporting
 - Dockerized REST API for CI/CD adoption
 - Docker Compose dev stack (API + UI + policy registry, optional analytics)
@@ -228,7 +228,7 @@ reaches AWS.
 flowchart TB
     subgraph Interfaces
         CLI([CLI])
-        MCP([MCP Server])
+        MCP([Multi-Cloud Policy (MCP) Server])
         WEB([Web UI])
         API([REST API])
         STL([Streamlit App])
@@ -271,7 +271,7 @@ flowchart TB
     PARSE --> SCHEMA[Provider Schema + Metadata]
     SCHEMA --> RULES[Apply Guardrail Rules]
     RULES --> REPORT[Findings + Summary]
-    REPORT --> OUTPUTS[CLI JSON / UI / MCP / REST]
+    REPORT --> OUTPUTS[CLI JSON / UI / Multi-Cloud Policy (MCP) / REST]
 ```
 
 Note: Mermaid diagrams render on GitHub and in the Wiki. PyPI will show the raw blocks.
@@ -282,7 +282,7 @@ Legend: <span style="color: green">✅ Delivered</span> • <span style="color: 
 
 | Deliverable | v1.0 Foundation | v2.0 Enterprise | v3.0 Ecosystem | v4.0 Intelligent | Docs |
 | --- | --- | --- | --- | --- | --- |
-| Dockerized MCP + REST API | <span style="color: green">✅ Delivered (0.2.x)</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/REST-API) |
+| Dockerized Multi-Cloud Policy (MCP) + REST API | <span style="color: green">✅ Delivered (0.2.x)</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/REST-API) |
 | CLI-first install | <span style="color: green">✅ Delivered (0.2.x)</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Packaging) |
 | Docker Compose local stack (API + UI + registry) | <span style="color: green">✅ Delivered (0.2.x)</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Docker-Compose) |
 | GitHub Action pre-apply / PR checks | <span style="color: green">✅ Delivered (0.2.x)</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/GitHub-Action) |
@@ -313,8 +313,8 @@ Legend: <span style="color: green">✅ Delivered</span> • <span style="color: 
 
 ## Comparison with Other Tools
 
-Terraform Guardrail MCP (TerraGuard) takes a fundamentally different approach to IaC governance than traditional
-scanning or linting tools. Guardrail is delivered as a Model Context Protocol (MCP) server with a
+Terraform Guardrail Multi-Cloud Policy (MCP) (TerraGuard) takes a fundamentally different approach to IaC governance than traditional
+scanning or linting tools. Guardrail is delivered as a Multi-Cloud Policy (MCP) server with a
 CLI and web UI. It runs outside Terraform, exposing provider metadata, scanning configs and state
 for sensitive values, and producing human-readable reports. Its rules engine focuses on secret
 hygiene and write-only arguments and lets platform teams publish non-negotiable guardrails while
@@ -325,7 +325,7 @@ analyzers embedded in CI pipelines. They scan Terraform files or plans for misco
 not provide a centralized control plane or cross-provider context. The table below summarizes the
 key differences:
 
-| Category | Guardrail MCP | Checkov | TFLint | OPA/Conftest |
+| Category | Guardrail Multi-Cloud Policy (MCP) | Checkov | TFLint | OPA/Conftest |
 | --- | --- | --- | --- | --- |
 | Primary purpose | External IaC governance control plane | Static multi-IaC security scanner | Terraform linter | General policy engine (Rego) |
 | IaC support | Terraform + multi-cloud providers (AWS, Azure, GCP, Kubernetes, Helm, OCI, Vault, vSphere, Alicloud) | Terraform, CloudFormation, Kubernetes, Helm, ARM, Serverless | Terraform (HCL) | Any domain via Rego policies |
@@ -339,7 +339,7 @@ key differences:
 Checkov provides a vast policy library and graph-based resource analysis to catch misconfigurations
 early, and TFLint offers pluggable, provider-aware linting rules to detect invalid types, deprecated
 syntax and best-practice drifts. These tools remain valuable for static analysis of Terraform code.
-Guardrail MCP builds upon them by acting as a higher-order control plane: it uses provider metadata
+Guardrail Multi-Cloud Policy (MCP) builds upon them by acting as a higher-order control plane: it uses provider metadata
 to validate schema usage, prevents secret leakage and drift before Terraform mutates state, and
 separates platform-owned safety floors from product-level constraints. In practice, teams often run
 TFLint or Checkov in their CI to catch coding errors while Guardrail serves as the last line of
@@ -384,7 +384,7 @@ terraform-guardrail policy list
 # registry API
 terraform-guardrail registry-api
 
-# MCP server (stdio)
+# Multi-Cloud Policy (MCP) server (stdio)
 terraform-guardrail mcp
 
 # Web UI
@@ -864,7 +864,7 @@ make release-dry VERSION=1.0.5
 make version-bump VERSION=1.0.5
 ```
 
-## MCP tools (current)
+## Multi-Cloud Policy (MCP) tools (current)
 
 - `scan_terraform`: Run compliance checks over a path and optional state file.
 - `get_provider_metadata`: Fetch provider metadata from Terraform Registry.

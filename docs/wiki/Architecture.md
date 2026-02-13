@@ -1,6 +1,6 @@
 # Architecture
 
-Terraform Guardrail MCP (TerraGuard) is organized into interfaces, a compliance core, and provider integrations.
+Terraform Guardrail Multi-Cloud Policy (MCP) (TerraGuard) is organized into interfaces, a compliance core, and provider integrations.
 
 ## High-Level Architecture
 
@@ -8,7 +8,7 @@ Terraform Guardrail MCP (TerraGuard) is organized into interfaces, a compliance 
 flowchart TB
     subgraph Interfaces
         CLI([CLI])
-        MCP([MCP Server])
+        MCP([Multi-Cloud Policy (MCP) Server])
         WEB([Web UI])
         API([REST API])
         STL([Streamlit App])
@@ -51,7 +51,7 @@ flowchart TB
     PARSE --> SCHEMA[Provider Schema + Metadata]
     SCHEMA --> RULES[Apply Guardrail Rules]
     RULES --> REPORT[Findings + Summary]
-    REPORT --> OUTPUTS[CLI JSON / UI / MCP / REST]
+    REPORT --> OUTPUTS[CLI JSON / UI / Multi-Cloud Policy (MCP) / REST]
 ```
 
 ## Ways to Use Guardrail
@@ -61,7 +61,7 @@ flowchart LR
     DEV[Developer] --> CLI[CLI]
     DEV --> UI[Streamlit UI]
     DEV --> API[REST API]
-    DEV --> MCP[MCP for AI Assistants]
+    DEV --> MCP[Multi-Cloud Policy (MCP) for AI Assistants]
     DEV --> CI[GitHub Action]
     DEV --> ADO[Azure DevOps]
     CLI --> GUARDRAIL

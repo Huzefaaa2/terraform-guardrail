@@ -1,6 +1,6 @@
 # Docker Compose Stack
 
-Terraform Guardrail MCP (TerraGuard) ships with a local Docker Compose stack that brings up the REST API, the
+Terraform Guardrail Multi-Cloud Policy (MCP) (TerraGuard) ships with a local Docker Compose stack that brings up the REST API, the
 Streamlit UI, and a lightweight policy registry. Optional analytics (Prometheus + Grafana) can be
 enabled via Compose profiles.
 

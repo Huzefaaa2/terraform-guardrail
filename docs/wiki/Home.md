@@ -1,6 +1,6 @@
-# Terraform Guardrail MCP (TerraGuard) Wiki
+# Terraform Guardrail Multi-Cloud Policy (MCP) (TerraGuard) Wiki
 
-Terraform Guardrail MCP (TerraGuard) (Model Context Protocol) is an enterprise-grade IaC governance
+Terraform Guardrail Multi-Cloud Policy (MCP) (TerraGuard) is an enterprise-grade IaC governance
 and guardrail platform that enforces architectural intent, compliance, and platform standards
 directly inside CI/CD. It runs outside Terraform, exposes provider context, and enforces guardrails
 that prevent bad state before apply.
@@ -26,7 +26,7 @@ date to Apache 2.0. Commercial usage requires explicit permission.
 
 - Licensing details: [Licensing](Licensing)
 
-## Terraform-Guardrail MCP (TerraGuard)
+## Terraform-Guardrail Multi-Cloud Policy (MCP) (TerraGuard)
 
 **Making Infrastructure Governance Executable**
 
@@ -43,9 +43,9 @@ Despite using Terraform and security scanners, enterprises still face:
 👉 The issue is not lack of tools —  
 👉 The issue is lack of a governance distribution mechanism.
 
-## What Terraform-Guardrail MCP Is
+## What Terraform-Guardrail Multi-Cloud Policy (MCP) Is
 
-Terraform-Guardrail MCP is an enterprise-grade IaC governance and guardrail platform for Terraform
+Terraform-Guardrail Multi-Cloud Policy (MCP) is an enterprise-grade IaC governance and guardrail platform for Terraform
 that enforces architectural intent, compliance, and platform standards directly in CI/CD.
 
 It:
@@ -61,7 +61,7 @@ Governance becomes code, not documents.
 
 | Layer | Role |
 | --- | --- |
-| Terraform-Guardrail MCP | Governance & enforcement orchestration |
+| Terraform-Guardrail Multi-Cloud Policy (MCP) | Governance & enforcement orchestration |
 | Checkov / tfsec / Terrascan | Deep static security & compliance scanning |
 | OPA / Sentinel | Advanced & runtime policy enforcement |
 | CI/CD (GitLab/GitHub) | Execution & control point |
@@ -106,7 +106,7 @@ With it:
 
 ## Bottom Line (Executive Takeaway)
 
-Terraform-Guardrail MCP turns infrastructure governance  
+Terraform-Guardrail Multi-Cloud Policy (MCP) turns infrastructure governance  
 from guidelines into guarantees.
 
 It enables speed and safety — without trading one for the other.
@@ -156,7 +156,7 @@ flowchart LR
 - [GitLab CI Templates](GitLab-CI)
 - [Packaging](Packaging)
 - [Licensing](Licensing)
-- [MCP Server](MCP-Server)
+- [Multi-Cloud Policy (MCP) Server](MCP-Server)
 - [Compliance Rules](Compliance-Rules)
 - [Streamlit Deployment](Streamlit-Deployment)
 - [Docker Compose Stack](Docker-Compose)

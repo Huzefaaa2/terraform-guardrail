@@ -1,6 +1,6 @@
-# MCP Server
+# Multi-Cloud Policy (MCP) Server
 
-Terraform Guardrail MCP (TerraGuard) exposes tools for scan, metadata, and snippet generation via stdio.
+Terraform Guardrail Multi-Cloud Policy (MCP) (TerraGuard) exposes tools for scan, metadata, and snippet generation via stdio.
 
 ## Start
 

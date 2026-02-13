@@ -28,7 +28,7 @@ flowchart TB
     DEV[Developer] --> CLI[CLI]
     DEV --> UI[Web UI]
     DEV --> API[REST API]
-    DEV --> MCP[MCP]
+    DEV --> MCP[Multi-Cloud Policy (MCP)]
     DEV --> GHA[GitHub Action]
     DEV --> GL[GitLab CI]
     DEV --> ADO[Azure DevOps]
@@ -80,7 +80,7 @@ flowchart LR
 flowchart TB
     subgraph Interfaces
         CLI([CLI])
-        MCP([MCP Server])
+        MCP([Multi-Cloud Policy (MCP) Server])
         WEB([Web UI])
         API([REST API])
         STL([Streamlit App])
@@ -123,5 +123,5 @@ flowchart TB
     PARSE --> SCHEMA[Provider Schema + Metadata]
     SCHEMA --> RULES[Apply Guardrail Rules]
     RULES --> REPORT[Findings + Summary]
-    REPORT --> OUTPUTS[CLI JSON / UI / MCP / REST]
+    REPORT --> OUTPUTS[CLI JSON / UI / Multi-Cloud Policy (MCP) / REST]
 ```

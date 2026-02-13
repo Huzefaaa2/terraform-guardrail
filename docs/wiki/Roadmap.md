@@ -7,7 +7,7 @@ Legend: <span style="color: green">✅ Delivered</span> • <span style="color: 
 
 | Deliverable | v1.0 Foundation | v2.0 Enterprise | v3.0 Ecosystem | v4.0 Intelligent | Docs |
 | --- | --- | --- | --- | --- | --- |
-| Dockerized MCP + REST API | <span style="color: green">✅ Delivered (0.2.x)</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/REST-API) |
+| Dockerized Multi-Cloud Policy (MCP) + REST API | <span style="color: green">✅ Delivered (0.2.x)</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/REST-API) |
 | CLI-first install | <span style="color: green">✅ Delivered (0.2.x)</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Packaging) |
 | Docker Compose local stack (API + UI + registry) | <span style="color: green">✅ Delivered (0.2.x)</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Docker-Compose) |
 | GitHub Action pre-apply / PR checks | <span style="color: green">✅ Delivered (0.2.x)</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/GitHub-Action) |

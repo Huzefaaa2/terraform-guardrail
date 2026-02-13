@@ -1,6 +1,6 @@
 # Packaging & Installers
 
-Terraform Guardrail MCP (TerraGuard) generates packaging artifacts on release tags:
+Terraform Guardrail Multi-Cloud Policy (MCP) (TerraGuard) generates packaging artifacts on release tags:
 
 - Homebrew formula
 - Chocolatey nuspec

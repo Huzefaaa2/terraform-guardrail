@@ -1,6 +1,6 @@
 # GitLab CI Templates
 
-Terraform Guardrail MCP (TerraGuard) ships with a GitLab CI template you can include in any
+Terraform Guardrail Multi-Cloud Policy (MCP) (TerraGuard) ships with a GitLab CI template you can include in any
 project to run pre-apply guardrail scans.
 
 ## Include the template

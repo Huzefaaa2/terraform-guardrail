@@ -1,7 +1,7 @@
 # Comparison with Other Tools
 
-Terraform Guardrail MCP (TerraGuard) takes a fundamentally different approach to IaC governance than traditional
-scanning or linting tools. Guardrail is delivered as a Model Context Protocol (MCP) server with a
+Terraform Guardrail Multi-Cloud Policy (MCP) (TerraGuard) takes a fundamentally different approach to IaC governance than traditional
+scanning or linting tools. Guardrail is delivered as a Multi-Cloud Policy (MCP) server with a
 CLI and web UI. It runs outside Terraform, exposing provider metadata, scanning configs and state
 for sensitive values, and producing human-readable reports. Its rules engine focuses on secret
 hygiene and write-only arguments and lets platform teams publish non-negotiable guardrails while
@@ -12,7 +12,7 @@ analyzers embedded in CI pipelines. They scan Terraform files or plans for misco
 not provide a centralized control plane or cross-provider context. The table below summarizes the
 key differences:
 
-| Category | Guardrail MCP | Checkov | TFLint | OPA/Conftest |
+| Category | Guardrail Multi-Cloud Policy (MCP) | Checkov | TFLint | OPA/Conftest |
 | --- | --- | --- | --- | --- |
 | Primary purpose | External IaC governance control plane | Static multi-IaC security scanner | Terraform linter | General policy engine (Rego) |
 | IaC support | Terraform + multi-cloud providers (AWS, Azure, GCP, Kubernetes, Helm, OCI, Vault, vSphere, Alicloud) | Terraform, CloudFormation, Kubernetes, Helm, ARM, Serverless | Terraform (HCL) | Any domain via Rego policies |
@@ -26,7 +26,7 @@ key differences:
 Checkov provides a vast policy library and graph-based resource analysis to catch misconfigurations
 early, and TFLint offers pluggable, provider-aware linting rules to detect invalid types, deprecated
 syntax and best-practice drifts. These tools remain valuable for static analysis of Terraform code.
-Guardrail MCP builds upon them by acting as a higher-order control plane: it uses provider metadata
+Guardrail Multi-Cloud Policy (MCP) builds upon them by acting as a higher-order control plane: it uses provider metadata
 to validate schema usage, prevents secret leakage and drift before Terraform mutates state, and
 separates platform-owned safety floors from product-level constraints. In practice, teams often run
 TFLint or Checkov in their CI to catch coding errors while Guardrail serves as the last line of

@@ -1,6 +1,6 @@
 # REST API
 
-Terraform Guardrail MCP (TerraGuard) exposes a REST API for CI/CD usage and UI integrations.
+Terraform Guardrail Multi-Cloud Policy (MCP) (TerraGuard) exposes a REST API for CI/CD usage and UI integrations.
 
 ## Purpose
 
@@ -10,4 +10,4 @@ Terraform Guardrail MCP (TerraGuard) exposes a REST API for CI/CD usage and UI i
 
 ## Status
 
-Delivered as part of the Dockerized MCP + REST API milestone.
+Delivered as part of the Dockerized Multi-Cloud Policy (MCP) + REST API milestone.

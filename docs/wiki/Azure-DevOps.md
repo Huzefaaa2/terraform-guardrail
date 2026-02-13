@@ -1,6 +1,6 @@
 # Azure DevOps / Pipeline Extension
 
-Terraform Guardrail MCP (TerraGuard) ships with an Azure DevOps pipeline template to run
+Terraform Guardrail Multi-Cloud Policy (MCP) (TerraGuard) ships with an Azure DevOps pipeline template to run
 pre-apply scans inside ADO pipelines.
 
 ## Template location

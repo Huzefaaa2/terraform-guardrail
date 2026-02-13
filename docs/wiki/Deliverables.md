@@ -3,9 +3,9 @@
 This page explains each roadmap deliverable and points to the most relevant documentation.
 
 <a name="dockerized-mcp-rest-api"></a>
-## Dockerized MCP + REST API
+## Dockerized Multi-Cloud Policy (MCP) + REST API
 
-Container images for the MCP server and REST API for consistent CI/CD usage.
+Container images for the Multi-Cloud Policy (MCP) server and REST API for consistent CI/CD usage.
 See [Architecture](Architecture.md) and [Docker Compose](Docker-Compose.md).
 
 <a name="cli-first-install"></a>
