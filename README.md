@@ -132,7 +132,7 @@ flowchart TB
     DEV[Developer] --> CLI[CLI]
     DEV --> UI[Web UI]
     DEV --> API[REST API]
-    DEV --> MCP[Multi-Cloud Policy (MCP)]
+    DEV --> MCP["Multi-Cloud Policy (MCP)"]
     DEV --> GHA[GitHub Action]
     DEV --> GL[GitLab CI]
     DEV --> ADO[Azure DevOps]
