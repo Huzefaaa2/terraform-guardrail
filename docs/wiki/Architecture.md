@@ -8,7 +8,7 @@ Terraform Guardrail Multi-Cloud Policy (MCP) (TerraGuard) is organized into inte
 flowchart TB
     subgraph Interfaces
         CLI([CLI])
-        MCP([Multi-Cloud Policy (MCP) Server])
+        MCP(["Multi-Cloud Policy (MCP) Server"])
         WEB([Web UI])
         API([REST API])
         STL([Streamlit App])
@@ -51,7 +51,7 @@ flowchart TB
     PARSE --> SCHEMA[Provider Schema + Metadata]
     SCHEMA --> RULES[Apply Guardrail Rules]
     RULES --> REPORT[Findings + Summary]
-    REPORT --> OUTPUTS[CLI JSON / UI / Multi-Cloud Policy (MCP) / REST]
+    REPORT --> OUTPUTS["CLI JSON / UI / Multi-Cloud Policy (MCP) / REST"]
 ```
 
 ## Ways to Use Guardrail
