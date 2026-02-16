@@ -12,6 +12,8 @@ This product is built for teams shipping infrastructure at scale who need speed 
 safety. Guardrail enforces non-negotiable platform invariants, allows composable product constraints,
 and produces human-readable reports that make decisions obvious and defensible.
 
+It offers an easy way to generate valid Terraform code and ensure compliance. This tool helps your team manage cloud resources more effectively. With a user-friendly CLI and a minimal web UI, you do not need a technical background to get started.
+
 Live app: https://terraform-guardrail.streamlit.app/
 
 ## Terraform-Guardrail Multi-Cloud Policy (MCP) (TerraGuard)
