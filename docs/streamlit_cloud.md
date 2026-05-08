@@ -6,6 +6,8 @@
 - `streamlit_app.py` exists at repo root for the v1 Foundation demo.
 - `streamlit_app_v2.py` exists at repo root for the v2 Enterprise demo.
 - `requirements.txt` contains `-e .` (already included).
+- `runtime.txt` pins Python 3.11 for predictable Streamlit Cloud builds.
+- `.streamlit/config.toml` defines the shared app theme and disables usage telemetry.
 
 ## v1 Foundation app
 
@@ -25,6 +27,13 @@
 5. Set the app URL/name to `terraform-guardrail-enterprise` when Streamlit asks for a URL.
 6. Choose **Deploy**.
 7. Use the app URL: https://terraform-guardrail-enterprise.streamlit.app/
+
+Recommended advanced settings:
+
+- Branch: `main`
+- Python version: read from `runtime.txt`
+- Secrets: none required for the public demo
+- App visibility: public, if you want the link to be readable from the README and wiki
 
 ## Cross-links
 

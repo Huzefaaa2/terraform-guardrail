@@ -36,6 +36,16 @@ https://www.linkedin.com/in/huzefaaa
 6. Deploy (Streamlit installs dependencies from
    [requirements.txt](https://github.com/Huzefaaa2/terraform-guardrail/blob/main/requirements.txt)).
 
+Recommended settings:
+
+- Branch: `main`
+- Python version: read from
+  [runtime.txt](https://github.com/Huzefaaa2/terraform-guardrail/blob/main/runtime.txt)
+- Theme: read from
+  [.streamlit/config.toml](https://github.com/Huzefaaa2/terraform-guardrail/blob/main/.streamlit/config.toml)
+- Secrets: none required for the public v1 or v2 demos
+- v2 app URL/name: `terraform-guardrail-enterprise`
+
 ## Container Deployment
 
 Run the v1 Foundation app:

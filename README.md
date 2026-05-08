@@ -545,7 +545,8 @@ streamlit run streamlit_app_v2.py
 1. Push this repo to GitHub.
 2. Create one Streamlit Cloud app for v1 with main file path `streamlit_app.py`.
 3. Create a second Streamlit Cloud app for v2 with main file path `streamlit_app_v2.py`.
-4. Deploy (Streamlit will install from `requirements.txt`).
+4. Deploy (Streamlit will install from `requirements.txt`, use Python from `runtime.txt`,
+   and apply the shared theme from `.streamlit/config.toml`).
 
 ### Container deployment
 
