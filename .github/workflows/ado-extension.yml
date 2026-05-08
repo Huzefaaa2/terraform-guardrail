@@ -13,16 +13,32 @@ on:
 
 jobs:
   publish:
-    if: ${{ secrets.ADO_PUBLISHER != '' && secrets.ADO_EXT_PAT != '' }}
     runs-on: ubuntu-latest
     steps:
+      - name: Check Azure DevOps secrets
+        id: gate
+        shell: bash
+        env:
+          ADO_PUBLISHER: ${{ secrets.ADO_PUBLISHER }}
+          ADO_EXT_PAT: ${{ secrets.ADO_EXT_PAT }}
+        run: |
+          if [ -z "$ADO_PUBLISHER" ] || [ -z "$ADO_EXT_PAT" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Missing Azure DevOps secrets. Skipping publish."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/checkout@v4
+        if: ${{ steps.gate.outputs.skip != 'true' }}
 
       - uses: actions/setup-node@v4
+        if: ${{ steps.gate.outputs.skip != 'true' }}
         with:
           node-version: "20"
 
       - name: Set extension version
+        if: ${{ steps.gate.outputs.skip != 'true' }}
         run: |
           VERSION="${{ github.ref_name }}"
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.version }}" ]; then
@@ -33,22 +49,29 @@ jobs:
           mv /tmp/vss-extension.json azure-devops-extension/vss-extension.json
 
       - name: Install task dependencies
+        if: ${{ steps.gate.outputs.skip != 'true' }}
         run: |
           cd azure-devops-extension/tasks/terraform-guardrail
           npm install
 
       - name: Install tfx
+        if: ${{ steps.gate.outputs.skip != 'true' }}
         run: npm install -g tfx-cli
 
       - name: Create extension package
+        if: ${{ steps.gate.outputs.skip != 'true' }}
         run: |
           cd azure-devops-extension
           tfx extension create --manifest-globs vss-extension.json
 
       - name: Publish extension
+        if: ${{ steps.gate.outputs.skip != 'true' }}
+        env:
+          ADO_PUBLISHER: ${{ secrets.ADO_PUBLISHER }}
+          ADO_EXT_PAT: ${{ secrets.ADO_EXT_PAT }}
         run: |
           cd azure-devops-extension
           tfx extension publish \
             --manifest-globs vss-extension.json \
-            --publisher "${{ secrets.ADO_PUBLISHER }}" \
-            --token "${{ secrets.ADO_EXT_PAT }}"
+            --publisher "$ADO_PUBLISHER" \
+            --token "$ADO_EXT_PAT"

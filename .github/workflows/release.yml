@@ -18,12 +18,16 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.ref || github.ref }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       - name: Validate tag and version
+        env:
+          RELEASE_REF: ${{ github.event.inputs.ref || github.ref_name }}
         run: |
-          TAG="${GITHUB_REF_NAME}"
+          TAG="${RELEASE_REF}"
           if ! echo "$TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
             echo "Invalid tag format: $TAG"
             exit 1
@@ -44,26 +48,30 @@ jobs:
           python -m pip install --upgrade build
           python -m build
       - name: Publish to PyPI
-        if: ${{ secrets.PYPI_API_TOKEN != '' }}
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: |
+          if [ -z "$TWINE_PASSWORD" ]; then
+            echo "PYPI_API_TOKEN not set; skipping PyPI publish."
+            exit 0
+          fi
           python -m pip install --upgrade twine
           twine upload --skip-existing dist/*
-      - name: Skip PyPI publish (missing token)
-        if: ${{ secrets.PYPI_API_TOKEN == '' }}
-        run: echo "PYPI_API_TOKEN not set; skipping PyPI publish."
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_REF: ${{ github.event.inputs.ref || github.ref_name }}
         run: |
           python - <<'PY' > /tmp/release.json
           import json
+          import os
           import pathlib
           import subprocess
 
-          tag = subprocess.check_output(["git", "describe", "--tags", "--abbrev=0"], text=True).strip()
+          tag = os.environ.get("RELEASE_REF") or subprocess.check_output(
+              ["git", "describe", "--tags", "--abbrev=0"], text=True
+          ).strip()
           body = pathlib.Path("RELEASE_NOTES.md").read_text() if pathlib.Path("RELEASE_NOTES.md").exists() else ""
           payload = {
               "tag_name": tag,
