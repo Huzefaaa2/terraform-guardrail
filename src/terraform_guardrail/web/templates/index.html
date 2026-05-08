@@ -8,51 +8,442 @@
     <link rel="stylesheet" href="/static/style.css" />
   </head>
   <body>
-    <main class="container">
-      <header class="hero">
-        <p class="badge">Terraform Guardrail MCP (TerraGuard)</p>
-        <h1>Ephemeral-values compliance, fast.</h1>
-        <p class="subtitle">
-          Upload a Terraform file to scan for sensitive leaks and missing ephemeral controls.
-        </p>
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <p class="badge">Terraform Guardrail MCP (TerraGuard)</p>
+          <h1>Enterprise guardrails workspace</h1>
+          <p class="subtitle">
+            Scan Terraform folders, curate enterprise policies, and review rule ownership in one flow.
+          </p>
+        </div>
+        <div class="top-actions">
+          <section class="guide-card" aria-label="How to guides">
+            <div class="guide-card-heading">
+              <div>
+                <span>How to guides</span>
+                <strong>Learn the workflow</strong>
+              </div>
+              <a href="{{ how_to_guides_url }}" target="_blank" rel="noreferrer">All guides</a>
+            </div>
+            <div class="guide-links">
+              {% for guide in how_to_guides %}
+              <a href="{{ guide.url }}" target="_blank" rel="noreferrer">
+                <strong>{{ guide.title }}</strong>
+                <small>{{ guide.description }}</small>
+              </a>
+              {% endfor %}
+            </div>
+          </section>
+          <div class="rule-meter">
+            <span>Next rule</span>
+            <strong>{{ next_rule_id }}</strong>
+          </div>
+        </div>
       </header>
 
-      <section class="panel">
-        <form action="/scan" method="post" enctype="multipart/form-data">
-          <label class="file-input">
-            <span>Select Terraform file</span>
-            <input type="file" name="tf_file" accept=".tf,.tfvars,.hcl" required />
-          </label>
-          <button type="submit">Scan</button>
-        </form>
-      </section>
-
       {% if error %}
-      <section class="panel error">{{ error }}</section>
+      <section class="notice error">{{ error }}</section>
       {% endif %}
 
-      {% if report %}
-      <section class="panel report">
-        <h2>Scan Report</h2>
-        <p class="meta">Scanned: {{ report.scanned_path }}</p>
-        <div class="summary">
-          <div><strong>Total</strong> {{ report.summary.findings }}</div>
-          <div><strong>High</strong> {{ report.summary.high }}</div>
-          <div><strong>Medium</strong> {{ report.summary.medium }}</div>
-          <div><strong>Low</strong> {{ report.summary.low }}</div>
+      <section class="workspace">
+        <div class="main-column">
+          <section class="panel scan-panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Scanner</p>
+                <h2>Upload Terraform workspace</h2>
+              </div>
+              <span class="count-pill">.tf .tfvars .hcl</span>
+            </div>
+            <form action="/scan" method="post" enctype="multipart/form-data" class="upload-form">
+              <label class="dropzone">
+                <span>Select files or a folder</span>
+                <small>Use multi-select or choose a directory when your browser supports it.</small>
+                <input
+                  type="file"
+                  name="tf_files"
+                  accept=".tf,.tfvars,.hcl"
+                  multiple
+                  webkitdirectory
+                  directory
+                  required
+                />
+              </label>
+              <button type="submit">Scan Workspace</button>
+            </form>
+          </section>
+
+          <section class="panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Baselines</p>
+                <h2>Org-wide baseline lifecycle</h2>
+              </div>
+              <span class="count-pill">{{ baselines | length }}</span>
+            </div>
+            <form action="/baselines" method="post" class="baseline-form">
+              <input type="text" name="name" placeholder="Baseline name, e.g. org-baseline" required />
+              <select name="policy_id" aria-label="Initial policy">
+                <option value="">No initial policy</option>
+                {% for policy in policies %}
+                <option value="{{ policy.id }}">{{ policy.rule_id or "none" }} · {{ policy.name }}</option>
+                {% endfor %}
+              </select>
+              <select name="scope" aria-label="Baseline scope">
+                <option value="org" selected>Org</option>
+                <option value="group">Group</option>
+                <option value="repo">Repo</option>
+              </select>
+              <input type="text" name="version" value="0.1.0" aria-label="Baseline version" />
+              <button type="submit">Create Baseline</button>
+            </form>
+            {% if baselines %}
+            <div class="baseline-list">
+              {% for baseline in baselines %}
+              <div>
+                <span>
+                  <strong>{{ baseline.name }}</strong>
+                  version={{ baseline.version }} · policies={{ baseline.policy_ids | length }} · approved={{ baseline.approved }}
+                </span>
+                <form action="/baselines/{{ baseline.id }}/version" method="post">
+                  <input type="text" name="version" placeholder="New version" required />
+                  <select name="policy_id" aria-label="Policy for version">
+                    <option value="">Keep policies</option>
+                    {% for policy in policies %}
+                    <option value="{{ policy.id }}">{{ policy.rule_id or "none" }} · {{ policy.name }}</option>
+                    {% endfor %}
+                  </select>
+                  <button type="submit">Version</button>
+                </form>
+                {% if not baseline.approved %}
+                <form action="/baselines/{{ baseline.id }}/approve" method="post">
+                  <button type="submit">Approve</button>
+                </form>
+                {% endif %}
+              </div>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </section>
+
+          <section class="panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Authoring</p>
+                <h2>Create enterprise policy</h2>
+              </div>
+              <span class="count-pill">{{ next_rule_id }}</span>
+            </div>
+            <div class="authoring-guide">
+              <strong>Example</strong>
+              <p>
+                Create a policy named <span>Production S3 encryption</span> with owner
+                <span>platform-security</span>, standard <span>SOC2</span>, control
+                <span>CC6.6</span>, and remediation <span>Enable default SSE with KMS</span>.
+                The rule ID is assigned automatically as <span>{{ next_rule_id }}</span>.
+              </p>
+            </div>
+            <form action="/policies" method="post" class="policy-form">
+              <input type="text" name="name" placeholder="Policy name" required />
+              <input type="text" value="{{ next_rule_id }}" aria-label="Assigned rule ID" readonly />
+              <input type="text" name="owner" placeholder="Owner" />
+              <input type="text" name="standard" placeholder="Standard" />
+              <input type="text" name="control_id" placeholder="Control ID" />
+              <input type="text" name="description" placeholder="Description" />
+              <input type="text" name="remediation" placeholder="Remediation" />
+              <button type="submit">Create Policy</button>
+            </form>
+          </section>
+
+          <section class="panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Enforcement</p>
+                <h2>Bind policies to orgs, groups, or repos</h2>
+              </div>
+              <span class="count-pill">{{ bindings | length }}</span>
+            </div>
+            <form action="/bindings" method="post" class="binding-form">
+              <select name="target_type" aria-label="Target type">
+                <option value="org">Org</option>
+                <option value="group" selected>Group</option>
+                <option value="repo">Repo</option>
+              </select>
+              <input type="text" name="target" placeholder="Target, e.g. platform" required />
+              <select name="policy_id" aria-label="Policy to bind">
+                <option value="">No direct policy</option>
+                {% for policy in policies %}
+                <option value="{{ policy.id }}">{{ policy.rule_id or "none" }} · {{ policy.name }}</option>
+                {% endfor %}
+              </select>
+              <select name="baseline_id" aria-label="Baseline to bind">
+                <option value="">No baseline</option>
+                {% for baseline in baselines %}
+                <option value="{{ baseline.id }}">{{ baseline.name }}</option>
+                {% endfor %}
+              </select>
+              <input type="text" name="parent" placeholder="Parent target, optional" />
+              <button type="submit">Create Binding</button>
+            </form>
+            {% if bindings %}
+            <div class="binding-list">
+              {% for binding in bindings %}
+              <span>
+                <strong>{{ binding.target_type }}:{{ binding.target }}</strong>
+                policies={{ binding.policy_ids | length }} · baselines={{ binding.baseline_ids | length }}
+                {% if binding.parent %} · parent={{ binding.parent }}{% endif %}
+              </span>
+              {% endfor %}
+            </div>
+            {% endif %}
+            <div class="resolver-box">
+              <div class="section-heading compact-heading">
+                <div>
+                  <p class="eyebrow">Resolve</p>
+                  <h2>Preview effective policies</h2>
+                </div>
+              </div>
+              <form action="/bindings/resolve" method="post" class="binding-form">
+                <input type="text" name="org" placeholder="Org, optional" />
+                <input type="text" name="group" placeholder="Group, optional" />
+                <input type="text" name="repo" placeholder="Repo, optional" />
+                <select name="baseline" aria-label="Explicit baseline">
+                  <option value="">No explicit baseline</option>
+                  {% for baseline in baselines %}
+                  <option value="{{ baseline.id }}">{{ baseline.name }}</option>
+                  {% endfor %}
+                </select>
+                <button type="submit">Resolve Policies</button>
+              </form>
+            </div>
+          </section>
+
+          {% if resolved %}
+          <section class="panel report">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Resolved enforcement</p>
+                <h2>{{ resolved.target_type }}:{{ resolved.target }}</h2>
+              </div>
+              <span class="count-pill">{{ resolved.policy_ids | length }} policies</span>
+            </div>
+            <div class="detail-grid">
+              <div><span>Bindings</span><strong>{{ resolved.binding_targets | join(", ") or "none" }}</strong></div>
+              <div><span>Baselines</span><strong>{{ resolved.baseline_ids | join(", ") or "none" }}</strong></div>
+              <div><span>Policies</span><strong>{{ resolved.policy_ids | length }}</strong></div>
+              <div><span>Target</span><strong>{{ resolved.target }}</strong></div>
+            </div>
+            {% if resolved.policies %}
+            <div class="binding-list">
+              {% for policy in resolved.policies %}
+              <span>
+                <strong>{{ policy.rule_id or "none" }} · {{ policy.name }}</strong>
+                {{ policy.status }} · {{ policy.severity }}
+              </span>
+              {% endfor %}
+            </div>
+            {% else %}
+            <p class="detail-copy">No policies resolved for this target.</p>
+            {% endif %}
+          </section>
+          {% endif %}
+
+          {% if selected_default_rule %}
+          <section class="panel detail-panel" id="policy-detail">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Default rule detail</p>
+                <h2>{{ selected_default_rule.name }}</h2>
+              </div>
+              <span class="status-badge">Built-in</span>
+            </div>
+            <div class="detail-grid">
+              <div><span>Rule ID</span><strong>{{ selected_default_rule.rule_id }}</strong></div>
+              <div><span>Source</span><strong>Default catalog</strong></div>
+              <div><span>Status</span><strong>Active</strong></div>
+              <div><span>Risk</span><strong>{{ selected_default_rule.risk }}</strong></div>
+            </div>
+            <p class="detail-copy">
+              {{ selected_default_rule.name }} is enforced by the built-in scanner rule catalog.
+              Recommended remediation: {{ selected_default_rule.remediation }}
+            </p>
+          </section>
+          {% elif selected_policy %}
+          <section class="panel detail-panel" id="policy-detail">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Policy detail</p>
+                <h2>{{ selected_policy.name }}</h2>
+              </div>
+              <span class="status-badge">{{ selected_policy.status }}</span>
+            </div>
+            <div class="detail-grid">
+              <div><span>Rule ID</span><strong>{{ selected_policy.rule_id or "unmapped" }}</strong></div>
+              <div><span>Scope</span><strong>{{ selected_policy.scope }}</strong></div>
+              <div><span>Severity</span><strong>{{ selected_policy.severity }}</strong></div>
+              <div><span>Owner</span><strong>{{ selected_policy.metadata.owner or "unassigned" }}</strong></div>
+              <div><span>Standard</span><strong>{{ selected_policy.metadata.standard or "none" }}</strong></div>
+              <div><span>Control</span><strong>{{ selected_policy.metadata.control_id or "none" }}</strong></div>
+            </div>
+            <form action="/policies/{{ selected_policy.id }}" method="post" class="policy-edit-form">
+              <input type="text" name="name" value="{{ selected_policy.name }}" required />
+              <input type="text" name="rule_id" value="{{ selected_policy.rule_id or '' }}" readonly />
+              <input type="text" name="owner" value="{{ selected_policy.metadata.owner or '' }}" />
+              <input type="text" name="standard" value="{{ selected_policy.metadata.standard or '' }}" />
+              <input type="text" name="control_id" value="{{ selected_policy.metadata.control_id or '' }}" />
+              <input type="text" name="description" value="{{ selected_policy.description }}" />
+              <input type="text" name="remediation" value="{{ selected_policy.metadata.remediation or '' }}" />
+              <button type="submit">Save Details</button>
+            </form>
+            {% if selected_policy.status != "approved" %}
+            <form action="/policies/{{ selected_policy.id }}/approve" method="post" class="approve-form">
+              <button type="submit">Approve Policy</button>
+            </form>
+            {% endif %}
+            <div class="preview-box">
+              <div class="section-heading compact-heading">
+                <div>
+                  <p class="eyebrow">Preview</p>
+                  <h2>Validate this policy before approval</h2>
+                </div>
+                <span class="count-pill">{{ selected_policy.rule_id or "none" }}</span>
+              </div>
+              <form
+                action="/policies/{{ selected_policy.id }}/preview"
+                method="post"
+                enctype="multipart/form-data"
+                class="upload-form"
+              >
+                <label class="dropzone compact-dropzone">
+                  <span>Upload Terraform files for preview</span>
+                  <small>Preview filters scan results to this policy rule ID.</small>
+                  <input
+                    type="file"
+                    name="preview_files"
+                    accept=".tf,.tfvars,.hcl"
+                    multiple
+                    webkitdirectory
+                    directory
+                    required
+                  />
+                </label>
+                <button type="submit">Preview Policy</button>
+              </form>
+            </div>
+          </section>
+          {% endif %}
+
+          {% if preview %}
+          <section class="panel report">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Policy preview</p>
+                <h2>{{ preview.policy_name }}</h2>
+              </div>
+              <span class="count-pill">{{ preview.rule_id or "unmapped" }}</span>
+            </div>
+            <div class="summary">
+              <div><strong>{{ preview.summary.findings }}</strong><span>Total</span></div>
+              <div><strong>{{ preview.summary.high }}</strong><span>High</span></div>
+              <div><strong>{{ preview.summary.medium }}</strong><span>Medium</span></div>
+              <div><strong>{{ preview.summary.low }}</strong><span>Low</span></div>
+            </div>
+            {% if preview.findings %}
+            <ul class="findings">
+              {% for finding in preview.findings %}
+              <li class="finding {{ finding.severity }}">
+                <span class="tag">{{ finding.severity }}</span>
+                <span class="rule">{{ finding.rule_id }}</span>
+                <span class="message">{{ finding.message }}</span>
+                <span class="path">{{ finding.path }}</span>
+              </li>
+              {% endfor %}
+            </ul>
+            {% else %}
+            <p class="detail-copy">No findings matched this policy rule ID in the uploaded files.</p>
+            {% endif %}
+          </section>
+          {% endif %}
+
+          {% if report %}
+          <section class="panel report">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Scan report</p>
+                <h2>{{ report.scanned_path }}</h2>
+              </div>
+            </div>
+            <div class="summary">
+              <div><strong>{{ report.summary.findings }}</strong><span>Total</span></div>
+              <div><strong>{{ report.summary.high }}</strong><span>High</span></div>
+              <div><strong>{{ report.summary.medium }}</strong><span>Medium</span></div>
+              <div><strong>{{ report.summary.low }}</strong><span>Low</span></div>
+            </div>
+            <ul class="findings">
+              {% for finding in report.findings %}
+              <li class="finding {{ finding.severity }}">
+                <span class="tag">{{ finding.severity }}</span>
+                <span class="rule">{{ finding.rule_id }}</span>
+                <span class="message">{{ finding.message }}</span>
+                <span class="path">{{ finding.path }}</span>
+              </li>
+              {% endfor %}
+            </ul>
+          </section>
+          {% endif %}
         </div>
-        <ul class="findings">
-          {% for finding in report.findings %}
-          <li class="finding {{ finding.severity }}">
-            <span class="tag">{{ finding.severity }}</span>
-            <span class="rule">{{ finding.rule_id }}</span>
-            <span class="message">{{ finding.message }}</span>
-            <span class="path">{{ finding.path }}</span>
-          </li>
-          {% endfor %}
-        </ul>
+
+        <aside class="side-panel">
+          <div class="section-heading compact-heading">
+            <div>
+              <p class="eyebrow">Rule catalog</p>
+              <h2>Default Rules</h2>
+            </div>
+            <span class="count-pill">{{ default_rules | length }}</span>
+          </div>
+          <nav class="rule-list" aria-label="Default scanner rules">
+            {% for rule in default_rules %}
+            <a
+              class="policy-link compact-link {% if selected_default_rule and selected_default_rule.rule_id == rule.rule_id %}active{% endif %}"
+              href="/?rule_id={{ rule.rule_id }}#policy-detail"
+            >
+              <span>
+                <strong>{{ rule.name }}</strong>
+                <small>Default scanner rule</small>
+              </span>
+              <em>{{ rule.rule_id }}</em>
+            </a>
+            {% endfor %}
+          </nav>
+
+          <div class="section-heading compact-heading enterprise-heading">
+            <div>
+              <p class="eyebrow">Registry</p>
+              <h2>Enterprise Policies</h2>
+            </div>
+            <span class="count-pill">{{ policies | length }}</span>
+          </div>
+          {% if policies %}
+          <nav class="policy-list scroll-list" aria-label="Enterprise policies">
+            {% for policy in policies %}
+            <a
+              class="policy-link {% if selected_policy and selected_policy.id == policy.id %}active{% endif %}"
+              href="/?policy_id={{ policy.id }}#policy-detail"
+            >
+              <span>
+                <strong>{{ policy.name }}</strong>
+                <small>{{ policy.metadata.owner or "No owner" }}</small>
+              </span>
+              <em>{{ policy.rule_id or "none" }}</em>
+            </a>
+            {% endfor %}
+          </nav>
+          {% else %}
+          <p class="empty-state">No enterprise policies yet.</p>
+          {% endif %}
+        </aside>
       </section>
-      {% endif %}
     </main>
   </body>
 </html>

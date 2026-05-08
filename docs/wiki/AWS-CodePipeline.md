@@ -55,6 +55,55 @@ artifacts:
     - guardrail-report.json
 ```
 
+The repository includes a runnable starter buildspec at
+`examples/aws-codepipeline/buildspec.yml` and a sample evidence artifact at
+`examples/aws-codepipeline/outputs/guardrail-evidence.json`.
+
+## Generate a CodeBuild Guardrail Stage
+
+Use the CLI scaffold command to generate a CodeBuild buildspec and README for your repository:
+
+```bash
+terraform-guardrail enterprise aws codepipeline init \
+  --destination aws-codepipeline-guardrail \
+  --terraform-dir infra \
+  --baseline org-baseline \
+  --evidence-format pdf
+```
+
+Generated files:
+
+- `buildspec-guardrail.yml`
+- `README.md`
+
+By default, the generated buildspec acts as a guardrail-only stage. Terraform apply should remain in
+a later CodePipeline stage. To include apply in the same buildspec:
+
+```bash
+terraform-guardrail enterprise aws codepipeline init --include-apply
+```
+
+For v2.0 Enterprise, the CodeBuild gate should call:
+
+```bash
+terraform-guardrail enterprise drift-gate . \
+  --provider aws \
+  --baseline org-baseline \
+  --snapshot-id prod \
+  --evidence-format pdf \
+  --format json
+```
+
+For evaluation without drift snapshot enforcement:
+
+```bash
+terraform-guardrail evaluate . --provider aws --baseline org-baseline --format json
+terraform-guardrail evidence export <evaluation-result-id> --format json
+```
+
+`drift-gate` records a pass/warn/block decision, compares against the approved drift snapshot, and
+can export immutable JSON, CSV, or PDF evidence artifacts for audit workflows.
+
 ## What this enables
 
 - Terraform-aware policy gates in CodePipeline

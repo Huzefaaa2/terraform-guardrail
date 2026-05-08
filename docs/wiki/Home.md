@@ -140,6 +140,7 @@ flowchart LR
 ## Quick links
 
 - [Roadmap](Roadmap)
+- [How-To Guides](How-To-Guides)
 - [Deliverables Reference](Deliverables)
 - [Enterprise Implementation Plan](Implementation-Plan)
 - [Enterprise Features](Enterprise-Features)
@@ -166,7 +167,7 @@ flowchart LR
 
 ## Latest Release
 
-- Version: 1.0.5
+- Version: 2.0.0
 - Container image: https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail
 - Registry image: https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail-registry
 - Supported providers: AWS, Azure, GCP, Kubernetes, Helm, OCI, Vault, Alicloud, vSphere

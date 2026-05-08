@@ -298,13 +298,13 @@ Legend: <span style="color: green">✅ Delivered</span> • <span style="color: 
 | Azure DevOps / Pipeline extension | <span style="color: green">✅ Delivered (1.0.x)</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Azure-DevOps) |
 | Policy layering model (base → env → app) | <span style="color: green">✅ Delivered (1.0.x)</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Policy-Layering) |
 | Custom rules (Option A/B + local bundles) | <span style="color: green">✅ Delivered (1.0.x)</span> |  |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Custom-Rules) |
-| AWS CodePipeline + CodeBuild integration |  | <span style="color: orange">🚧 Planned</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/AWS-CodePipeline) |
-| Policy authoring UI |  | <span style="color: orange">🚧 Planned</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Policy-Authoring-UI) |
-| Policy metadata + rich failure messages |  | <span style="color: orange">🚧 Planned</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Policy-Metadata) |
-| Drift-prevention rules before apply |  | <span style="color: orange">🚧 Planned</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Drift-Prevention) |
-| Org-wide baselines |  | <span style="color: orange">🚧 Planned</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Org-Wide-Baselines) |
-| Group-level enforcement |  | <span style="color: orange">🚧 Planned</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Group-Level-Enforcement) |
-| Evidence export (SOC2 / ISO / PCI) |  | <span style="color: orange">🚧 Planned</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Evidence-Export) |
+| AWS CodePipeline + CodeBuild integration |  | <span style="color: green">✅ Delivered (2.0.0)</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/AWS-CodePipeline) |
+| Policy authoring UI |  | <span style="color: green">✅ Delivered (2.0.0)</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Policy-Authoring-UI) |
+| Policy metadata + rich failure messages |  | <span style="color: green">✅ Delivered (2.0.0)</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Policy-Metadata) |
+| Drift-prevention rules before apply |  | <span style="color: green">✅ Delivered (2.0.0)</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Drift-Prevention) |
+| Org-wide baselines |  | <span style="color: green">✅ Delivered (2.0.0)</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Org-Wide-Baselines) |
+| Group-level enforcement |  | <span style="color: green">✅ Delivered (2.0.0)</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Group-Level-Enforcement) |
+| Evidence export (SOC2 / ISO / PCI) |  | <span style="color: green">✅ Delivered (2.0.0)</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Evidence-Export) |
 | Contributor governance + public roadmap |  |  | <span style="color: orange">🚧 Planned</span> |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Governance) |
 | Reference implementations across tools |  |  | <span style="color: orange">🚧 Planned</span> |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Reference-Implementations) |
 | Cross-provider invariant enforcement |  |  | <span style="color: orange">🚧 Planned</span> |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Cross-Provider-Invariants) |
@@ -354,12 +354,12 @@ defense to enforce organizational guardrails and deliver contextual guidance.
 | Terraform pre-apply enforcement | ✅ Yes | ❌ No |
 | CI/CD policy gate | ✅ Yes | ❌ No |
 | IaC-aware guardrails | ✅ Yes | ❌ No |
-| AWS Organizations awareness | 🚧 Planned | ⚠️ Account-level only |
+| AWS Organizations awareness | ✅ Org/group/repo baselines | ⚠️ Account-level only |
 | Control Tower integration | 🚧 Companion mode | ⚠️ Platform-only |
-| Drift prevention (pre-deploy) | 🚧 Planned | ❌ Post-deploy only |
+| Drift prevention (pre-deploy) | ✅ Yes | ❌ Post-deploy only |
 | Policy versioning & audit trail | ✅ Yes | ❌ Limited |
 | Multi-cloud parity | ✅ Yes | ❌ AWS-only |
-| Evidence export for audits | 🚧 Planned | ⚠️ Fragmented |
+| Evidence export for audits | ✅ JSON/CSV/PDF | ⚠️ Fragmented |
 
 ### Summary
 
@@ -399,7 +399,7 @@ terraform-guardrail web
 pip install terraform-guardrail
 ```
 
-PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 1.0.5)
+PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 2.0.0)
 
 ## Examples
 
@@ -408,6 +408,7 @@ The `examples/` folder provides practical CI simulations:
 - `examples/fixtures/` includes good and bad Terraform inputs (`.tf`, `.tfvars`, `.hcl`, `.tfstate`).
 - `examples/gitlab-ci/` contains a GitLab template example and sample outputs.
 - `examples/github-actions/` contains a GitHub Actions workflow and sample outputs.
+- `examples/aws-codepipeline/` contains a CodeBuild buildspec and sample enterprise evidence output.
 
 Each example folder includes a `README.md` with steps and expected output formats (JSON, SARIF,
 JUnit, CSV).
@@ -700,7 +701,7 @@ Include the shared template in your `.gitlab-ci.yml`:
 ```yaml
 include:
   - project: "Huzefaaa2/terraform-guardrail"
-    ref: "v1.0.5"
+    ref: "v2.0.0"
     file: "/.gitlab/terraform-guardrail.yml"
 ```
 
@@ -788,7 +789,7 @@ secrets are set:
 - PyPI: https://pypi.org/project/terraform-guardrail/
 - GitHub Releases: https://github.com/Huzefaaa2/terraform-guardrail/releases
 - Container Image: https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail
-- Latest release: v1.0.5
+- Latest release: v2.0.0
 - Release history: `RELEASE.md`
 - Enterprise Features: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Enterprise-Features
 
@@ -862,8 +863,8 @@ make changelog
 ### Release Helpers
 
 ```bash
-make release-dry VERSION=1.0.5
-make version-bump VERSION=1.0.5
+make release-dry VERSION=2.0.0
+make version-bump VERSION=2.0.0
 ```
 
 ## Multi-Cloud Policy (MCP) tools (current)

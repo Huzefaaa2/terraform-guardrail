@@ -13,6 +13,13 @@ class Finding(BaseModel):
     message: str
     path: str | None = None
     detail: dict[str, Any] | None = None
+    owner: str | None = None
+    standard: str | None = None
+    control_id: str | None = None
+    risk: str | None = None
+    expiry: str | None = None
+    remediation: str | None = None
+    evidence_id: str | None = None
 
 
 class ScanSummary(BaseModel):

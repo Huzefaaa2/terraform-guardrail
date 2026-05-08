@@ -35,8 +35,14 @@ Planned Azure DevOps extension for pre-apply checks in ADO pipelines.
 
 ## AWS CodePipeline + CodeBuild integration
 
-Planned buildspec integration for policy gates in AWS CodePipeline. See
+Delivered buildspec integration for policy gates and evidence artifacts in AWS CodePipeline. See
 [AWS CodePipeline](AWS-CodePipeline.md).
+
+<a name="policy-authoring-ui"></a>
+## Policy authoring UI
+
+Delivered enterprise authoring workflow in the FastAPI web UI for creating, editing, approving,
+previewing, and browsing policies. See [Policy Authoring UI](Policy-Authoring-UI.md).
 
 <a name="policy-layering-model"></a>
 ## Policy layering model (base → env → app)
@@ -77,12 +83,32 @@ Linux one-liner install script. See [Packaging](Packaging.md).
 <a name="policy-metadata-rich-messages"></a>
 ## Policy metadata + rich failure messages
 
-Planned metadata (owner, risk, expiry) and actionable failure guidance.
+Delivered metadata fields for ownership, compliance standards, control IDs, risk, expiry, and
+remediation guidance. See [Policy Metadata](Policy-Metadata.md).
 
 <a name="drift-prevention"></a>
 ## Drift-prevention rules before apply
 
-Planned rules to block drift before Terraform mutates state.
+Delivered drift checks and drift gates that compare current findings with an approved snapshot
+before Terraform mutates state. See [Drift Prevention](Drift-Prevention.md).
+
+<a name="org-wide-baselines"></a>
+## Org-wide baselines
+
+Delivered baseline lifecycle, versioning, approvals, and resolution order for baseline, pack/layer,
+environment, and app scopes. See [Org-Wide Baselines](Org-Wide-Baselines.md).
+
+<a name="group-level-enforcement"></a>
+## Group-level enforcement
+
+Delivered org, group, and repo bindings with inheritance-aware resolution. See
+[Group-Level Enforcement](Group-Level-Enforcement.md).
+
+<a name="evidence-export"></a>
+## Evidence export (SOC2 / ISO / PCI)
+
+Delivered JSON, CSV, and PDF evidence export records tied to evaluation results. See
+[Evidence Export](Evidence-Export.md).
 
 <a name="contributor-governance"></a>
 ## Contributor governance + public roadmap
