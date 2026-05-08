@@ -9,6 +9,19 @@ from fastapi.responses import Response
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 from pydantic import BaseModel
 
+from terraform_guardrail.enterprise import (
+    Baseline,
+    EnterprisePolicy,
+    EnterpriseStore,
+    EvaluationContext,
+    GroupPolicyBinding,
+    check_drift,
+    evaluate_enterprise,
+    export_evidence,
+    preview_policy,
+    resolve_policy_set,
+    run_drift_gate,
+)
 from terraform_guardrail.generator import generate_snippet
 from terraform_guardrail.policy_registry import (
     PolicyRegistryError,
@@ -53,8 +66,78 @@ class SnippetRequest(BaseModel):
     name: str = "example"
 
 
+class PolicyVersionRequest(BaseModel):
+    version: str
+    rule_body: str = ""
+    actor: str = "system"
+
+
+class PolicyApprovalRequest(BaseModel):
+    actor: str = "system"
+    comment: str | None = None
+
+
+class BaselineVersionRequest(BaseModel):
+    version: str
+    policy_ids: list[str] | None = None
+    actor: str = "system"
+
+
+class PolicyPreviewRequest(BaseModel):
+    path: str
+    state_path: str | None = None
+    actor: str = "system"
+
+
+class EvaluateRequest(BaseModel):
+    path: str
+    state_path: str | None = None
+    provider: str | None = None
+    policy_set: str | None = None
+    baseline: str | None = None
+    context: dict[str, Any] | None = None
+    fail_on: str | None = None
+    actor: str = "system"
+
+
+class DriftCheckRequest(BaseModel):
+    path: str
+    state_path: str | None = None
+    snapshot_id: str = "default"
+    update_snapshot: bool = False
+    actor: str = "system"
+
+
+class EvidenceExportRequest(BaseModel):
+    result_id: str
+    format: str = "json"
+    actor: str = "system"
+
+
+class DriftGateRequest(BaseModel):
+    path: str
+    state_path: str | None = None
+    snapshot_id: str = "default"
+    provider: str | None = None
+    policy_set: str | None = None
+    baseline: str | None = None
+    context: dict[str, Any] | None = None
+    fail_on: str | None = None
+    update_snapshot: bool = False
+    create_snapshot: bool = True
+    evidence_format: str | None = None
+    actor: str = "system"
+
+
+class BindingResolveRequest(BaseModel):
+    org: str | None = None
+    group: str | None = None
+    repo: str | None = None
+    baseline: str | None = None
+
+
 def create_app() -> FastAPI:
-    app = FastAPI(title="Terraform Guardrail MCP (TerraGuard) API", version="1.0.5")
+    app = FastAPI(title="Terraform Guardrail MCP (TerraGuard) API", version="2.0.0")
 
     @app.middleware("http")
     async def record_metrics(request, call_next):  # type: ignore[no-untyped-def]
@@ -128,5 +211,285 @@ def create_app() -> FastAPI:
         except Exception as exc:  # noqa: BLE001
             raise HTTPException(status_code=400, detail=str(exc)) from exc
         return {"language": snippet.language, "content": snippet.content}
+
+    @app.post("/policies")
+    def create_policy(policy: EnterprisePolicy) -> dict[str, Any]:
+        try:
+            return EnterpriseStore().save_policy(policy).model_dump(mode="json")
+        except Exception as exc:  # noqa: BLE001
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.get("/policies")
+    def policies(scope: str | None = None) -> dict[str, Any]:
+        items = EnterpriseStore().list_policies()
+        if scope:
+            items = [policy for policy in items if policy.scope == scope]
+        return {"policies": [policy.model_dump(mode="json") for policy in items]}
+
+    @app.get("/policies/{policy_id}")
+    def policy(policy_id: str) -> dict[str, Any]:
+        try:
+            return EnterpriseStore().get_policy(policy_id).model_dump(mode="json")
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.put("/policies/{policy_id}")
+    def update_policy(policy_id: str, policy: EnterprisePolicy) -> dict[str, Any]:
+        if policy.id != policy_id:
+            policy.id = policy_id
+        try:
+            return EnterpriseStore().save_policy(policy).model_dump(mode="json")
+        except Exception as exc:  # noqa: BLE001
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.post("/policies/{policy_id}/versions")
+    def create_policy_version(policy_id: str, request: PolicyVersionRequest) -> dict[str, Any]:
+        try:
+            version = EnterpriseStore().add_policy_version(
+                policy_id=policy_id,
+                version=request.version,
+                rule_body=request.rule_body,
+                actor=request.actor,
+            )
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        return version.model_dump(mode="json")
+
+    @app.get("/policies/{policy_id}/versions")
+    def policy_versions(policy_id: str) -> dict[str, Any]:
+        versions = EnterpriseStore().list_policy_versions(policy_id)
+        return {"versions": [version.model_dump(mode="json") for version in versions]}
+
+    @app.post("/policies/{policy_id}/approve")
+    def approve_policy(policy_id: str, request: PolicyApprovalRequest) -> dict[str, Any]:
+        try:
+            approval = EnterpriseStore().approve_policy(
+                policy_id=policy_id,
+                actor=request.actor,
+                comment=request.comment,
+            )
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        return approval.model_dump(mode="json")
+
+    @app.post("/policies/{policy_id}/preview")
+    def preview_enterprise_policy(
+        policy_id: str,
+        request: PolicyPreviewRequest,
+    ) -> dict[str, Any]:
+        try:
+            result = preview_policy(
+                policy_id=policy_id,
+                path=request.path,
+                state_path=request.state_path,
+                actor=request.actor,
+            )
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except Exception as exc:  # noqa: BLE001
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        return result.model_dump(mode="json")
+
+    @app.post("/baselines")
+    def create_baseline(baseline: Baseline) -> dict[str, Any]:
+        try:
+            return EnterpriseStore().save_baseline(baseline).model_dump(mode="json")
+        except Exception as exc:  # noqa: BLE001
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.get("/baselines")
+    def baselines() -> dict[str, Any]:
+        items = EnterpriseStore().list_baselines()
+        return {"baselines": [baseline.model_dump(mode="json") for baseline in items]}
+
+    @app.post("/baselines/{baseline_id}/versions")
+    def create_baseline_version(
+        baseline_id: str,
+        request: BaselineVersionRequest,
+    ) -> dict[str, Any]:
+        try:
+            version = EnterpriseStore().add_baseline_version(
+                baseline_id=baseline_id,
+                version=request.version,
+                policy_ids=request.policy_ids,
+                actor=request.actor,
+            )
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        return version.model_dump(mode="json")
+
+    @app.get("/baselines/{baseline_id}/versions")
+    def baseline_versions(baseline_id: str) -> dict[str, Any]:
+        try:
+            versions = EnterpriseStore().list_baseline_versions(baseline_id)
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        return {"versions": [version.model_dump(mode="json") for version in versions]}
+
+    @app.post("/baselines/{baseline_id}/approve")
+    def approve_baseline(baseline_id: str, request: PolicyApprovalRequest) -> dict[str, Any]:
+        try:
+            approval = EnterpriseStore().approve_baseline(
+                baseline_id=baseline_id,
+                actor=request.actor,
+                comment=request.comment,
+            )
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        return approval.model_dump(mode="json")
+
+    @app.get("/baselines/{baseline_id}/approvals")
+    def baseline_approvals(baseline_id: str) -> dict[str, Any]:
+        try:
+            approvals = EnterpriseStore().list_baseline_approvals(baseline_id)
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        return {"approvals": [approval.model_dump(mode="json") for approval in approvals]}
+
+    @app.post("/bindings")
+    def create_binding(binding: GroupPolicyBinding) -> dict[str, Any]:
+        try:
+            return EnterpriseStore().save_binding(binding).model_dump(mode="json")
+        except Exception as exc:  # noqa: BLE001
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.get("/bindings")
+    def bindings(
+        target_type: str | None = None,
+        target: str | None = None,
+    ) -> dict[str, Any]:
+        items = EnterpriseStore().list_bindings()
+        if target_type:
+            items = [binding for binding in items if binding.target_type == target_type]
+        if target:
+            items = [binding for binding in items if binding.target == target]
+        return {"bindings": [binding.model_dump(mode="json") for binding in items]}
+
+    @app.post("/bindings/resolve")
+    def resolve_bindings(request: BindingResolveRequest) -> dict[str, Any]:
+        result = resolve_policy_set(
+            EnterpriseStore(),
+            EvaluationContext(
+                org=request.org,
+                group=request.group,
+                repo=request.repo,
+                baseline=request.baseline,
+            ),
+        )
+        return result.model_dump(mode="json")
+
+    @app.post("/integrations/gitlab/groups")
+    def create_gitlab_group_binding(binding: GroupPolicyBinding) -> dict[str, Any]:
+        if binding.target_type != "group":
+            raise HTTPException(
+                status_code=400,
+                detail="GitLab group bindings require target_type=group.",
+            )
+        try:
+            return EnterpriseStore().save_binding(binding).model_dump(mode="json")
+        except Exception as exc:  # noqa: BLE001
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.get("/integrations/gitlab/groups/{group_id}/policies")
+    def gitlab_group_policies(group_id: str) -> dict[str, Any]:
+        store = EnterpriseStore()
+        result = resolve_policy_set(store, EvaluationContext(group=group_id))
+        return {
+            "group_id": group_id,
+            "binding_targets": result.binding_targets,
+            "baseline_ids": result.baseline_ids,
+            "policy_ids": result.policy_ids,
+            "policies": result.policies,
+        }
+
+    @app.post("/evaluate")
+    def evaluate(request: EvaluateRequest) -> dict[str, Any]:
+        try:
+            result = evaluate_enterprise(
+                path=request.path,
+                state_path=request.state_path,
+                provider=request.provider,
+                policy_set=request.policy_set,
+                baseline=request.baseline,
+                context=request.context,
+                fail_on=request.fail_on,
+                actor=request.actor,
+            )
+        except Exception as exc:  # noqa: BLE001
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        return result.model_dump(mode="json")
+
+    @app.get("/results/{result_id}")
+    def evaluation_result(result_id: str) -> dict[str, Any]:
+        try:
+            return EnterpriseStore().get_evaluation(result_id).model_dump(mode="json")
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.post("/drift/check")
+    def drift_check(request: DriftCheckRequest) -> dict[str, Any]:
+        try:
+            result = check_drift(
+                path=request.path,
+                state_path=request.state_path,
+                snapshot_id=request.snapshot_id,
+                update_snapshot=request.update_snapshot,
+                actor=request.actor,
+            )
+        except Exception as exc:  # noqa: BLE001
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        return result.model_dump(mode="json")
+
+    @app.post("/drift/gate")
+    def drift_gate(request: DriftGateRequest) -> dict[str, Any]:
+        if request.evidence_format and request.evidence_format not in {"json", "csv", "pdf"}:
+            raise HTTPException(
+                status_code=400,
+                detail="Evidence format must be json, csv, or pdf.",
+            )
+        try:
+            result = run_drift_gate(
+                path=request.path,
+                state_path=request.state_path,
+                snapshot_id=request.snapshot_id,
+                provider=request.provider,
+                policy_set=request.policy_set,
+                baseline=request.baseline,
+                context=request.context,
+                fail_on=request.fail_on,
+                update_snapshot=request.update_snapshot,
+                create_snapshot=request.create_snapshot,
+                export_format=request.evidence_format,  # type: ignore[arg-type]
+                actor=request.actor,
+            )
+        except Exception as exc:  # noqa: BLE001
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        return result.model_dump(mode="json")
+
+    @app.post("/exports")
+    def create_export(request: EvidenceExportRequest) -> dict[str, Any]:
+        if request.format not in {"json", "csv", "pdf"}:
+            raise HTTPException(
+                status_code=400,
+                detail="Export format must be json, csv, or pdf.",
+            )
+        try:
+            export = export_evidence(
+                result_id=request.result_id,
+                format=request.format,  # type: ignore[arg-type]
+                actor=request.actor,
+            )
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except Exception as exc:  # noqa: BLE001
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        return export.model_dump(mode="json")
+
+    @app.get("/exports/{export_id}")
+    def evidence_export(export_id: str) -> dict[str, Any]:
+        try:
+            return EnterpriseStore().get_export(export_id).model_dump(mode="json")
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     return app

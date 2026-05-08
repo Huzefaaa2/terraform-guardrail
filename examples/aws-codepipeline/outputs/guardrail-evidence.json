@@ -1,0 +1,41 @@
+{
+  "id": "eval_example",
+  "created_at": "2026-05-07T00:00:00Z",
+  "decision": "block",
+  "context": {
+    "provider": "aws",
+    "policy_set": null,
+    "baseline": "org-baseline",
+    "environment": "prod",
+    "app": "payments",
+    "org": "example-org",
+    "group": "platform",
+    "repo": "infra",
+    "extra": {}
+  },
+  "resolved_policy_ids": ["pol_example"],
+  "report": {
+    "scanned_path": "infra",
+    "summary": {
+      "scanned_files": 1,
+      "findings": 1,
+      "high": 1,
+      "medium": 0,
+      "low": 0
+    },
+    "findings": [
+      {
+        "rule_id": "TG008",
+        "severity": "high",
+        "message": "Security group ingress open to the world",
+        "path": "infra/main.tf",
+        "owner": "platform-security",
+        "standard": "SOC2",
+        "control_id": "CC6.6",
+        "risk": "high",
+        "remediation": "Restrict ingress CIDRs to approved ranges."
+      }
+    ]
+  },
+  "evidence_id": "evid_example"
+}

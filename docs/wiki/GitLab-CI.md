@@ -8,7 +8,7 @@ project to run pre-apply guardrail scans.
 ```yaml
 include:
   - project: "Huzefaaa2/terraform-guardrail"
-    ref: "v1.0.5"
+    ref: "v2.0.0"
     file: "/.gitlab/terraform-guardrail.yml"
 ```
 

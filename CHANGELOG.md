@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.0] - 2026-05-07
+
+### Added
+- Enterprise JSON store for policy lifecycle, baselines, group/repo bindings, evaluations, drift checks, evidence exports, and audit events.
+- Enterprise REST API endpoints for policy authoring, approvals, baseline lifecycle, group enforcement resolution, evaluation results, drift gates, and export retrieval.
+- Enterprise CLI commands for policy, baseline, binding, evaluation, drift, evidence export, and AWS CodePipeline/CodeBuild scaffolding.
+- Web UI support for multi-file/folder uploads, policy authoring, default rule catalog details, policy preview, baseline management, group enforcement preview, and how-to guides.
+- Rich finding metadata and remediation fields for enterprise reports.
+- AWS CodePipeline example docs, buildspec scaffold, and evidence artifact examples.
+
+### Changed
+- Roadmap, README, wiki home page, release notes, and package version updated for v2.0.0 Enterprise.
+
 ## [1.0.5] - 2026-01-27
 
 ### Changed

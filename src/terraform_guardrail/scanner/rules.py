@@ -32,3 +32,86 @@ RULES = {
     "TG019": "Azure storage account public network access enabled",
     "TG020": "EBS volume not encrypted",
 }
+
+RULE_METADATA = {
+    "TG001": {
+        "risk": "medium",
+        "remediation": "Add ephemeral = true to sensitive Terraform variables.",
+    },
+    "TG002": {
+        "risk": "high",
+        "remediation": "Move hardcoded secrets to variables, secret managers, or CI secrets.",
+    },
+    "TG003": {
+        "risk": "high",
+        "remediation": "Use ephemeral or write-only values to keep secrets out of Terraform state.",
+    },
+    "TG004": {
+        "risk": "low",
+        "remediation": "Fix invalid HCL syntax before running guardrail evaluation.",
+    },
+    "TG005": {
+        "risk": "medium",
+        "remediation": "Verify the attribute name against the provider schema.",
+    },
+    "TG006": {
+        "risk": "high",
+        "remediation": "Remove public ACLs and use private bucket policies.",
+    },
+    "TG007": {
+        "risk": "high",
+        "remediation": "Enable all S3 public access block settings.",
+    },
+    "TG008": {
+        "risk": "high",
+        "remediation": "Restrict ingress CIDRs to approved network ranges.",
+    },
+    "TG009": {
+        "risk": "high",
+        "remediation": "Scope IAM actions and resources explicitly.",
+    },
+    "TG010": {
+        "risk": "medium",
+        "remediation": "Remove public IP association for private compute hosts.",
+    },
+    "TG011": {
+        "risk": "medium",
+        "remediation": "Enable S3 default encryption with KMS or AES256.",
+    },
+    "TG012": {
+        "risk": "medium",
+        "remediation": "Enable encrypted RDS storage and use managed KMS keys.",
+    },
+    "TG013": {
+        "risk": "medium",
+        "remediation": "Use HTTPS listeners with managed TLS certificates.",
+    },
+    "TG014": {
+        "risk": "low",
+        "remediation": "Attach instances to explicit subnet and VPC boundaries.",
+    },
+    "TG015": {
+        "risk": "high",
+        "remediation": "Disable publicly_accessible on database resources.",
+    },
+    "TG016": {
+        "risk": "low",
+        "remediation": "Add the mandatory tags required by your platform baseline.",
+    },
+    "TG017": {
+        "risk": "medium",
+        "remediation": "Deploy resources only in approved regions or locations.",
+    },
+    "TG018": {
+        "risk": "medium",
+        "remediation": "Use approved instance types or SKUs for the workload tier.",
+    },
+    "TG019": {
+        "risk": "medium",
+        "remediation": "Disable public network access or use private endpoints.",
+    },
+    "TG020": {
+        "risk": "medium",
+        "remediation": "Enable EBS encryption with a managed KMS key.",
+    },
+}
