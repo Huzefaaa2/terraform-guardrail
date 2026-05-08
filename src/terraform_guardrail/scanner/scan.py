@@ -580,7 +580,7 @@ def _iter_resources(hcl_data: dict) -> Iterable[tuple[str, str, dict]]:
                 continue
             for name, attrs in instances.items():
                 if isinstance(attrs, dict):
-                    yield resource_type, name, attrs
+                    yield _hcl_string(resource_type), _hcl_string(name), attrs
 
 
 def _as_list(value: object) -> list:
@@ -593,16 +593,24 @@ def _as_list(value: object) -> list:
 
 def _string_value(value: object) -> str | None:
     if isinstance(value, str):
-        return value
+        return _hcl_string(value)
     return None
 
 
 def _truthy(value: object) -> bool:
     if value is True:
         return True
-    if isinstance(value, str):
-        return value.strip().lower() in {"true", "yes", "1", "enabled"}
+    text = _string_value(value)
+    if text is not None:
+        return text.strip().lower() in {"true", "yes", "1", "enabled"}
     return False
+
+
+def _hcl_string(value: str) -> str:
+    text = value.strip()
+    if len(text) >= 2 and text[0] == '"' and text[-1] == '"':
+        return text[1:-1]
+    return value
 
 
 def _load_csv_env(name: str) -> list[str]:
@@ -621,23 +629,24 @@ def _s3_public_block_disabled(attrs: dict) -> bool:
     ]
     for key in keys:
         value = attrs.get(key)
-        if value is False or (isinstance(value, str) and value.lower() == "false"):
+        text = _string_value(value)
+        if value is False or (text is not None and text.lower() == "false"):
             return True
     return False
 
 
 def _security_group_is_public(resource_type: str, attrs: dict) -> bool:
     if resource_type == "aws_security_group_rule":
-        if attrs.get("type") != "ingress":
+        if _string_value(attrs.get("type")) != "ingress":
             return False
         cidrs = _as_list(attrs.get("cidr_blocks")) + _as_list(attrs.get("ipv6_cidr_blocks"))
-        return any(str(cidr) in PUBLIC_CIDRS for cidr in cidrs)
+        return any((_string_value(cidr) or str(cidr)) in PUBLIC_CIDRS for cidr in cidrs)
 
     for ingress in _as_list(attrs.get("ingress")):
         if not isinstance(ingress, dict):
             continue
         cidrs = _as_list(ingress.get("cidr_blocks")) + _as_list(ingress.get("ipv6_cidr_blocks"))
-        if any(str(cidr) in PUBLIC_CIDRS for cidr in cidrs):
+        if any((_string_value(cidr) or str(cidr)) in PUBLIC_CIDRS for cidr in cidrs):
             return True
     return False
 
@@ -652,8 +661,14 @@ def _iam_policy_is_wildcard(attrs: dict) -> bool:
         for statement in _as_list(statements):
             if not isinstance(statement, dict):
                 continue
-            actions = _as_list(statement.get("Action"))
-            resources = _as_list(statement.get("Resource"))
+            actions = [
+                _string_value(action) or action
+                for action in _as_list(statement.get("Action"))
+            ]
+            resources = [
+                _string_value(resource) or resource
+                for resource in _as_list(statement.get("Resource"))
+            ]
             if "*" in actions or "*" in resources:
                 return True
     return False
