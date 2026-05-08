@@ -34,6 +34,22 @@ Both apps include links to each other:
 - v2 Enterprise app links back to the v1 Foundation demo.
 - Both apps link to the GitHub repo, wiki, and author LinkedIn page.
 
+## Container deployment
+
+Run the v1 Foundation app:
+
+```bash
+docker build -f Dockerfile.streamlit -t terraform-guardrail-streamlit:v1 .
+docker run --rm -p 8501:8501 terraform-guardrail-streamlit:v1
+```
+
+Run the v2 Enterprise app:
+
+```bash
+docker build -f Dockerfile.streamlit.v2 -t terraform-guardrail-streamlit:v2 .
+docker run --rm -p 8502:8501 terraform-guardrail-streamlit:v2
+```
+
 ## Troubleshooting
 
 - If imports fail, ensure the repo has `requirements.txt` at the root.

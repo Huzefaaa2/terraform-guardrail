@@ -35,3 +35,19 @@ https://www.linkedin.com/in/huzefaaa
 5. Main file: [streamlit_app_v2.py](https://github.com/Huzefaaa2/terraform-guardrail/blob/main/streamlit_app_v2.py).
 6. Deploy (Streamlit installs dependencies from
    [requirements.txt](https://github.com/Huzefaaa2/terraform-guardrail/blob/main/requirements.txt)).
+
+## Container Deployment
+
+Run the v1 Foundation app:
+
+```bash
+docker build -f Dockerfile.streamlit -t terraform-guardrail-streamlit:v1 .
+docker run --rm -p 8501:8501 terraform-guardrail-streamlit:v1
+```
+
+Run the v2 Enterprise app:
+
+```bash
+docker build -f Dockerfile.streamlit.v2 -t terraform-guardrail-streamlit:v2 .
+docker run --rm -p 8502:8501 terraform-guardrail-streamlit:v2
+```

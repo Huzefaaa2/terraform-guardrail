@@ -547,6 +547,22 @@ streamlit run streamlit_app_v2.py
 3. Create a second Streamlit Cloud app for v2 with main file path `streamlit_app_v2.py`.
 4. Deploy (Streamlit will install from `requirements.txt`).
 
+### Container deployment
+
+Run the v1 Foundation app:
+
+```bash
+docker build -f Dockerfile.streamlit -t terraform-guardrail-streamlit:v1 .
+docker run --rm -p 8501:8501 terraform-guardrail-streamlit:v1
+```
+
+Run the v2 Enterprise app:
+
+```bash
+docker build -f Dockerfile.streamlit.v2 -t terraform-guardrail-streamlit:v2 .
+docker run --rm -p 8502:8501 terraform-guardrail-streamlit:v2
+```
+
 ## REST API (Docker)
 
 Build and run the API server:
