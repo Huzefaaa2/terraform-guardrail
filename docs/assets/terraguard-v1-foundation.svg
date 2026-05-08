@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
+  <title id="title">Terraform Guardrail v1 Foundation feature map</title>
+  <desc id="desc">A foundation diagram showing Terraform file scanning, state secret checks, schema validation, provider metadata, reporting, CLI, web UI, REST API, and MCP tools.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0a1220"/>
+      <stop offset="0.48" stop-color="#12243d"/>
+      <stop offset="1" stop-color="#16354f"/>
+    </linearGradient>
+    <linearGradient id="scan" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#93c5fd"/>
+      <stop offset="1" stop-color="#34d399"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="16" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+    <style>
+      .title { font: 800 42px Inter, Segoe UI, Arial, sans-serif; fill: #f8fafc; }
+      .subtitle { font: 500 18px Inter, Segoe UI, Arial, sans-serif; fill: #cbd5e1; }
+      .label { font: 800 18px Inter, Segoe UI, Arial, sans-serif; fill: #f8fafc; }
+      .small { font: 600 13px Inter, Segoe UI, Arial, sans-serif; fill: #bfd0e3; }
+      .tiny { font: 800 12px Inter, Segoe UI, Arial, sans-serif; fill: #082032; }
+      .card { fill: rgba(255,255,255,0.08); stroke: rgba(255,255,255,0.18); stroke-width: 1.5; rx: 18; }
+      .lane { fill: rgba(255,255,255,0.06); stroke: rgba(147,197,253,0.28); stroke-width: 1.5; rx: 24; }
+      .line { stroke: #93c5fd; stroke-width: 3; stroke-linecap: round; opacity: 0.72; }
+      .terminal { fill: #07111f; stroke: #334155; stroke-width: 1.5; rx: 14; }
+    </style>
+  </defs>
+  <rect width="1200" height="520" fill="url(#bg)"/>
+  <path d="M60 388 C177 302 271 378 381 288 C505 185 607 198 724 279 C855 370 988 306 1140 155" fill="none" stroke="#93c5fd" stroke-opacity="0.13" stroke-width="72" stroke-linecap="round"/>
+  <g transform="translate(58 56)">
+    <text class="title" x="0" y="0">v1 Foundation Scanner</text>
+    <text class="subtitle" x="0" y="34">Fast Terraform feedback through scanning, schema checks, provider insight, and developer-ready reports.</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect class="lane" x="64" y="140" width="1072" height="250"/>
+    <rect class="card" x="104" y="188" width="188" height="154"/>
+    <path d="M151 224 h70 l28 28 v60 h-98z M221 224 v28 h28" fill="none" stroke="#93c5fd" stroke-width="5" stroke-linejoin="round"/>
+    <text class="label" x="132" y="330">Terraform Inputs</text>
+    <text class="small" x="130" y="354">files, folders, tfstate</text>
+    <line class="line" x1="292" y1="265" x2="398" y2="265"/>
+    <rect class="card" x="398" y="168" width="400" height="194"/>
+    <circle cx="598" cy="238" r="55" fill="url(#scan)"/>
+    <path d="M560 238 h76 M598 200 v76" stroke="#082032" stroke-width="10" stroke-linecap="round"/>
+    <path d="M548 238 c28 -44 72 -44 100 0 c-28 44 -72 44 -100 0z" fill="none" stroke="#082032" stroke-width="8"/>
+    <text class="label" x="486" y="324">Guardrail Scan Engine</text>
+    <text class="small" x="476" y="348">TG001-TG020 default rules</text>
+    <line class="line" x1="798" y1="265" x2="906" y2="265"/>
+    <rect class="card" x="906" y="188" width="188" height="154"/>
+    <path d="M956 226 h88 v82 h-88z M972 246 h54 M972 266 h54 M972 286 h38" fill="none" stroke="#34d399" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text class="label" x="950" y="330">Reports</text>
+    <text class="small" x="934" y="354">summary, CSV, JSON</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect class="card" x="90" y="420" width="238" height="58"/>
+    <text class="label" x="120" y="444">Secret Hygiene</text>
+    <text class="small" x="120" y="464">tfvars and tfstate leak checks</text>
+    <rect class="card" x="356" y="420" width="238" height="58"/>
+    <text class="label" x="386" y="444">Schema Validation</text>
+    <text class="small" x="386" y="464">Terraform CLI aware validation</text>
+    <rect class="card" x="622" y="420" width="238" height="58"/>
+    <text class="label" x="652" y="444">Provider Metadata</text>
+    <text class="small" x="652" y="464">Registry-backed resource insight</text>
+    <rect class="card" x="888" y="420" width="238" height="58"/>
+    <text class="label" x="918" y="444">Multiple Interfaces</text>
+    <text class="small" x="918" y="464">CLI, REST API, Web UI, MCP</text>
+  </g>
+  <g transform="translate(86 108)">
+    <rect width="166" height="38" rx="19" fill="#93c5fd"/>
+    <text class="tiny" x="24" y="24">Developer First</text>
+  </g>
+  <g transform="translate(948 108)">
+    <rect width="166" height="38" rx="19" fill="#34d399"/>
+    <text class="tiny" x="26" y="24">CI Ready</text>
+  </g>
+  <g transform="translate(480 98)">
+    <rect class="terminal" width="240" height="54"/>
+    <circle cx="26" cy="27" r="6" fill="#ef4444"/>
+    <circle cx="46" cy="27" r="6" fill="#f59e0b"/>
+    <circle cx="66" cy="27" r="6" fill="#22c55e"/>
+    <text class="small" x="90" y="32">terraform-guardrail scan</text>
+  </g>
+</svg>

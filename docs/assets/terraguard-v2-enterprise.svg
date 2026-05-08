@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
+  <title id="title">Terraform Guardrail v2 Enterprise feature map</title>
+  <desc id="desc">A control plane diagram showing policy authoring, org baselines, group enforcement, drift prevention, evidence export, and CI integrations.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#07111f"/>
+      <stop offset="0.52" stop-color="#102a35"/>
+      <stop offset="1" stop-color="#0b3c3a"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.05"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2dd4bf"/>
+      <stop offset="1" stop-color="#60a5fa"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000000" flood-opacity="0.32"/>
+    </filter>
+    <style>
+      .title { font: 800 42px Inter, Segoe UI, Arial, sans-serif; fill: #f8fafc; }
+      .subtitle { font: 500 18px Inter, Segoe UI, Arial, sans-serif; fill: #cbd5e1; }
+      .label { font: 800 18px Inter, Segoe UI, Arial, sans-serif; fill: #f8fafc; }
+      .small { font: 600 13px Inter, Segoe UI, Arial, sans-serif; fill: #b6c7d8; }
+      .tiny { font: 700 12px Inter, Segoe UI, Arial, sans-serif; fill: #dff8ff; }
+      .card { fill: url(#card); stroke: rgba(255,255,255,0.18); stroke-width: 1.5; rx: 18; }
+      .line { stroke: #49d6c9; stroke-width: 2.5; stroke-linecap: round; opacity: 0.7; }
+      .chip { fill: rgba(45,212,191,0.14); stroke: rgba(45,212,191,0.42); stroke-width: 1; rx: 12; }
+      .node { fill: #0f2534; stroke: #2dd4bf; stroke-width: 2; }
+      .nodeAlt { fill: #132238; stroke: #60a5fa; stroke-width: 2; }
+    </style>
+  </defs>
+  <rect width="1200" height="520" fill="url(#bg)"/>
+  <path d="M77 402 C180 345 258 378 340 324 C445 255 474 141 610 160 C756 180 776 309 918 289 C1022 274 1086 195 1145 222" fill="none" stroke="#2dd4bf" stroke-opacity="0.18" stroke-width="64" stroke-linecap="round"/>
+  <g transform="translate(58 56)">
+    <text class="title" x="0" y="0">v2 Enterprise Control Plane</text>
+    <text class="subtitle" x="0" y="34">Policy lifecycle, context-aware enforcement, drift gates, and audit evidence for Terraform delivery.</text>
+  </g>
+  <g filter="url(#softShadow)">
+    <rect class="card" x="430" y="148" width="340" height="220"/>
+    <circle cx="600" cy="224" r="54" fill="url(#accent)" opacity="0.92"/>
+    <path d="M575 222 l17 17 l37 -43" fill="none" stroke="#06202b" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    <text class="label" x="501" y="304">Enterprise Evaluation</text>
+    <text class="small" x="495" y="330">pass / warn / block decisions</text>
+  </g>
+  <g>
+    <line class="line" x1="430" y1="204" x2="314" y2="150"/>
+    <line class="line" x1="430" y1="258" x2="302" y2="258"/>
+    <line class="line" x1="430" y1="316" x2="314" y2="384"/>
+    <line class="line" x1="770" y1="204" x2="892" y2="150"/>
+    <line class="line" x1="770" y1="258" x2="902" y2="258"/>
+    <line class="line" x1="770" y1="316" x2="892" y2="384"/>
+  </g>
+  <g filter="url(#softShadow)">
+    <rect class="card" x="82" y="100" width="250" height="96"/>
+    <circle class="node" cx="124" cy="148" r="22"/>
+    <path d="M114 148 h20 M124 138 v20" stroke="#9ff3e9" stroke-width="4" stroke-linecap="round"/>
+    <text class="label" x="158" y="142">Policy Authoring</text>
+    <text class="small" x="158" y="166">metadata, approvals, versions</text>
+  </g>
+  <g filter="url(#softShadow)">
+    <rect class="card" x="70" y="210" width="250" height="96"/>
+    <circle class="nodeAlt" cx="112" cy="258" r="22"/>
+    <path d="M101 250 h22 v18 h-22z" fill="none" stroke="#cfe7ff" stroke-width="3"/>
+    <text class="label" x="146" y="252">Org Baselines</text>
+    <text class="small" x="146" y="276">baseline to app resolution</text>
+  </g>
+  <g filter="url(#softShadow)">
+    <rect class="card" x="82" y="336" width="250" height="96"/>
+    <circle class="node" cx="124" cy="384" r="22"/>
+    <path d="M112 390 c8 -18 16 -18 24 0 M113 379 c7 -12 15 -12 22 0" fill="none" stroke="#9ff3e9" stroke-width="3" stroke-linecap="round"/>
+    <text class="label" x="158" y="378">Group Enforcement</text>
+    <text class="small" x="158" y="402">org, group, repo bindings</text>
+  </g>
+  <g filter="url(#softShadow)">
+    <rect class="card" x="868" y="100" width="250" height="96"/>
+    <circle class="nodeAlt" cx="910" cy="148" r="22"/>
+    <path d="M899 148 h22 M910 137 v22" stroke="#cfe7ff" stroke-width="3" stroke-linecap="round"/>
+    <path d="M899 148 c0 -15 22 -15 22 0 c0 15 -22 15 -22 0z" fill="none" stroke="#cfe7ff" stroke-width="3"/>
+    <text class="label" x="944" y="142">Drift Prevention</text>
+    <text class="small" x="944" y="166">snapshot checks before apply</text>
+  </g>
+  <g filter="url(#softShadow)">
+    <rect class="card" x="880" y="210" width="250" height="96"/>
+    <circle class="node" cx="922" cy="258" r="22"/>
+    <path d="M912 246 h15 l7 7 v17 h-22z M927 246 v8 h8" fill="none" stroke="#9ff3e9" stroke-width="3" stroke-linejoin="round"/>
+    <text class="label" x="956" y="252">Evidence Export</text>
+    <text class="small" x="956" y="276">JSON, CSV, PDF artifacts</text>
+  </g>
+  <g filter="url(#softShadow)">
+    <rect class="card" x="868" y="336" width="250" height="96"/>
+    <circle class="nodeAlt" cx="910" cy="384" r="22"/>
+    <path d="M898 384 h24 M910 372 v24 M900 374 l20 20 M920 374 l-20 20" stroke="#cfe7ff" stroke-width="3" stroke-linecap="round"/>
+    <text class="label" x="944" y="378">CI/CD Gates</text>
+    <text class="small" x="944" y="402">GitHub, GitLab, AWS, Azure</text>
+  </g>
+  <g transform="translate(438 400)">
+    <rect class="chip" x="0" y="0" width="96" height="32"/>
+    <text class="tiny" x="18" y="21">SOC2</text>
+    <rect class="chip" x="108" y="0" width="96" height="32"/>
+    <text class="tiny" x="132" y="21">ISO</text>
+    <rect class="chip" x="216" y="0" width="96" height="32"/>
+    <text class="tiny" x="238" y="21">PCI</text>
+  </g>
+</svg>
