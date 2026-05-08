@@ -19,13 +19,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.ref || github.ref }}
+          ref: ${{ inputs.ref || github.ref }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       - name: Validate tag and version
         env:
-          RELEASE_REF: ${{ github.event.inputs.ref || github.ref_name }}
+          RELEASE_REF: ${{ inputs.ref || github.ref_name }}
         run: |
           TAG="${RELEASE_REF}"
           if ! echo "$TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
@@ -61,7 +61,7 @@ jobs:
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_REF: ${{ github.event.inputs.ref || github.ref_name }}
+          RELEASE_REF: ${{ inputs.ref || github.ref_name }}
         run: |
           python - <<'PY' > /tmp/release.json
           import json

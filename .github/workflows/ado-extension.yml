@@ -39,10 +39,12 @@ jobs:
 
       - name: Set extension version
         if: ${{ steps.gate.outputs.skip != 'true' }}
+        env:
+          INPUT_VERSION: ${{ inputs.version || '' }}
         run: |
           VERSION="${{ github.ref_name }}"
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.version }}" ]; then
-            VERSION="${{ inputs.version }}"
+          if [ -n "$INPUT_VERSION" ]; then
+            VERSION="$INPUT_VERSION"
           fi
           VERSION="${VERSION#v}"
           jq ".version=\"${VERSION}\"" azure-devops-extension/vss-extension.json > /tmp/vss-extension.json
