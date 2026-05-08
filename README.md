@@ -2,17 +2,21 @@
 
 [![CI](https://github.com/Huzefaaa2/terraform-guardrail/actions/workflows/ci.yml/badge.svg)](https://github.com/Huzefaaa2/terraform-guardrail/actions/workflows/ci.yml)
 
-Terraform Guardrail Multi-Cloud Policy (MCP) (TerraGuard) is an enterprise-grade IaC governance
-and guardrail platform that enforces architectural intent, compliance, and platform standards
-directly inside CI/CD. It runs outside Terraform and gives AI assistants and platform teams real
-provider context, policy intelligence, and auditable guardrails so every change is safer by default.
-The result is a cleaner state, fewer failures, and a shorter path from idea to production.
+**v2.0 Enterprise is live.** Terraform Guardrail has moved from Terraform scanning into an
+enterprise governance control plane: author policies, enforce org baselines, bind controls by group
+or repo, block drift before apply, and export audit evidence for SOC2, ISO, PCI, and internal
+review.
 
-This product is built for teams shipping infrastructure at scale who need speed without sacrificing
-safety. Guardrail enforces non-negotiable platform invariants, allows composable product constraints,
-and produces human-readable reports that make decisions obvious and defensible.
+Terraform Guardrail Multi-Cloud Policy (MCP) (TerraGuard) runs outside Terraform and turns platform
+standards into executable CI/CD guardrails. It gives platform teams policy lifecycle management,
+developers fast feedback, and auditors traceable evidence without slowing delivery.
 
-It offers an easy way to generate valid Terraform code and ensure compliance. This tool helps your team manage cloud resources more effectively. With a user-friendly CLI and a minimal web UI, you do not need a technical background to get started.
+Use it as a CLI, REST API, web UI, MCP server, or CI gate. Start with the built-in TG001-TG020 rule
+catalog, add enterprise metadata and approvals, then roll out pass/warn/block decisions across
+GitHub, GitLab, Azure DevOps, and AWS CodePipeline.
+
+- Release notes: https://github.com/Huzefaaa2/terraform-guardrail/releases/tag/v2.0.0
+- Enterprise wiki: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Release-v2.0.0
 
 Live app: https://terraform-guardrail.streamlit.app/
 
