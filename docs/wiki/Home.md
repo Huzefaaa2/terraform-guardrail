@@ -14,6 +14,10 @@ workflow. The release adds policy authoring, metadata-rich findings, org baselin
 enforcement, drift gates before apply, audit evidence export, and AWS CodePipeline/CodeBuild
 integration.
 
+![Terraform Guardrail v2 Enterprise feature map](https://raw.githubusercontent.com/Huzefaaa2/terraform-guardrail/main/docs/assets/terraguard-v2-enterprise.svg)
+
+![Terraform Guardrail v1 Foundation feature map](https://raw.githubusercontent.com/Huzefaaa2/terraform-guardrail/main/docs/assets/terraguard-v1-foundation.svg)
+
 Start with the release detail page, then follow the roadmap and task guides:
 
 - [v2.0.0 Enterprise Release](Release-v2.0.0)
