@@ -1,7 +1,7 @@
 # How To Generate CI Evidence
 
 Use evidence export when a pipeline needs an audit artifact for SOC2, ISO, PCI, or internal
-governance.
+governance. v2.0.0 supports JSON, CSV, and PDF evidence exports.
 
 ## CLI workflow
 
@@ -40,6 +40,17 @@ The pipeline should keep both artifacts:
 - `guardrail-report.json`
 - `guardrail-evidence.json`
 - Optional PDF evidence for audit packets
+
+For drift prevention and evidence in one command, use:
+
+```bash
+terraform-guardrail enterprise drift-gate ./infra \
+  --provider aws \
+  --baseline org-baseline \
+  --snapshot-id prod \
+  --evidence-format json \
+  --format json
+```
 
 ## What the evidence contains
 

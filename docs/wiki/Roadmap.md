@@ -3,6 +3,8 @@
 Minor releases deliver increments within each major deliverable. Major releases group outcomes by
 phase.
 
+Latest delivered major release: [v2.0.0 Enterprise Release](Release-v2.0.0).
+
 Legend: <span style="color: green">✅ Delivered</span> • <span style="color: orange">🚧 Planned</span>
 
 | Deliverable | v1.0 Foundation | v2.0 Enterprise | v3.0 Ecosystem | v4.0 Intelligent | Docs |

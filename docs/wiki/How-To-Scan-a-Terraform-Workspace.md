@@ -11,6 +11,8 @@ applied.
 3. Click **Scan Workspace**.
 4. Review the scan report for high, medium, and low findings.
 5. Click a rule ID in the right-side catalog to understand the rule.
+6. If a finding needs ownership or compliance context, create an enterprise policy and map it to
+   the rule.
 
 ## CLI
 
@@ -28,3 +30,9 @@ terraform-guardrail scan ./infra --format json
 
 Try scanning a small folder that contains one Terraform file with an S3 bucket or security group.
 This makes it easy to connect each finding to the resource that triggered it.
+
+## Next steps
+
+- [Use the Default Rule Catalog](How-To-Use-the-Default-Rule-Catalog)
+- [Create an Enterprise Policy](How-To-Create-an-Enterprise-Policy)
+- [Run a Drift Gate Before Apply](How-To-Run-a-Drift-Gate)

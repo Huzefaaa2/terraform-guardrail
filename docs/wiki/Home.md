@@ -5,6 +5,33 @@ and guardrail platform that enforces architectural intent, compliance, and platf
 directly inside CI/CD. It runs outside Terraform, exposes provider context, and enforces guardrails
 that prevent bad state before apply.
 
+## Latest Release and Roadmap
+
+**Latest release: v2.0.0 Enterprise Foundation**
+
+v2.0.0 moves Terraform Guardrail from scanner and registry foundation into an enterprise governance
+workflow. The release adds policy authoring, metadata-rich findings, org baselines, group/repo
+enforcement, drift gates before apply, audit evidence export, and AWS CodePipeline/CodeBuild
+integration.
+
+Start with the release detail page, then follow the roadmap and task guides:
+
+- [v2.0.0 Enterprise Release](Release-v2.0.0)
+- [Roadmap](Roadmap)
+- [Enterprise Features](Enterprise-Features)
+- [How-To Guides](How-To-Guides)
+- [AWS CodePipeline](AWS-CodePipeline)
+- [Diagrams](Diagrams)
+
+The current roadmap status is:
+
+| Phase | Status | Focus |
+| --- | --- | --- |
+| v1.0 Foundation | Delivered | Registry, packaging, CI templates, policy layering, custom rules |
+| v2.0 Enterprise | Delivered | Authoring UI, baselines, group enforcement, drift gates, evidence export |
+| v3.0 Ecosystem | Planned | Reference implementations, policy packs, service API, cross-provider invariants |
+| v4.0 Intelligent | Planned | Context-aware evaluation and suggested fixes |
+
 ## Quick Install
 
 ```bash
@@ -139,6 +166,7 @@ flowchart LR
 
 ## Quick links
 
+- [v2.0.0 Enterprise Release](Release-v2.0.0)
 - [Roadmap](Roadmap)
 - [How-To Guides](How-To-Guides)
 - [Deliverables Reference](Deliverables)
@@ -168,10 +196,17 @@ flowchart LR
 ## Latest Release
 
 - Version: 2.0.0
+- Release: https://github.com/Huzefaaa2/terraform-guardrail/releases/tag/v2.0.0
+- PyPI: https://pypi.org/project/terraform-guardrail/2.0.0/
 - Container image: https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail
 - Registry image: https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail-registry
 - Supported providers: AWS, Azure, GCP, Kubernetes, Helm, OCI, Vault, Alicloud, vSphere
 - Local stack: Docker Compose (API + UI + policy registry, optional analytics)
+- Enterprise store: JSON file store under `.guardrail/enterprise` or
+  `GUARDRAIL_ENTERPRISE_DATA_DIR`
+- Enterprise API: policies, baselines, bindings, evaluations, drift checks, and evidence exports
+- Enterprise CLI: `evaluate`, `enterprise policy`, `enterprise baseline`, `enterprise binding`,
+  `enterprise drift-gate`, and `evidence export`
 - Policy registry: OPA bundles published under `/bundles/*.tar.gz` (registry path; sample bundles:
   https://github.com/Huzefaaa2/terraform-guardrail/tree/main/ops/policy-registry/bundles)
 - Policy evaluation available via CLI when OPA is installed
@@ -186,4 +221,8 @@ flowchart LR
 | CSV export | No | Yes |
 | Provider metadata | Yes | Yes |
 | Snippet generation | Yes | No |
-| Multi-file scan | Yes (directory) | Yes (upload up to 10) |
+| Multi-file scan | Yes (directory) | Yes (multi-file or folder upload) |
+| Enterprise policy authoring | Yes | Yes |
+| Org baselines and group enforcement | Yes | Yes |
+| Drift gate before apply | Yes | API-backed |
+| Evidence export | JSON / CSV / PDF | Linked from evaluation workflows |

@@ -1,6 +1,11 @@
 # Enterprise Features
 
-This index groups the enterprise-grade capabilities planned and delivered for TerraGuard.
+This index groups the enterprise-grade capabilities delivered in v2.0.0 and planned for later
+major releases.
+
+- [v2.0.0 Enterprise Release](Release-v2.0.0)
+- [Roadmap](Roadmap)
+- [How-To Guides](How-To-Guides)
 
 ## Governance & Controls
 

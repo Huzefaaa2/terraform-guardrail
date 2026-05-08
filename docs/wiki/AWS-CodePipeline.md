@@ -43,16 +43,19 @@ phases:
     commands:
       - terraform init
       - terraform plan -out=tfplan
-      - terraform-guardrail evaluate \
+      - terraform-guardrail enterprise drift-gate . \
           --provider aws \
-          --policy-set org-baseline \
-          --input tfplan
+          --baseline org-baseline \
+          --snapshot-id prod \
+          --evidence-format json \
+          --format json
   build:
     commands:
       - terraform apply -auto-approve tfplan
 artifacts:
   files:
     - guardrail-report.json
+    - guardrail-evidence.json
 ```
 
 The repository includes a runnable starter buildspec at
