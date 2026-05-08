@@ -189,7 +189,8 @@ flowchart LR
 - [Compliance Rules](Compliance-Rules)
 - [Streamlit Deployment](Streamlit-Deployment)
 - [Docker Compose Stack](Docker-Compose)
-- [Live Streamlit App](https://terraform-guardrail.streamlit.app/)
+- [v1 Foundation Live App](https://terraform-guardrail.streamlit.app/)
+- [v2 Enterprise Live App](https://terraform-guardrail-enterprise.streamlit.app/)
 - [PyPI Package](https://pypi.org/project/terraform-guardrail/)
 - [Release Process](Release-Process)
 

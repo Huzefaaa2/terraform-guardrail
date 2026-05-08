@@ -8,6 +8,9 @@ CLI, and web UI.
 
 - GitHub Release: https://github.com/Huzefaaa2/terraform-guardrail/releases/tag/v2.0.0
 - PyPI: https://pypi.org/project/terraform-guardrail/2.0.0/
+- v2 Enterprise live app: https://terraform-guardrail-enterprise.streamlit.app/
+- v1 Foundation live app: https://terraform-guardrail.streamlit.app/
+- Author: Huzefa Husain, https://www.linkedin.com/in/huzefaaa
 - Container image: `ghcr.io/huzefaaa2/terraform-guardrail:v2.0.0`
 - Registry image: `ghcr.io/huzefaaa2/terraform-guardrail-registry:v2.0.0`
 - Homebrew, Chocolatey, packaging, container, registry image, and CI workflows completed for the

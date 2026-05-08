@@ -17,6 +17,9 @@ GitHub, GitLab, Azure DevOps, and AWS CodePipeline.
 
 - Release notes: https://github.com/Huzefaaa2/terraform-guardrail/releases/tag/v2.0.0
 - Enterprise wiki: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Release-v2.0.0
+- v1 Foundation live app: https://terraform-guardrail.streamlit.app/
+- v2 Enterprise live app: https://terraform-guardrail-enterprise.streamlit.app/
+- Author: Huzefa Husain — https://www.linkedin.com/in/huzefaaa
 
 Live app: https://terraform-guardrail.streamlit.app/
 
@@ -518,17 +521,30 @@ Visit `http://127.0.0.1:8000` and upload a Terraform file to view a compliance r
 
 ## Streamlit App
 
+Terraform Guardrail keeps two Streamlit demos:
+
+| App | Purpose | Main file | Live URL |
+| --- | --- | --- | --- |
+| v1 Foundation | Scanner, state leak checks, schema-aware validation | `streamlit_app.py` | https://terraform-guardrail.streamlit.app/ |
+| v2 Enterprise | Policy authoring, org baselines, drift gates, evidence export | `streamlit_app_v2.py` | https://terraform-guardrail-enterprise.streamlit.app/ |
+
+Run the v1 Foundation demo:
+
 ```bash
 streamlit run streamlit_app.py
 ```
 
-Live app: https://terraform-guardrail.streamlit.app/
+Run the v2 Enterprise demo:
+
+```bash
+streamlit run streamlit_app_v2.py
+```
 
 ### Streamlit Cloud deployment
 
 1. Push this repo to GitHub.
-2. Create a new Streamlit Cloud app.
-3. Set the main file path to `streamlit_app.py`.
+2. Create one Streamlit Cloud app for v1 with main file path `streamlit_app.py`.
+3. Create a second Streamlit Cloud app for v2 with main file path `streamlit_app_v2.py`.
 4. Deploy (Streamlit will install from `requirements.txt`).
 
 ## REST API (Docker)

@@ -13,11 +13,18 @@ from terraform_guardrail.scanner.scan import scan_path
 REPO_URL = "https://github.com/Huzefaaa2/terraform-guardrail"
 WIKI_URL = "https://github.com/Huzefaaa2/terraform-guardrail/wiki"
 LINKEDIN_URL = "https://www.linkedin.com/in/huzefaaa"
+LIVE_V1_URL = "https://terraform-guardrail.streamlit.app/"
+LIVE_V2_URL = "https://terraform-guardrail-enterprise.streamlit.app/"
 
 st.set_page_config(page_title="Terraform Guardrail MCP (TerraGuard)", page_icon="🛡️", layout="wide")
 
 st.title("Terraform Guardrail MCP (TerraGuard)")
 st.caption("MCP-backed Terraform assistant with ephemeral-values compliance.")
+st.info(
+    "You are viewing the v1 Foundation demo. "
+    "Open the v2 Enterprise demo for policy authoring, baselines, drift gates, "
+    f"and evidence: {LIVE_V2_URL}"
+)
 
 st.markdown("### What it checks")
 col_a, col_b, col_c = st.columns(3)
@@ -33,9 +40,13 @@ with col_c:
 
 with st.sidebar:
     st.header("Resources")
+    st.markdown("### Live app versions")
+    st.markdown(f"- [v1 Foundation demo]({LIVE_V1_URL})")
+    st.markdown(f"- [v2 Enterprise demo]({LIVE_V2_URL})")
+    st.divider()
     st.markdown(f"- [GitHub Repo]({REPO_URL})")
     st.markdown(f"- [Wiki Docs]({WIKI_URL})")
-    st.markdown(f"- [Follow on LinkedIn]({LINKEDIN_URL})")
+    st.markdown(f"- [Author: Huzefa Husain]({LINKEDIN_URL})")
     st.divider()
     st.subheader("Install")
     st.code("pip install terraform-guardrail")
