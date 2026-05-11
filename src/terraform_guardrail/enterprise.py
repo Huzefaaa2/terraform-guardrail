@@ -139,12 +139,14 @@ class EvaluationContext(BaseModel):
 
 class EvaluationResult(BaseModel):
     id: str = Field(default_factory=lambda: new_id("eval"))
+    request_id: str | None = None
     created_at: str = Field(default_factory=utc_now)
     decision: Literal["pass", "warn", "block"]
     context: EvaluationContext = Field(default_factory=EvaluationContext)
     resolved_policy_ids: list[str] = Field(default_factory=list)
     report: dict[str, Any]
     evidence_id: str | None = None
+    service_metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class EvidenceExport(BaseModel):
@@ -681,6 +683,19 @@ def install_policy_pack(
     )
 
 
+def ensure_policy_pack_installed(
+    pack_id: str,
+    store: EnterpriseStore | None = None,
+    actor: str = "system",
+) -> PolicyPackInstallResult:
+    store = store or EnterpriseStore()
+    pack = get_builtin_policy_pack(pack_id)
+    for install in reversed(store.list_installed_pack_results()):
+        if install.pack_id == pack.id and install.version == pack.version:
+            return install
+    return store.install_policy_pack(pack, actor=actor, approve=True, create_baseline=True)
+
+
 def evaluate_enterprise(
     path: Path | str,
     state_path: Path | str | None = None,
@@ -691,6 +706,8 @@ def evaluate_enterprise(
     fail_on: str | None = None,
     store: EnterpriseStore | None = None,
     actor: str = "system",
+    request_id: str | None = None,
+    service_metadata: dict[str, Any] | None = None,
 ) -> EvaluationResult:
     store = store or EnterpriseStore()
     ctx = EvaluationContext(provider=provider, policy_set=policy_set, baseline=baseline)
@@ -705,10 +722,12 @@ def evaluate_enterprise(
     enrich_report_findings(report, store, resolved_policy_ids)
     decision = decide(report, resolved_policy_ids, store, fail_on=fail_on)
     result = EvaluationResult(
+        request_id=request_id,
         decision=decision,
         context=ctx,
         resolved_policy_ids=resolved_policy_ids,
         report=report.model_dump(mode="json"),
+        service_metadata=service_metadata or {},
     )
     return store.save_evaluation(result, actor=actor)
 

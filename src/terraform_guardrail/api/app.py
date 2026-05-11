@@ -16,6 +16,7 @@ from terraform_guardrail.enterprise import (
     EvaluationContext,
     GroupPolicyBinding,
     check_drift,
+    ensure_policy_pack_installed,
     evaluate_enterprise,
     export_evidence,
     get_builtin_policy_pack,
@@ -101,6 +102,20 @@ class EvaluateRequest(BaseModel):
     context: dict[str, Any] | None = None
     fail_on: str | None = None
     actor: str = "system"
+
+
+class ServiceEvaluateRequest(BaseModel):
+    path: str
+    state_path: str | None = None
+    request_id: str | None = None
+    provider: str | None = None
+    policy_pack: str | None = None
+    baseline: str | None = None
+    context: dict[str, Any] | None = None
+    fail_on: str | None = None
+    evidence_format: str | None = "json"
+    actor: str = "service"
+    callback_url: str | None = None
 
 
 class DriftCheckRequest(BaseModel):
@@ -458,6 +473,76 @@ def create_app() -> FastAPI:
         except Exception as exc:  # noqa: BLE001
             raise HTTPException(status_code=400, detail=str(exc)) from exc
         return result.model_dump(mode="json")
+
+    @app.post("/service/evaluate")
+    def service_evaluate(request: ServiceEvaluateRequest) -> dict[str, Any]:
+        if request.evidence_format and request.evidence_format not in {"json", "csv", "pdf"}:
+            raise HTTPException(
+                status_code=400,
+                detail="Evidence format must be json, csv, or pdf.",
+            )
+        store = EnterpriseStore()
+        pack_install = None
+        baseline = request.baseline
+        try:
+            if request.policy_pack:
+                pack_install = ensure_policy_pack_installed(
+                    request.policy_pack,
+                    store=store,
+                    actor=request.actor,
+                )
+                if baseline is None and pack_install.baseline_id:
+                    baseline = pack_install.baseline_id
+            result = evaluate_enterprise(
+                path=request.path,
+                state_path=request.state_path,
+                provider=request.provider,
+                baseline=baseline,
+                context=request.context,
+                fail_on=request.fail_on,
+                store=store,
+                actor=request.actor,
+                request_id=request.request_id,
+                service_metadata={
+                    "policy_pack": request.policy_pack,
+                    "callback_url": request.callback_url,
+                    "service_endpoint": "/service/evaluate",
+                },
+            )
+            export = None
+            if request.evidence_format:
+                export = export_evidence(
+                    result.id,
+                    format=request.evidence_format,  # type: ignore[arg-type]
+                    store=store,
+                    actor=request.actor,
+                )
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except Exception as exc:  # noqa: BLE001
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+        summary = result.report.get("summary", {})
+        payload: dict[str, Any] = {
+            "request_id": request.request_id,
+            "result_id": result.id,
+            "decision": result.decision,
+            "status": "completed",
+            "summary": summary,
+            "links": {
+                "result": f"/results/{result.id}",
+                "evidence": f"/exports/{export.id}" if export else None,
+            },
+            "resolved": {
+                "baseline": baseline,
+                "policy_pack": request.policy_pack,
+                "policy_pack_install_id": pack_install.id if pack_install else None,
+                "policy_ids": result.resolved_policy_ids,
+            },
+            "evidence": export.model_dump(mode="json") if export else None,
+            "result": result.model_dump(mode="json"),
+        }
+        return payload
 
     @app.get("/results/{result_id}")
     def evaluation_result(result_id: str) -> dict[str, Any]:

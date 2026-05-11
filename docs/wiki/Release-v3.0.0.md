@@ -17,7 +17,7 @@ Guardrails-as-a-Service API, and public contributor governance.
 | Capability | Status | Notes |
 | --- | --- | --- |
 | Enterprise policy packs | Delivered | Built-in pack catalog, CLI/API install, baseline creation, audit event |
-| Guardrails-as-a-Service API | Next | Harden `/evaluate` for service-style CI use and evidence links |
+| Guardrails-as-a-Service API | Delivered | `/service/evaluate` contract with request ID, pack context, evidence links |
 | Cross-provider invariant enforcement | Planned | Shared controls across AWS, Azure, and GCP patterns |
 | Reference implementations across tools | Planned | End-to-end examples for GitHub, GitLab, Azure DevOps, AWS CodePipeline |
 | Contributor governance + public roadmap | Planned | Issue templates, contribution workflow, roadmap hygiene |
@@ -47,3 +47,26 @@ REST endpoints:
 - `POST /packs/{pack_id}/install`
 
 Detailed guide: [Policy Packs](Policy-Packs).
+
+## Delivered: Guardrails-as-a-Service API
+
+The second v3.0 capability adds a CI-friendly service contract:
+
+```bash
+curl -X POST http://localhost:8080/service/evaluate \
+  -H 'content-type: application/json' \
+  -d '{
+    "path":"./infra",
+    "request_id":"github-run-12345",
+    "provider":"aws",
+    "policy_pack":"aws-control-tower",
+    "fail_on":"high",
+    "evidence_format":"json",
+    "actor":"github-actions"
+  }'
+```
+
+The response includes a stable request ID, result ID, pass/warn/block decision, resolved policy
+pack and baseline context, and links to stored result and evidence records.
+
+Detailed guide: [Guardrails-as-a-Service API](Guardrails-as-a-Service).

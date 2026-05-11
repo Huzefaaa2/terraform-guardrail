@@ -130,6 +130,52 @@ def test_enterprise_api_policy_packs(monkeypatch, tmp_path: Path) -> None:
     assert baseline_response.json()["baselines"][0]["name"] == "aws-control-tower-baseline"
 
 
+def test_guardrails_as_a_service_evaluate_contract(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("GUARDRAIL_ENTERPRISE_DATA_DIR", str(tmp_path / "store"))
+    infra = tmp_path / "main.tf"
+    infra.write_text(
+        """
+resource "aws_s3_bucket" "logs" {
+  bucket = "logs"
+}
+""",
+        encoding="utf-8",
+    )
+    client = TestClient(create_app())
+
+    response = client.post(
+        "/service/evaluate",
+        json={
+            "path": str(infra),
+            "request_id": "ci-123",
+            "provider": "aws",
+            "policy_pack": "aws-control-tower",
+            "fail_on": "high",
+            "evidence_format": "json",
+            "actor": "github-actions",
+            "context": {"repo": "payments-infra", "environment": "prod"},
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["request_id"] == "ci-123"
+    assert payload["status"] == "completed"
+    assert payload["decision"] == "block"
+    assert payload["links"]["result"] == f"/results/{payload['result_id']}"
+    assert payload["links"]["evidence"] == f"/exports/{payload['evidence']['id']}"
+    assert payload["resolved"]["policy_pack"] == "aws-control-tower"
+    assert payload["resolved"]["policy_pack_install_id"]
+    assert payload["resolved"]["policy_ids"]
+    assert payload["result"]["request_id"] == "ci-123"
+    assert payload["result"]["service_metadata"]["service_endpoint"] == "/service/evaluate"
+    assert Path(payload["evidence"]["path"]).exists()
+
+    stored = client.get(payload["links"]["result"])
+    assert stored.status_code == 200
+    assert stored.json()["request_id"] == "ci-123"
+
+
 def test_enterprise_api_baseline_lifecycle(monkeypatch, tmp_path: Path) -> None:
     monkeypatch.setenv("GUARDRAIL_ENTERPRISE_DATA_DIR", str(tmp_path / "store"))
     client = TestClient(create_app())

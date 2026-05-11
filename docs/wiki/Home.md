@@ -34,7 +34,7 @@ The current roadmap status is:
 | --- | --- | --- |
 | v1.0 Foundation | Delivered | Registry, packaging, CI templates, policy layering, custom rules |
 | v2.0 Enterprise | Delivered | Authoring UI, baselines, group enforcement, drift gates, evidence export |
-| v3.0 Ecosystem | In progress | Policy packs delivered; service API, reference implementations, invariants next |
+| v3.0 Ecosystem | In progress | Policy packs and service API delivered; reference implementations and invariants next |
 | v4.0 Intelligent | Planned | Context-aware evaluation and suggested fixes |
 
 ## Quick Install

@@ -11,6 +11,7 @@ from terraform_guardrail.enterprise import (
     GroupPolicyBinding,
     PolicyMetadata,
     check_drift,
+    ensure_policy_pack_installed,
     evaluate_enterprise,
     export_evidence,
     get_builtin_policy_pack,
@@ -94,6 +95,17 @@ def test_builtin_policy_pack_install_creates_policies_baseline_and_audit(tmp_pat
     assert {policy.status for policy in policies} == {"approved"}
     assert policies[0].metadata.standard == "PCI DSS"
     assert store.audit_events()[-1].action == "policy_pack.install"
+
+
+def test_ensure_policy_pack_installed_reuses_existing_install(tmp_path: Path) -> None:
+    store = EnterpriseStore(tmp_path)
+
+    first = ensure_policy_pack_installed("aws-control-tower", store=store, actor="platform")
+    second = ensure_policy_pack_installed("aws-control-tower", store=store, actor="platform")
+
+    assert second.id == first.id
+    assert len(store.list_policies()) == 3
+    assert len(store.list_baselines()) == 1
 
 
 def test_binding_parent_inheritance_resolves_repo_to_group_and_org(tmp_path: Path) -> None:
