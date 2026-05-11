@@ -801,6 +801,11 @@ def enrich_report_findings(
 
     for finding in report.findings:
         policy = by_rule.get(finding.rule_id)
+        if policy is None and finding.rule_id in {"TG021", "TG022", "TG023"}:
+            detail = finding.detail or {}
+            resource = detail.get("resource")
+            if isinstance(resource, str):
+                policy = _policy_for_invariant_finding(finding.rule_id, resource, by_rule)
         rule_metadata = RULE_METADATA.get(finding.rule_id, {})
         if policy:
             finding.owner = policy.metadata.owner
@@ -820,6 +825,42 @@ def enrich_report_findings(
             detail.setdefault("default_risk", rule_metadata.get("risk"))
             detail.setdefault("recommendation", rule_metadata.get("remediation"))
         finding.detail = detail
+
+
+def _policy_for_invariant_finding(
+    rule_id: str,
+    resource: str,
+    by_rule: dict[str, EnterprisePolicy],
+) -> EnterprisePolicy | None:
+    rule_map = {
+        "TG021": (
+            "TG006",
+            "TG007",
+            "TG008",
+            "TG010",
+            "TG015",
+            "TG019",
+        ),
+        "TG022": ("TG011", "TG012", "TG020"),
+        "TG023": ("TG016",),
+    }
+    for mapped_rule in rule_map.get(rule_id, ()):
+        policy = by_rule.get(mapped_rule)
+        if policy and _policy_resource_matches(policy.rule_id, resource):
+            return policy
+    return None
+
+
+def _policy_resource_matches(rule_id: str | None, resource: str) -> bool:
+    if rule_id == "TG011":
+        return resource.startswith("aws_s3_bucket.")
+    if rule_id == "TG012":
+        return resource.startswith(("aws_db_instance.", "aws_rds_cluster."))
+    if rule_id == "TG020":
+        return resource.startswith("aws_ebs_volume.")
+    if rule_id == "TG019":
+        return resource.startswith("azurerm_storage_account.")
+    return True
 
 
 def decide(

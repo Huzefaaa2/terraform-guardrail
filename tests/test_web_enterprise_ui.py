@@ -41,9 +41,9 @@ def test_web_scan_accepts_multiple_files(monkeypatch, tmp_path) -> None:
 def test_web_policy_rule_id_is_allocated_without_conflicts(monkeypatch, tmp_path) -> None:
     monkeypatch.setenv("GUARDRAIL_ENTERPRISE_DATA_DIR", str(tmp_path / "store"))
     store = EnterpriseStore()
-    assert _next_rule_id(store) == "TG021"
+    assert _next_rule_id(store) == "TG024"
 
-    store.save_policy(EnterprisePolicy(name="Existing", rule_id="TG021"))
+    store.save_policy(EnterprisePolicy(name="Existing", rule_id="TG024"))
     client = TestClient(create_app())
     response = client.post(
         "/policies",
@@ -59,8 +59,8 @@ def test_web_policy_rule_id_is_allocated_without_conflicts(monkeypatch, tmp_path
 
     assert response.status_code == 200
     policies = EnterpriseStore().list_policies()
-    assert {policy.rule_id for policy in policies} == {"TG021", "TG022"}
-    assert "TG022" in response.text
+    assert {policy.rule_id for policy in policies} == {"TG024", "TG025"}
+    assert "TG025" in response.text
 
 
 def test_web_lists_default_rules_and_renders_rule_detail(monkeypatch, tmp_path) -> None:

@@ -18,7 +18,7 @@ Guardrails-as-a-Service API, and public contributor governance.
 | --- | --- | --- |
 | Enterprise policy packs | Delivered | Built-in pack catalog, CLI/API install, baseline creation, audit event |
 | Guardrails-as-a-Service API | Delivered | `/service/evaluate` contract with request ID, pack context, evidence links |
-| Cross-provider invariant enforcement | Planned | Shared controls across AWS, Azure, and GCP patterns |
+| Cross-provider invariant enforcement | Delivered | TG021-TG023 common exposure, encryption, and ownership controls |
 | Reference implementations across tools | Planned | End-to-end examples for GitHub, GitLab, Azure DevOps, AWS CodePipeline |
 | Contributor governance + public roadmap | Planned | Issue templates, contribution workflow, roadmap hygiene |
 
@@ -70,3 +70,17 @@ The response includes a stable request ID, result ID, pass/warn/block decision, 
 pack and baseline context, and links to stored result and evidence records.
 
 Detailed guide: [Guardrails-as-a-Service API](Guardrails-as-a-Service).
+
+## Delivered: Cross-Provider Invariant Enforcement
+
+The third v3.0 capability adds provider-normalized controls:
+
+- `TG021`: public exposure invariant.
+- `TG022`: storage encryption invariant.
+- `TG023`: ownership metadata invariant.
+
+These findings carry `detail.invariant`, `detail.provider`, and `detail.resource` so policy packs,
+service API consumers, and evidence exports can reason about common controls across AWS, Azure, and
+GCP.
+
+Detailed guide: [Cross-Provider Invariants](Cross-Provider-Invariants).

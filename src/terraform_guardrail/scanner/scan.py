@@ -568,6 +568,75 @@ def _resource_findings(hcl_data: dict, path: Path) -> list[Finding]:
                     )
                 )
 
+        findings.extend(_cross_provider_invariant_findings(resource_type, resource_id, attrs, path))
+
+    return findings
+
+
+def _cross_provider_invariant_findings(
+    resource_type: str,
+    resource_id: str,
+    attrs: dict,
+    path: Path,
+) -> list[Finding]:
+    findings: list[Finding] = []
+    provider = _provider_for_resource(resource_type)
+    if provider is None:
+        return findings
+
+    if _public_exposure_invariant(resource_type, attrs):
+        findings.append(
+            Finding(
+                rule_id="TG021",
+                severity="medium",
+                message=f"{RULES['TG021']}: {resource_id}",
+                path=str(path),
+                detail={
+                    "invariant": "public_exposure",
+                    "provider": provider,
+                    "resource": resource_id,
+                    "recommendation": (
+                        "Disable public access or restrict ingress to approved ranges."
+                    ),
+                },
+            )
+        )
+
+    if _storage_encryption_invariant(resource_type, attrs):
+        findings.append(
+            Finding(
+                rule_id="TG022",
+                severity="medium",
+                message=f"{RULES['TG022']}: {resource_id}",
+                path=str(path),
+                detail={
+                    "invariant": "storage_encryption",
+                    "provider": provider,
+                    "resource": resource_id,
+                    "recommendation": (
+                        "Enable provider-native encryption for this storage resource."
+                    ),
+                },
+            )
+        )
+
+    if _ownership_tag_invariant(resource_type, attrs):
+        findings.append(
+            Finding(
+                rule_id="TG023",
+                severity="low",
+                message=f"{RULES['TG023']}: {resource_id}",
+                path=str(path),
+                detail={
+                    "invariant": "ownership",
+                    "provider": provider,
+                    "resource": resource_id,
+                    "required": ["owner", "environment"],
+                    "recommendation": "Add owner and environment tags or labels.",
+                },
+            )
+        )
+
     return findings
 
 
@@ -581,6 +650,70 @@ def _iter_resources(hcl_data: dict) -> Iterable[tuple[str, str, dict]]:
             for name, attrs in instances.items():
                 if isinstance(attrs, dict):
                     yield _hcl_string(resource_type), _hcl_string(name), attrs
+
+
+def _provider_for_resource(resource_type: str) -> str | None:
+    if resource_type.startswith("aws_"):
+        return "aws"
+    if resource_type.startswith("azurerm_"):
+        return "azure"
+    if resource_type.startswith("google_"):
+        return "gcp"
+    return None
+
+
+def _public_exposure_invariant(resource_type: str, attrs: dict) -> bool:
+    if resource_type == "aws_s3_bucket":
+        acl = _string_value(attrs.get("acl"))
+        return bool(acl and acl.lower() in PUBLIC_ACLS)
+    if resource_type == "aws_s3_bucket_public_access_block":
+        return _s3_public_block_disabled(attrs)
+    if resource_type in {"aws_security_group", "aws_security_group_rule"}:
+        return _security_group_is_public(resource_type, attrs)
+    if resource_type == "aws_instance":
+        return _truthy(attrs.get("associate_public_ip_address"))
+    if resource_type in {"aws_db_instance", "aws_rds_cluster"}:
+        return _truthy(attrs.get("publicly_accessible"))
+    if resource_type == "azurerm_storage_account":
+        return _truthy(attrs.get("public_network_access_enabled"))
+    if resource_type == "azurerm_network_security_rule":
+        return _azure_network_rule_is_public(attrs)
+    if resource_type == "google_storage_bucket":
+        return _gcp_storage_bucket_is_public(attrs)
+    if resource_type == "google_compute_firewall":
+        return _gcp_firewall_is_public(attrs)
+    return False
+
+
+def _storage_encryption_invariant(resource_type: str, attrs: dict) -> bool:
+    if resource_type == "aws_s3_bucket":
+        return "server_side_encryption_configuration" not in attrs
+    if resource_type in {"aws_db_instance", "aws_rds_cluster"}:
+        return not _truthy(attrs.get("storage_encrypted"))
+    if resource_type == "aws_ebs_volume":
+        return not _truthy(attrs.get("encrypted"))
+    if resource_type == "azurerm_storage_account":
+        return _truthy(attrs.get("infrastructure_encryption_enabled")) is False
+    if resource_type == "azurerm_managed_disk":
+        return attrs.get("disk_encryption_set_id") in {None, ""}
+    if resource_type == "google_storage_bucket":
+        return "encryption" not in attrs
+    if resource_type == "google_compute_disk":
+        return "disk_encryption_key" not in attrs
+    return False
+
+
+def _ownership_tag_invariant(resource_type: str, attrs: dict) -> bool:
+    provider = _provider_for_resource(resource_type)
+    if provider is None:
+        return False
+    if provider == "gcp":
+        labels = attrs.get("labels") if isinstance(attrs.get("labels"), dict) else {}
+        return "owner" not in labels or "environment" not in labels
+    tags = attrs.get("tags")
+    if not isinstance(tags, dict):
+        tags = attrs.get("tags_all") if isinstance(attrs.get("tags_all"), dict) else {}
+    return "owner" not in tags or "environment" not in tags
 
 
 def _as_list(value: object) -> list:
@@ -649,6 +782,44 @@ def _security_group_is_public(resource_type: str, attrs: dict) -> bool:
         if any((_string_value(cidr) or str(cidr)) in PUBLIC_CIDRS for cidr in cidrs):
             return True
     return False
+
+
+def _azure_network_rule_is_public(attrs: dict) -> bool:
+    direction = _string_value(attrs.get("direction"))
+    access = _string_value(attrs.get("access"))
+    if direction and direction.lower() != "inbound":
+        return False
+    if access and access.lower() == "deny":
+        return False
+    prefixes = (
+        _as_list(attrs.get("source_address_prefix"))
+        + _as_list(attrs.get("source_address_prefixes"))
+        + _as_list(attrs.get("source_application_security_group_ids"))
+    )
+    for prefix in prefixes:
+        text = _string_value(prefix) or str(prefix)
+        if text in {"*", "Internet", "0.0.0.0/0", "::/0"}:
+            return True
+    return False
+
+
+def _gcp_storage_bucket_is_public(attrs: dict) -> bool:
+    iam_configuration = attrs.get("iam_configuration")
+    if isinstance(iam_configuration, dict):
+        public_access_prevention = _string_value(iam_configuration.get("public_access_prevention"))
+        if public_access_prevention and public_access_prevention.lower() == "enforced":
+            return False
+    return _string_value(attrs.get("predefined_acl")) in {
+        "publicRead",
+        "publicReadWrite",
+    }
+
+
+def _gcp_firewall_is_public(attrs: dict) -> bool:
+    source_ranges = _as_list(attrs.get("source_ranges"))
+    if not source_ranges:
+        return False
+    return any((_string_value(value) or str(value)) in PUBLIC_CIDRS for value in source_ranges)
 
 
 def _iam_policy_is_wildcard(attrs: dict) -> bool:

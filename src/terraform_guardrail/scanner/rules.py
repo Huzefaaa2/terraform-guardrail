@@ -31,6 +31,9 @@ RULES = {
     "TG018": "Instance type or SKU not in allowed list",
     "TG019": "Azure storage account public network access enabled",
     "TG020": "EBS volume not encrypted",
+    "TG021": "Cross-provider public exposure invariant violation",
+    "TG022": "Cross-provider storage encryption invariant violation",
+    "TG023": "Cross-provider ownership tag invariant violation",
 }
 
 RULE_METADATA = {
@@ -113,5 +116,17 @@ RULE_METADATA = {
     "TG020": {
         "risk": "medium",
         "remediation": "Enable EBS encryption with a managed KMS key.",
+    },
+    "TG021": {
+        "risk": "high",
+        "remediation": "Disable public access and use private networking or approved ingress.",
+    },
+    "TG022": {
+        "risk": "high",
+        "remediation": "Enable provider-native encryption for storage resources.",
+    },
+    "TG023": {
+        "risk": "low",
+        "remediation": "Add consistent ownership tags or labels across all cloud resources.",
     },
 }
