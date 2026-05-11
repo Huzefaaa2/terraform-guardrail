@@ -4,6 +4,7 @@ Minor releases deliver increments within each major deliverable. Major releases 
 phase.
 
 Latest delivered major release: [v2.0.0 Enterprise Release](Release-v2.0.0).
+Current development track: [v3.0.0 Ecosystem Development](Release-v3.0.0).
 
 Legend: <span style="color: green">✅ Delivered</span> • <span style="color: orange">🚧 Planned</span>
 
@@ -34,6 +35,6 @@ Legend: <span style="color: green">✅ Delivered</span> • <span style="color: 
 | Reference implementations across tools |  |  | <span style="color: orange">🚧 Planned</span> |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Reference-Implementations) |
 | Cross-provider invariant enforcement |  |  | <span style="color: orange">🚧 Planned</span> |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Cross-Provider-Invariants) |
 | Guardrails-as-a-Service API |  |  | <span style="color: orange">🚧 Planned</span> |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Guardrails-as-a-Service) |
-| Enterprise policy packs |  |  | <span style="color: orange">🚧 Planned</span> |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Policy-Packs) |
+| Enterprise policy packs |  |  | <span style="color: green">✅ Delivered (v3.0 development)</span> |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Policy-Packs) |
 | Context-aware evaluation |  |  |  | <span style="color: orange">🚧 Planned</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Context-Aware-Evaluation) |
 | Suggested fixes + recommendations |  |  |  | <span style="color: orange">🚧 Planned</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Suggested-Fixes) |

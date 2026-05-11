@@ -27,6 +27,9 @@ from terraform_guardrail.enterprise import (
     check_drift,
     evaluate_enterprise,
     export_evidence,
+    get_builtin_policy_pack,
+    install_policy_pack,
+    list_builtin_policy_packs,
     resolve_policy_set,
     run_drift_gate,
 )
@@ -50,6 +53,7 @@ enterprise_app = typer.Typer(help="Enterprise policy lifecycle commands.")
 enterprise_policy_app = typer.Typer(help="Enterprise policy commands.")
 enterprise_baseline_app = typer.Typer(help="Enterprise baseline commands.")
 enterprise_binding_app = typer.Typer(help="Enterprise group/repo binding commands.")
+enterprise_pack_app = typer.Typer(help="Enterprise policy pack commands.")
 enterprise_aws_app = typer.Typer(help="AWS enterprise integration commands.")
 enterprise_aws_codepipeline_app = typer.Typer(help="AWS CodePipeline scaffold commands.")
 evidence_app = typer.Typer(help="Evidence export commands.")
@@ -60,6 +64,7 @@ app.add_typer(evidence_app, name="evidence")
 enterprise_app.add_typer(enterprise_policy_app, name="policy")
 enterprise_app.add_typer(enterprise_baseline_app, name="baseline")
 enterprise_app.add_typer(enterprise_binding_app, name="binding")
+enterprise_app.add_typer(enterprise_pack_app, name="pack")
 enterprise_app.add_typer(enterprise_aws_app, name="aws")
 enterprise_aws_app.add_typer(enterprise_aws_codepipeline_app, name="codepipeline")
 console = Console()
@@ -660,6 +665,88 @@ def enterprise_binding_resolve(
     console.print(f"Policies: {', '.join(result.policy_ids) or 'none'}")
     for policy in result.policies:
         console.print(f"- {policy.get('rule_id') or 'none'} {policy.get('name')}")
+
+
+@enterprise_pack_app.command("list")
+def enterprise_pack_list(
+    provider: Annotated[str | None, typer.Option(help="Filter by provider")] = None,
+    standard: Annotated[str | None, typer.Option(help="Filter by standard")] = None,
+    format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
+) -> None:
+    packs = list_builtin_policy_packs()
+    if provider:
+        packs = [pack for pack in packs if provider in pack.providers]
+    if standard:
+        packs = [pack for pack in packs if standard in pack.standards]
+    if format == "json":
+        console.print(
+            JSON(
+                json.dumps(
+                    [pack.model_dump(mode="json", exclude={"policies"}) for pack in packs],
+                    indent=2,
+                )
+            )
+        )
+        return
+    for pack in packs:
+        console.print(
+            f"- {pack.id} {pack.name} [{pack.version}] "
+            f"providers={','.join(pack.providers)} policies={len(pack.policies)}"
+        )
+
+
+@enterprise_pack_app.command("show")
+def enterprise_pack_show(
+    pack_id: Annotated[str, typer.Argument(help="Built-in pack ID")],
+    format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
+) -> None:
+    try:
+        pack = get_builtin_policy_pack(pack_id)
+    except KeyError as exc:
+        console.print(str(exc))
+        raise typer.Exit(code=1) from exc
+    if format == "json":
+        console.print(JSON(json.dumps(pack.model_dump(mode="json"), indent=2)))
+        return
+    console.print(f"{pack.id}: {pack.name}")
+    console.print(f"Version: {pack.version}")
+    console.print(f"Category: {pack.category}")
+    console.print(f"Providers: {', '.join(pack.providers)}")
+    console.print(f"Standards: {', '.join(pack.standards)}")
+    console.print(f"Baseline: {pack.baseline_name or pack.id + '-baseline'}")
+    console.print(pack.description)
+    for policy in pack.policies:
+        console.print(f"- {policy.rule_id} {policy.name} [{policy.severity}]")
+
+
+@enterprise_pack_app.command("install")
+def enterprise_pack_install(
+    pack_id: Annotated[str, typer.Argument(help="Built-in pack ID")],
+    actor: Annotated[str, typer.Option(help="Installer identity")] = "system",
+    no_approve: Annotated[
+        bool,
+        typer.Option(help="Install policies as draft instead of approved"),
+    ] = False,
+    no_baseline: Annotated[
+        bool,
+        typer.Option(help="Do not create an approved baseline for the pack"),
+    ] = False,
+    format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
+) -> None:
+    try:
+        result = install_policy_pack(
+            pack_id,
+            actor=actor,
+            approve=not no_approve,
+            create_baseline=not no_baseline,
+        )
+    except KeyError as exc:
+        console.print(str(exc))
+        raise typer.Exit(code=1) from exc
+    except Exception as exc:  # noqa: BLE001
+        console.print(f"Pack install failed: {exc}")
+        raise typer.Exit(code=1) from exc
+    _print_model(result, format)
 
 
 @enterprise_aws_codepipeline_app.command("init")

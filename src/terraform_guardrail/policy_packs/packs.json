@@ -1,0 +1,215 @@
+[
+  {
+    "id": "pci-dss",
+    "name": "PCI DSS Cloud Controls",
+    "version": "0.1.0",
+    "category": "compliance",
+    "providers": ["aws", "azure", "gcp"],
+    "standards": ["PCI DSS"],
+    "description": "Baseline controls for payment workloads: encryption, secret hygiene, public exposure, and evidence-ready metadata.",
+    "baseline_name": "pci-dss-baseline",
+    "policies": [
+      {
+        "name": "Sensitive values must not leak into Terraform files",
+        "description": "Detect hardcoded secrets and sensitive variables in Terraform inputs.",
+        "rule_id": "TG001",
+        "severity": "block",
+        "category": "compliance",
+        "providers": ["aws", "azure", "gcp"],
+        "metadata": {
+          "standard": "PCI DSS",
+          "control_id": "3.5.1",
+          "owner": "security-compliance",
+          "risk": "high",
+          "remediation": "Move secrets into a managed secret store and pass them through secure CI/CD variables."
+        }
+      },
+      {
+        "name": "Storage must not be publicly exposed",
+        "description": "Block public storage exposure patterns before infrastructure is applied.",
+        "rule_id": "TG006",
+        "severity": "block",
+        "category": "security",
+        "providers": ["aws", "azure", "gcp"],
+        "metadata": {
+          "standard": "PCI DSS",
+          "control_id": "1.2.1",
+          "owner": "cloud-security",
+          "risk": "high",
+          "remediation": "Disable public ACLs and use least-privilege identity policies."
+        }
+      },
+      {
+        "name": "Storage encryption is required",
+        "description": "Require encrypted object storage for regulated workloads.",
+        "rule_id": "TG011",
+        "severity": "block",
+        "category": "compliance",
+        "providers": ["aws", "azure", "gcp"],
+        "metadata": {
+          "standard": "PCI DSS",
+          "control_id": "3.5.1",
+          "owner": "platform-security",
+          "risk": "high",
+          "remediation": "Enable provider-native default encryption with customer-managed keys where required."
+        }
+      }
+    ]
+  },
+  {
+    "id": "aws-control-tower",
+    "name": "AWS Control Tower Landing Zone",
+    "version": "0.1.0",
+    "category": "security",
+    "providers": ["aws"],
+    "standards": ["AWS Well-Architected", "AWS Control Tower"],
+    "description": "AWS landing-zone guardrails for public access, encryption, network exposure, tagging, and drift gates.",
+    "baseline_name": "aws-control-tower-baseline",
+    "policies": [
+      {
+        "name": "Public S3 access is blocked",
+        "description": "Prevent public S3 ACLs in landing-zone accounts.",
+        "rule_id": "TG006",
+        "severity": "block",
+        "category": "security",
+        "providers": ["aws"],
+        "metadata": {
+          "standard": "AWS Control Tower",
+          "control_id": "CT.S3.PR.8",
+          "owner": "aws-platform",
+          "risk": "high",
+          "remediation": "Use S3 Block Public Access and private bucket policies."
+        }
+      },
+      {
+        "name": "S3 default encryption is required",
+        "description": "Require S3 default server-side encryption.",
+        "rule_id": "TG011",
+        "severity": "block",
+        "category": "security",
+        "providers": ["aws"],
+        "metadata": {
+          "standard": "AWS Well-Architected",
+          "control_id": "SEC08-BP02",
+          "owner": "aws-platform",
+          "risk": "medium",
+          "remediation": "Enable default bucket encryption with SSE-S3 or SSE-KMS."
+        }
+      },
+      {
+        "name": "Mandatory account tags",
+        "description": "Require ownership and environment tags for platform inventory.",
+        "rule_id": "TG016",
+        "severity": "warn",
+        "category": "cost",
+        "providers": ["aws"],
+        "metadata": {
+          "standard": "AWS Well-Architected",
+          "control_id": "COST02-BP01",
+          "owner": "finops",
+          "risk": "low",
+          "remediation": "Add owner, environment, and cost_center tags."
+        }
+      }
+    ]
+  },
+  {
+    "id": "azure-landing-zone",
+    "name": "Azure Landing Zone Controls",
+    "version": "0.1.0",
+    "category": "security",
+    "providers": ["azurerm"],
+    "standards": ["Azure CAF", "ISO 27001"],
+    "description": "Azure landing-zone controls for storage hardening, network exposure, identity, and compliance metadata.",
+    "baseline_name": "azure-landing-zone-baseline",
+    "policies": [
+      {
+        "name": "Azure storage public access is blocked",
+        "description": "Prevent public storage exposure in Azure landing zones.",
+        "rule_id": "TG006",
+        "severity": "block",
+        "category": "security",
+        "providers": ["azurerm"],
+        "metadata": {
+          "standard": "Azure CAF",
+          "control_id": "SEC-08",
+          "owner": "azure-platform",
+          "risk": "high",
+          "remediation": "Disable public blob access and enforce private endpoints for sensitive accounts."
+        }
+      },
+      {
+        "name": "Azure storage encryption is required",
+        "description": "Require encrypted storage for landing-zone workloads.",
+        "rule_id": "TG011",
+        "severity": "block",
+        "category": "compliance",
+        "providers": ["azurerm"],
+        "metadata": {
+          "standard": "ISO 27001",
+          "control_id": "A.8.24",
+          "owner": "azure-platform",
+          "risk": "medium",
+          "remediation": "Enable platform encryption and customer-managed keys where required."
+        }
+      }
+    ]
+  },
+  {
+    "id": "banking-resiliency",
+    "name": "Banking Resiliency Controls",
+    "version": "0.1.0",
+    "category": "resiliency",
+    "providers": ["aws", "azure", "gcp"],
+    "standards": ["Internal Banking Standard", "SOC2"],
+    "description": "Financial-services guardrails for encryption, exposure, tagging, and change evidence across cloud providers.",
+    "baseline_name": "banking-resiliency-baseline",
+    "policies": [
+      {
+        "name": "Regulated data encryption is required",
+        "description": "Require encryption controls for regulated banking workloads.",
+        "rule_id": "TG011",
+        "severity": "block",
+        "category": "compliance",
+        "providers": ["aws", "azure", "gcp"],
+        "metadata": {
+          "standard": "SOC2",
+          "control_id": "CC6.6",
+          "owner": "banking-platform",
+          "risk": "high",
+          "remediation": "Enable provider-native encryption and document key ownership."
+        }
+      },
+      {
+        "name": "Internet exposure requires review",
+        "description": "Warn on broad ingress and public exposure patterns.",
+        "rule_id": "TG008",
+        "severity": "warn",
+        "category": "security",
+        "providers": ["aws", "azure", "gcp"],
+        "metadata": {
+          "standard": "Internal Banking Standard",
+          "control_id": "NET-004",
+          "owner": "network-security",
+          "risk": "medium",
+          "remediation": "Restrict ingress to approved CIDR ranges or use private connectivity."
+        }
+      },
+      {
+        "name": "Application ownership tags are mandatory",
+        "description": "Require ownership metadata for service accountability.",
+        "rule_id": "TG016",
+        "severity": "warn",
+        "category": "resiliency",
+        "providers": ["aws", "azure", "gcp"],
+        "metadata": {
+          "standard": "Internal Banking Standard",
+          "control_id": "OPS-001",
+          "owner": "operations",
+          "risk": "low",
+          "remediation": "Add service_owner, business_unit, environment, and data_classification tags."
+        }
+      }
+    ]
+  }
+]

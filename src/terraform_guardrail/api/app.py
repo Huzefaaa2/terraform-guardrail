@@ -18,6 +18,9 @@ from terraform_guardrail.enterprise import (
     check_drift,
     evaluate_enterprise,
     export_evidence,
+    get_builtin_policy_pack,
+    install_policy_pack,
+    list_builtin_policy_packs,
     preview_policy,
     resolve_policy_set,
     run_drift_gate,
@@ -136,6 +139,12 @@ class BindingResolveRequest(BaseModel):
     baseline: str | None = None
 
 
+class PolicyPackInstallRequest(BaseModel):
+    actor: str = "system"
+    approve: bool = True
+    create_baseline: bool = True
+
+
 def create_app() -> FastAPI:
     app = FastAPI(title="Terraform Guardrail MCP (TerraGuard) API", version="2.0.0")
 
@@ -203,6 +212,37 @@ def create_app() -> FastAPI:
         except PolicyRegistryError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
         return bundle.to_dict()
+
+    @app.get("/packs")
+    def packs() -> dict[str, Any]:
+        return {
+            "packs": [
+                pack.model_dump(mode="json", exclude={"policies"})
+                for pack in list_builtin_policy_packs()
+            ]
+        }
+
+    @app.get("/packs/{pack_id}")
+    def pack(pack_id: str) -> dict[str, Any]:
+        try:
+            return get_builtin_policy_pack(pack_id).model_dump(mode="json")
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.post("/packs/{pack_id}/install")
+    def install_pack(pack_id: str, request: PolicyPackInstallRequest) -> dict[str, Any]:
+        try:
+            result = install_policy_pack(
+                pack_id,
+                actor=request.actor,
+                approve=request.approve,
+                create_baseline=request.create_baseline,
+            )
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except Exception as exc:  # noqa: BLE001
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        return result.model_dump(mode="json")
 
     @app.post("/generate-snippet")
     def snippet(request: SnippetRequest) -> dict[str, Any]:

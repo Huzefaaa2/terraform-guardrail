@@ -104,6 +104,32 @@ def test_enterprise_api_binding_endpoints(monkeypatch, tmp_path: Path) -> None:
     assert resolve_response.json()["binding_targets"] == ["group:platform"]
 
 
+def test_enterprise_api_policy_packs(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("GUARDRAIL_ENTERPRISE_DATA_DIR", str(tmp_path / "store"))
+    client = TestClient(create_app())
+
+    list_response = client.get("/packs")
+    assert list_response.status_code == 200
+    assert "pci-dss" in {pack["id"] for pack in list_response.json()["packs"]}
+
+    show_response = client.get("/packs/aws-control-tower")
+    assert show_response.status_code == 200
+    assert show_response.json()["baseline_name"] == "aws-control-tower-baseline"
+
+    install_response = client.post(
+        "/packs/aws-control-tower/install",
+        json={"actor": "platform"},
+    )
+    assert install_response.status_code == 200
+    payload = install_response.json()
+    assert payload["pack_id"] == "aws-control-tower"
+    assert payload["baseline_id"]
+
+    baseline_response = client.get("/baselines")
+    assert baseline_response.status_code == 200
+    assert baseline_response.json()["baselines"][0]["name"] == "aws-control-tower-baseline"
+
+
 def test_enterprise_api_baseline_lifecycle(monkeypatch, tmp_path: Path) -> None:
     monkeypatch.setenv("GUARDRAIL_ENTERPRISE_DATA_DIR", str(tmp_path / "store"))
     client = TestClient(create_app())
@@ -270,6 +296,30 @@ def test_enterprise_cli_binding_create_and_list(monkeypatch, tmp_path: Path) -> 
     assert resolved.exit_code == 0
     assert "Target: group:platform" in resolved.stdout
     assert "pol_example" in resolved.stdout
+
+
+def test_enterprise_cli_policy_pack_install(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("GUARDRAIL_ENTERPRISE_DATA_DIR", str(tmp_path / "store"))
+    runner = CliRunner()
+
+    list_result = runner.invoke(app, ["enterprise", "pack", "list"])
+    assert list_result.exit_code == 0
+    assert "pci-dss" in list_result.stdout
+
+    show_result = runner.invoke(app, ["enterprise", "pack", "show", "pci-dss"])
+    assert show_result.exit_code == 0
+    assert "PCI DSS Cloud Controls" in show_result.stdout
+
+    install_result = runner.invoke(
+        app,
+        ["enterprise", "pack", "install", "pci-dss", "--actor", "platform", "--format", "json"],
+    )
+    assert install_result.exit_code == 0
+    assert '"pack_id": "pci-dss"' in install_result.stdout
+
+    baseline_result = runner.invoke(app, ["enterprise", "baseline", "list"])
+    assert baseline_result.exit_code == 0
+    assert "pci-dss-baseline" in baseline_result.stdout
 
 
 def test_enterprise_cli_evidence_pdf_export(monkeypatch, tmp_path: Path) -> None:

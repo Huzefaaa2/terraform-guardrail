@@ -5,6 +5,7 @@ import json
 import os
 import uuid
 from datetime import datetime, timezone
+from importlib import resources
 from pathlib import Path
 from typing import Any, Literal
 
@@ -205,6 +206,42 @@ class ResolvedPolicySet(BaseModel):
     policies: list[dict[str, Any]] = Field(default_factory=list)
 
 
+class PolicyPackTemplate(BaseModel):
+    name: str
+    description: str = ""
+    rule_id: str
+    severity: Literal["info", "warn", "block"] = "warn"
+    category: Literal["security", "cost", "resiliency", "compliance"] = "security"
+    scope: Literal["org", "group", "repo"] = "org"
+    providers: list[str] = Field(default_factory=list)
+    rule_type: Literal["rego", "native", "invariant"] = "native"
+    rule_body: str = ""
+    metadata: PolicyMetadata = Field(default_factory=PolicyMetadata)
+    baseline_policy: bool = True
+
+
+class PolicyPack(BaseModel):
+    id: str
+    name: str
+    version: str = "0.1.0"
+    category: Literal["security", "cost", "resiliency", "compliance"] = "security"
+    providers: list[str] = Field(default_factory=list)
+    standards: list[str] = Field(default_factory=list)
+    description: str = ""
+    baseline_name: str | None = None
+    policies: list[PolicyPackTemplate] = Field(default_factory=list)
+
+
+class PolicyPackInstallResult(BaseModel):
+    id: str = Field(default_factory=lambda: new_id("pack_install"))
+    pack_id: str
+    pack_name: str
+    version: str
+    installed_at: str = Field(default_factory=utc_now)
+    policy_ids: list[str] = Field(default_factory=list)
+    baseline_id: str | None = None
+
+
 class EnterpriseStore:
     def __init__(self, root: Path | str | None = None) -> None:
         self.root = Path(root) if root else enterprise_data_dir()
@@ -395,6 +432,75 @@ class EnterpriseStore:
     def list_bindings(self) -> list[GroupPolicyBinding]:
         return [GroupPolicyBinding.model_validate(item) for item in self._read_list("bindings")]
 
+    def list_installed_pack_results(self) -> list[PolicyPackInstallResult]:
+        return [
+            PolicyPackInstallResult.model_validate(item)
+            for item in self._read_list("policy_pack_installs")
+        ]
+
+    def install_policy_pack(
+        self,
+        pack: PolicyPack,
+        actor: str = "system",
+        approve: bool = True,
+        create_baseline: bool = True,
+    ) -> PolicyPackInstallResult:
+        created_policy_ids: list[str] = []
+        for template in pack.policies:
+            policy = EnterprisePolicy(
+                name=template.name,
+                description=template.description,
+                category=template.category,
+                severity=template.severity,
+                scope=template.scope,
+                providers=template.providers,
+                rule_type=template.rule_type,
+                rule_body=template.rule_body,
+                rule_id=template.rule_id,
+                metadata=template.metadata,
+                version=pack.version,
+                baseline_policy=template.baseline_policy,
+            )
+            saved = self.save_policy(policy, actor=actor)
+            if approve:
+                self.approve_policy(saved.id, actor=actor, comment=f"Installed from {pack.id}")
+            created_policy_ids.append(saved.id)
+
+        baseline_id = None
+        if create_baseline:
+            baseline = self.save_baseline(
+                Baseline(
+                    name=pack.baseline_name or f"{pack.id}-baseline",
+                    policy_ids=created_policy_ids,
+                    version=pack.version,
+                    approved=approve,
+                ),
+                actor=actor,
+            )
+            baseline_id = baseline.id
+
+        result = PolicyPackInstallResult(
+            pack_id=pack.id,
+            pack_name=pack.name,
+            version=pack.version,
+            policy_ids=created_policy_ids,
+            baseline_id=baseline_id,
+        )
+        installs = self.list_installed_pack_results()
+        installs.append(result)
+        self._write_models("policy_pack_installs", installs)
+        self.add_audit(
+            actor,
+            "policy_pack.install",
+            pack.id,
+            {
+                "version": pack.version,
+                "policy_ids": created_policy_ids,
+                "baseline_id": baseline_id,
+            },
+        )
+        return result
+
     def save_binding(
         self,
         binding: GroupPolicyBinding,
@@ -543,6 +649,36 @@ class EnterpriseStore:
 
 def enterprise_data_dir() -> Path:
     return Path(os.getenv("GUARDRAIL_ENTERPRISE_DATA_DIR", DEFAULT_ENTERPRISE_DATA_DIR))
+
+
+def list_builtin_policy_packs() -> list[PolicyPack]:
+    data = resources.files("terraform_guardrail.policy_packs").joinpath("packs.json")
+    payload = json.loads(data.read_text(encoding="utf-8"))
+    return [PolicyPack.model_validate(item) for item in payload]
+
+
+def get_builtin_policy_pack(pack_id: str) -> PolicyPack:
+    for pack in list_builtin_policy_packs():
+        if pack.id == pack_id:
+            return pack
+    raise KeyError(f"Policy pack not found: {pack_id}")
+
+
+def install_policy_pack(
+    pack_id: str,
+    store: EnterpriseStore | None = None,
+    actor: str = "system",
+    approve: bool = True,
+    create_baseline: bool = True,
+) -> PolicyPackInstallResult:
+    store = store or EnterpriseStore()
+    pack = get_builtin_policy_pack(pack_id)
+    return store.install_policy_pack(
+        pack,
+        actor=actor,
+        approve=approve,
+        create_baseline=create_baseline,
+    )
 
 
 def evaluate_enterprise(

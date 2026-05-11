@@ -13,6 +13,9 @@ from terraform_guardrail.enterprise import (
     check_drift,
     evaluate_enterprise,
     export_evidence,
+    get_builtin_policy_pack,
+    install_policy_pack,
+    list_builtin_policy_packs,
     preview_policy,
     resolve_policy_ids,
     resolve_policy_set,
@@ -70,6 +73,27 @@ def test_baseline_resolution_and_group_inheritance(tmp_path: Path) -> None:
     )
 
     assert resolved == [org_policy.id, group_policy.id]
+
+
+def test_builtin_policy_pack_install_creates_policies_baseline_and_audit(tmp_path: Path) -> None:
+    store = EnterpriseStore(tmp_path)
+
+    packs = list_builtin_policy_packs()
+    assert {pack.id for pack in packs} >= {"pci-dss", "aws-control-tower"}
+    pack = get_builtin_policy_pack("pci-dss")
+    result = install_policy_pack("pci-dss", store=store, actor="platform")
+
+    assert result.pack_id == pack.id
+    assert len(result.policy_ids) == len(pack.policies)
+    assert result.baseline_id is not None
+    baseline = store.get_baseline(result.baseline_id)
+    assert baseline.name == "pci-dss-baseline"
+    assert baseline.approved is True
+    assert baseline.policy_ids == result.policy_ids
+    policies = [store.get_policy(policy_id) for policy_id in result.policy_ids]
+    assert {policy.status for policy in policies} == {"approved"}
+    assert policies[0].metadata.standard == "PCI DSS"
+    assert store.audit_events()[-1].action == "policy_pack.install"
 
 
 def test_binding_parent_inheritance_resolves_repo_to_group_and_org(tmp_path: Path) -> None:

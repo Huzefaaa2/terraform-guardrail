@@ -47,6 +47,7 @@ include-package-data = true
 
 [tool.setuptools.package-data]
 terraform_guardrail = ["web/templates/*.html", "web/static/*.css", "web/static/*.png"]
+"terraform_guardrail.policy_packs" = ["*.json"]
 
 [tool.ruff]
 line-length = 100

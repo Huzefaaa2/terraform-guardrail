@@ -21,6 +21,7 @@ integration.
 Start with the release detail page, then follow the roadmap and task guides:
 
 - [v2.0.0 Enterprise Release](Release-v2.0.0)
+- [v3.0.0 Ecosystem Development](Release-v3.0.0)
 - [Roadmap](Roadmap)
 - [Enterprise Features](Enterprise-Features)
 - [How-To Guides](How-To-Guides)
@@ -33,7 +34,7 @@ The current roadmap status is:
 | --- | --- | --- |
 | v1.0 Foundation | Delivered | Registry, packaging, CI templates, policy layering, custom rules |
 | v2.0 Enterprise | Delivered | Authoring UI, baselines, group enforcement, drift gates, evidence export |
-| v3.0 Ecosystem | Planned | Reference implementations, policy packs, service API, cross-provider invariants |
+| v3.0 Ecosystem | In progress | Policy packs delivered; service API, reference implementations, invariants next |
 | v4.0 Intelligent | Planned | Context-aware evaluation and suggested fixes |
 
 ## Quick Install
