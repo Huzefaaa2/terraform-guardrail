@@ -7,12 +7,11 @@ that prevent bad state before apply.
 
 ## Latest Release and Roadmap
 
-**Latest release: v2.0.0 Enterprise Foundation**
+**Latest release: v3.0.0 Ecosystem**
 
-v2.0.0 moves Terraform Guardrail from scanner and registry foundation into an enterprise governance
-workflow. The release adds policy authoring, metadata-rich findings, org baselines, group/repo
-enforcement, drift gates before apply, audit evidence export, and AWS CodePipeline/CodeBuild
-integration.
+v3.0.0 expands Terraform Guardrail from an enterprise control plane into an ecosystem layer. The
+release adds enterprise policy packs, Guardrails-as-a-Service evaluation, cross-provider
+invariants, reference implementations across CI/CD tools, and contributor governance.
 
 ![Terraform Guardrail v2 Enterprise feature map](https://raw.githubusercontent.com/Huzefaaa2/terraform-guardrail/main/docs/assets/terraguard-v2-enterprise.svg)
 
@@ -21,7 +20,7 @@ integration.
 Start with the release detail page, then follow the roadmap and task guides:
 
 - [v2.0.0 Enterprise Release](Release-v2.0.0)
-- [v3.0.0 Ecosystem Development](Release-v3.0.0)
+- [v3.0.0 Ecosystem Release](Release-v3.0.0)
 - [Roadmap](Roadmap)
 - [Governance](Governance)
 - [Enterprise Features](Enterprise-Features)
@@ -202,9 +201,9 @@ flowchart LR
 
 ## Latest Release
 
-- Version: 2.0.0
-- Release: https://github.com/Huzefaaa2/terraform-guardrail/releases/tag/v2.0.0
-- PyPI: https://pypi.org/project/terraform-guardrail/2.0.0/
+- Version: 3.0.0
+- Release: https://github.com/Huzefaaa2/terraform-guardrail/releases/tag/v3.0.0
+- PyPI: https://pypi.org/project/terraform-guardrail/3.0.0/
 - Container image: https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail
 - Registry image: https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail-registry
 - Supported providers: AWS, Azure, GCP, Kubernetes, Helm, OCI, Vault, Alicloud, vSphere

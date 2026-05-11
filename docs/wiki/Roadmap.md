@@ -3,7 +3,7 @@
 Minor releases deliver increments within each major deliverable. Major releases group outcomes by
 phase.
 
-Latest delivered major release: [v3.0.0 Ecosystem Development](Release-v3.0.0).
+Latest delivered major release: [v3.0.0 Ecosystem Release](Release-v3.0.0).
 Next development track: v4.0 Intelligent.
 
 Legend: <span style="color: green">✅ Delivered</span> • <span style="color: orange">🚧 Planned</span>

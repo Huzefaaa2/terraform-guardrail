@@ -26,7 +26,7 @@ report defects, request policy packs, and track roadmap progress without ambigui
 The roadmap is tracked in:
 
 - [Roadmap](Roadmap)
-- [v3.0.0 Ecosystem Development](Release-v3.0.0)
+- [v3.0.0 Ecosystem Release](Release-v3.0.0)
 - [`.github/ROADMAP.yml`](https://github.com/Huzefaaa2/terraform-guardrail/blob/main/.github/ROADMAP.yml)
 
 When a roadmap item ships, update all three locations plus the README roadmap table.

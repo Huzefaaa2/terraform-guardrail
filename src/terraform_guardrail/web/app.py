@@ -51,7 +51,7 @@ HOW_TO_GUIDES = [
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="Terraform Guardrail MCP (TerraGuard)", version="2.0.0")
+    app = FastAPI(title="Terraform Guardrail MCP (TerraGuard)", version="3.0.0")
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
     templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 

@@ -161,7 +161,7 @@ class PolicyPackInstallRequest(BaseModel):
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="Terraform Guardrail MCP (TerraGuard) API", version="2.0.0")
+    app = FastAPI(title="Terraform Guardrail MCP (TerraGuard) API", version="3.0.0")
 
     @app.middleware("http")
     async def record_metrics(request, call_next):  # type: ignore[no-untyped-def]

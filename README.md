@@ -19,9 +19,9 @@ GitHub, GitLab, Azure DevOps, and AWS CodePipeline.
 
 ![Terraform Guardrail v1 Foundation feature map](docs/assets/terraguard-v1-foundation.svg)
 
-- Release notes: https://github.com/Huzefaaa2/terraform-guardrail/releases/tag/v2.0.0
+- Release notes: https://github.com/Huzefaaa2/terraform-guardrail/releases/tag/v3.0.0
 - Enterprise wiki: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Release-v2.0.0
-- v3 Ecosystem docs: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Release-v3.0.0
+- v3 Ecosystem release: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Release-v3.0.0
 - Contributing: https://github.com/Huzefaaa2/terraform-guardrail/blob/main/CONTRIBUTING.md
 - v1 Foundation live app: https://terraform-guardrail.streamlit.app/
 - v2 Enterprise live app: https://terraform-guardrail-enterprise.streamlit.app/
@@ -412,7 +412,7 @@ terraform-guardrail web
 pip install terraform-guardrail
 ```
 
-PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 2.0.0)
+PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 3.0.0)
 
 ## Examples
 
@@ -832,7 +832,7 @@ secrets are set:
 - PyPI: https://pypi.org/project/terraform-guardrail/
 - GitHub Releases: https://github.com/Huzefaaa2/terraform-guardrail/releases
 - Container Image: https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail
-- Latest release: v2.0.0
+- Latest release: v3.0.0
 - Release history: `RELEASE.md`
 - Enterprise Features: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Enterprise-Features
 
@@ -906,8 +906,8 @@ make changelog
 ### Release Helpers
 
 ```bash
-make release-dry VERSION=2.0.0
-make version-bump VERSION=2.0.0
+make release-dry VERSION=3.0.0
+make version-bump VERSION=3.0.0
 ```
 
 ## Multi-Cloud Policy (MCP) tools (current)

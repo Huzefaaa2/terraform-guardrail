@@ -1,3 +1,26 @@
+# v3.0.0
+
+## Highlights
+- v3.0 Ecosystem release with installable enterprise policy packs, a CI-friendly Guardrails-as-a-Service API, cross-provider invariant enforcement, and reference implementations across major delivery tools.
+- Built-in policy packs for PCI DSS, AWS Control Tower, Azure landing zone, and banking resiliency baselines.
+- `POST /service/evaluate` contract with caller request IDs, optional policy pack installation, evidence export, result links, and pass/warn/block decisions.
+- New normalized invariant rules TG021-TG023 for public exposure, storage encryption, and ownership metadata across AWS, Azure, and GCP.
+- End-to-end v3 examples for GitHub Actions, GitLab CI, Azure DevOps, and AWS CodePipeline/CodeBuild.
+- Contributor governance package with contribution guide, security policy, code of conduct, issue templates, PR template, and public roadmap metadata.
+
+## Added
+- `terraform-guardrail enterprise pack list/show/install` commands.
+- API endpoints: `GET /packs`, `GET /packs/{pack_id}`, `POST /packs/{pack_id}/install`, and `POST /service/evaluate`.
+- Built-in `terraform_guardrail.policy_packs` catalog packaged with the Python distribution.
+- Reference implementation files under `examples/*/*service-v3*`.
+- Governance files and validation tests.
+
+## Changed
+- Version updated to 3.0.0 for the Ecosystem release.
+- README and wiki roadmap now mark v3.0 Ecosystem roadmap items as delivered and identify v4.0 Intelligent as the next development track.
+
+---
+
 # v2.0.0
 
 ## Highlights

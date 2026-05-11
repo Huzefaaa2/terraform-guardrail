@@ -4,7 +4,7 @@ This index groups the enterprise-grade capabilities delivered in v2.0.0 and plan
 major releases.
 
 - [v2.0.0 Enterprise Release](Release-v2.0.0)
-- [v3.0.0 Ecosystem Development](Release-v3.0.0)
+- [v3.0.0 Ecosystem Release](Release-v3.0.0)
 - [Roadmap](Roadmap)
 - [How-To Guides](How-To-Guides)
 

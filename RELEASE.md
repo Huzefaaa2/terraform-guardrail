@@ -2,6 +2,8 @@
 
 | Version | Date (UTC) | Highlights |
 | --- | --- | --- |
+| 3.0.0 | 2026-05-11 | Ecosystem release: policy packs, service API, invariants, reference implementations, governance |
+| 2.0.0 | 2026-05-07 | Enterprise foundation: policy lifecycle, baselines, drift gates, evidence export |
 | 1.0.5 | 2026-01-27 | Chocolatey release bump after local verification |
 | 1.0.4 | 2026-01-25 | Chocolatey metadata aligned with review guidance |
 | 1.0.3 | 2026-01-25 | Chocolatey install fix (Python dependency) |

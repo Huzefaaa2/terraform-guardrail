@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.0] - 2026-05-11
+
+### Added
+- Built-in enterprise policy packs for PCI DSS, AWS Control Tower, Azure landing zone, and banking resiliency.
+- Policy pack API endpoints and CLI install/list/show commands.
+- Guardrails-as-a-Service endpoint `POST /service/evaluate` with request IDs, policy pack context, evidence links, and CI-friendly response contract.
+- Cross-provider invariant rules TG021-TG023 for public exposure, storage encryption, and ownership metadata across AWS, Azure, and GCP.
+- v3 reference implementations for GitHub Actions, GitLab CI, Azure DevOps, and AWS CodePipeline/CodeBuild.
+- Contributor governance package with contribution guide, code of conduct, security policy, issue templates, PR template, and public roadmap metadata.
+
+### Changed
+- Roadmap, README, wiki home page, release notes, and package version updated for v3.0.0 Ecosystem.
+
 ## [2.0.0] - 2026-05-07
 
 ### Added

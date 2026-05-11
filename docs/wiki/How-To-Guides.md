@@ -1,7 +1,7 @@
 # How-To Guides
 
 Use these guides when you want a task-first path through Terraform Guardrail instead of a
-reference page. These guides are current for the v2.0.0 Enterprise release.
+reference page. These guides are current for the v3.0.0 Ecosystem release.
 
 ## Start here
 

@@ -21,7 +21,7 @@ def _load_json(path: Path) -> dict[str, Any]:
 
 
 def create_registry_app() -> FastAPI:
-    app = FastAPI(title="Terraform Guardrail Policy Registry", version="2.0.0")
+    app = FastAPI(title="Terraform Guardrail Policy Registry", version="3.0.0")
 
     @app.get("/health")
     def health() -> dict[str, str]:

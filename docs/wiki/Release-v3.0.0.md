@@ -1,8 +1,16 @@
-# v3.0.0 Ecosystem Development
+# v3.0.0 Ecosystem Release
 
 v3.0.0 expands Terraform Guardrail from an enterprise control plane into an ecosystem layer:
 curated policy packs, reference implementations, cross-provider invariants, a stronger
 Guardrails-as-a-Service API, and public contributor governance.
+
+## Release Status
+
+- GitHub Release: https://github.com/Huzefaaa2/terraform-guardrail/releases/tag/v3.0.0
+- PyPI: https://pypi.org/project/terraform-guardrail/3.0.0/
+- Homebrew: `brew install Huzefaaa2/tap/terraform-guardrail`
+- Container image: `ghcr.io/huzefaaa2/terraform-guardrail:v3.0.0`
+- Registry image: `ghcr.io/huzefaaa2/terraform-guardrail-registry:v3.0.0`
 
 ## Implementation Sequence
 
