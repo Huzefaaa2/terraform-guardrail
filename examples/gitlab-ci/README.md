@@ -13,6 +13,12 @@ This example simulates a GitLab CI pipeline using the shared template and shows 
 
 See `.gitlab-ci.yml` in this folder. It uses the published template and points to the fixtures.
 
+## v3 service API example
+
+See `service-v3.gitlab-ci.yml` for a Guardrails-as-a-Service reference implementation. It starts
+the TerraGuard API in the job, calls `POST /service/evaluate` with `policy_pack=aws-control-tower`,
+and stores the service response plus generated evidence as artifacts.
+
 ## Outputs
 
 Sample outputs are provided in `outputs/`:

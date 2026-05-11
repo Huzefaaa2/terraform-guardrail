@@ -1,0 +1,66 @@
+trigger:
+  - main
+
+pool:
+  vmImage: "ubuntu-latest"
+
+variables:
+  GUARDRAIL_API_URL: "http://127.0.0.1:8080"
+
+steps:
+  - checkout: self
+
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: "3.11"
+
+  - script: |
+      pip install .
+      terraform-guardrail api --host 127.0.0.1 --port 8080 &
+      for i in $(seq 1 20); do
+        curl -fsS "$(GUARDRAIL_API_URL)/health" && exit 0
+        sleep 1
+      done
+      exit 1
+    displayName: Start TerraGuard service API
+
+  - script: |
+      curl -fsS -X POST "$(GUARDRAIL_API_URL)/service/evaluate" \
+        -H "content-type: application/json" \
+        -d "{
+          \"path\":\"examples/fixtures/terraform/bad\",
+          \"state_path\":\"examples/fixtures/state/bad.tfstate\",
+          \"request_id\":\"ado-$(Build.BuildId)\",
+          \"provider\":\"aws\",
+          \"policy_pack\":\"aws-control-tower\",
+          \"context\":{\"repo\":\"$(Build.Repository.Name)\",\"environment\":\"$(Build.SourceBranchName)\"},
+          \"fail_on\":\"high\",
+          \"evidence_format\":\"json\",
+          \"actor\":\"azure-devops\"
+        }" | tee guardrail-service-response.json
+    displayName: Evaluate with v3 service contract
+
+  - script: |
+      python - <<'PY'
+      import json
+      import sys
+
+      with open("guardrail-service-response.json", encoding="utf-8") as handle:
+          payload = json.load(handle)
+      print(f"TerraGuard decision: {payload['decision']}")
+      if payload["decision"] == "block":
+          sys.exit(1)
+      PY
+    displayName: Enforce TerraGuard decision
+
+  - task: PublishBuildArtifacts@1
+    condition: always()
+    inputs:
+      PathtoPublish: "guardrail-service-response.json"
+      ArtifactName: "terraguard-v3-service-response"
+
+  - task: PublishBuildArtifacts@1
+    condition: always()
+    inputs:
+      PathtoPublish: ".guardrail/enterprise/evidence"
+      ArtifactName: "terraguard-v3-evidence"

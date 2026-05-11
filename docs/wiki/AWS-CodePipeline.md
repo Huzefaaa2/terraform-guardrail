@@ -62,6 +62,11 @@ The repository includes a runnable starter buildspec at
 `examples/aws-codepipeline/buildspec.yml` and a sample evidence artifact at
 `examples/aws-codepipeline/outputs/guardrail-evidence.json`.
 
+For v3.0 Ecosystem service evaluation, use
+`examples/aws-codepipeline/buildspec-service-v3.yml`. It starts the TerraGuard API in CodeBuild,
+calls `POST /service/evaluate`, uses `policy_pack=aws-control-tower`, and publishes the service
+response plus evidence artifacts.
+
 ## Generate a CodeBuild Guardrail Stage
 
 Use the CLI scaffold command to generate a CodeBuild buildspec and README for your repository:

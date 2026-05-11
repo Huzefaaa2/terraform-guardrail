@@ -1,0 +1,50 @@
+stages:
+  - guardrails
+
+variables:
+  GUARDRAIL_API_URL: "http://127.0.0.1:8080"
+  GUARDRAIL_REQUEST_ID: "gitlab-${CI_PIPELINE_ID}-${CI_JOB_ID}"
+
+guardrails_service_v3:
+  stage: guardrails
+  image: python:3.11
+  before_script:
+    - pip install .
+    - terraform-guardrail api --host 127.0.0.1 --port 8080 &
+    - |
+      for i in $(seq 1 20); do
+        curl -fsS "$GUARDRAIL_API_URL/health" && break
+        sleep 1
+      done
+  script:
+    - |
+      curl -fsS -X POST "$GUARDRAIL_API_URL/service/evaluate" \
+        -H "content-type: application/json" \
+        -d "{
+          \"path\":\"examples/fixtures/terraform/bad\",
+          \"state_path\":\"examples/fixtures/state/bad.tfstate\",
+          \"request_id\":\"$GUARDRAIL_REQUEST_ID\",
+          \"provider\":\"aws\",
+          \"policy_pack\":\"aws-control-tower\",
+          \"context\":{\"repo\":\"$CI_PROJECT_PATH\",\"environment\":\"$CI_COMMIT_REF_NAME\"},
+          \"fail_on\":\"high\",
+          \"evidence_format\":\"json\",
+          \"actor\":\"gitlab-ci\"
+        }" | tee guardrail-service-response.json
+    - |
+      python - <<'PY'
+      import json
+      import sys
+
+      with open("guardrail-service-response.json", encoding="utf-8") as handle:
+          payload = json.load(handle)
+      print(f"TerraGuard decision: {payload['decision']}")
+      if payload["decision"] == "block":
+          sys.exit(1)
+      PY
+  artifacts:
+    when: always
+    paths:
+      - guardrail-service-response.json
+      - .guardrail/enterprise/evidence/*.json
+    expire_in: 14 days

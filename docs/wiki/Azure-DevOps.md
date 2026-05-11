@@ -101,3 +101,11 @@ steps:
 - `policyQuery`: OPA query override
 - `jsonReport`, `sarifReport`, `junitReport`: report filenames
 - `publishReports`: set to `false` to skip publish tasks
+
+## v3 Service API Reference
+
+For a Guardrails-as-a-Service pipeline example, see
+[`examples/azure-devops/service-v3.yml`](https://github.com/Huzefaaa2/terraform-guardrail/blob/main/examples/azure-devops/service-v3.yml).
+
+The example starts the TerraGuard API, calls `POST /service/evaluate` with
+`policy_pack=aws-control-tower`, and publishes the service response plus evidence artifacts.

@@ -1,0 +1,51 @@
+version: 0.2
+
+env:
+  variables:
+    GUARDRAIL_API_URL: "http://127.0.0.1:8080"
+
+phases:
+  install:
+    commands:
+      - curl -fsSL https://guardrail.sh/install | bash
+  pre_build:
+    commands:
+      - terraform init
+      - terraform plan -out=tfplan
+      - terraform-guardrail api --host 127.0.0.1 --port 8080 &
+      - |
+        for i in $(seq 1 20); do
+          curl -fsS "$GUARDRAIL_API_URL/health" && break
+          sleep 1
+        done
+      - |
+        curl -fsS -X POST "$GUARDRAIL_API_URL/service/evaluate" \
+          -H "content-type: application/json" \
+          -d "{
+            \"path\":\".\",
+            \"request_id\":\"codebuild-$CODEBUILD_BUILD_ID\",
+            \"provider\":\"aws\",
+            \"policy_pack\":\"aws-control-tower\",
+            \"context\":{\"repo\":\"$CODEBUILD_SOURCE_REPO_URL\",\"environment\":\"$CODEBUILD_SOURCE_VERSION\"},
+            \"fail_on\":\"high\",
+            \"evidence_format\":\"json\",
+            \"actor\":\"aws-codebuild\"
+          }" | tee guardrail-service-response.json
+      - |
+        python - <<'PY'
+        import json
+        import sys
+
+        with open("guardrail-service-response.json", encoding="utf-8") as handle:
+            payload = json.load(handle)
+        print(f"TerraGuard decision: {payload['decision']}")
+        if payload["decision"] == "block":
+            sys.exit(1)
+        PY
+  build:
+    commands:
+      - terraform apply -auto-approve tfplan
+artifacts:
+  files:
+    - guardrail-service-response.json
+    - .guardrail/enterprise/evidence/**/*

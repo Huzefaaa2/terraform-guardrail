@@ -19,7 +19,7 @@ Guardrails-as-a-Service API, and public contributor governance.
 | Enterprise policy packs | Delivered | Built-in pack catalog, CLI/API install, baseline creation, audit event |
 | Guardrails-as-a-Service API | Delivered | `/service/evaluate` contract with request ID, pack context, evidence links |
 | Cross-provider invariant enforcement | Delivered | TG021-TG023 common exposure, encryption, and ownership controls |
-| Reference implementations across tools | Planned | End-to-end examples for GitHub, GitLab, Azure DevOps, AWS CodePipeline |
+| Reference implementations across tools | Delivered | GitHub, GitLab, Azure DevOps, and AWS CodePipeline v3 examples |
 | Contributor governance + public roadmap | Planned | Issue templates, contribution workflow, roadmap hygiene |
 
 ## Delivered: Enterprise Policy Packs
@@ -84,3 +84,17 @@ service API consumers, and evidence exports can reason about common controls acr
 GCP.
 
 Detailed guide: [Cross-Provider Invariants](Cross-Provider-Invariants).
+
+## Delivered: Reference Implementations
+
+The fourth v3.0 capability adds end-to-end service API examples for:
+
+- GitHub Actions
+- GitLab CI
+- Azure DevOps
+- AWS CodePipeline / CodeBuild
+
+Each example uses `POST /service/evaluate`, a CI-native `request_id`, `policy_pack=aws-control-tower`,
+JSON evidence export, and block/warn/pass enforcement.
+
+Detailed guide: [Reference Implementations](Reference-Implementations).

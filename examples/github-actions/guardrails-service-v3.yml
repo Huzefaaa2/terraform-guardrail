@@ -1,0 +1,72 @@
+name: TerraGuard v3 Service Gate
+
+on:
+  pull_request:
+    paths:
+      - "**/*.tf"
+      - "**/*.tfvars"
+      - "**/*.hcl"
+  workflow_dispatch:
+
+jobs:
+  guardrails-service:
+    runs-on: ubuntu-latest
+    env:
+      GUARDRAIL_API_URL: http://127.0.0.1:8080
+      GUARDRAIL_REQUEST_ID: github-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Terraform Guardrail
+        run: pip install .
+
+      - name: Start Guardrails-as-a-Service API
+        run: |
+          terraform-guardrail api --host 127.0.0.1 --port 8080 &
+          for i in $(seq 1 20); do
+            curl -fsS "$GUARDRAIL_API_URL/health" && exit 0
+            sleep 1
+          done
+          exit 1
+
+      - name: Evaluate with v3 service contract
+        run: |
+          curl -fsS -X POST "$GUARDRAIL_API_URL/service/evaluate" \
+            -H "content-type: application/json" \
+            -d "{
+              \"path\":\"examples/fixtures/terraform/bad\",
+              \"state_path\":\"examples/fixtures/state/bad.tfstate\",
+              \"request_id\":\"$GUARDRAIL_REQUEST_ID\",
+              \"provider\":\"aws\",
+              \"policy_pack\":\"aws-control-tower\",
+              \"context\":{\"repo\":\"${{ github.repository }}\",\"environment\":\"pull-request\"},
+              \"fail_on\":\"high\",
+              \"evidence_format\":\"json\",
+              \"actor\":\"github-actions\"
+            }" | tee guardrail-service-response.json
+
+      - name: Enforce decision
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+
+          with open("guardrail-service-response.json", encoding="utf-8") as handle:
+              payload = json.load(handle)
+          print(f"TerraGuard decision: {payload['decision']}")
+          if payload["decision"] == "block":
+              sys.exit(1)
+          PY
+
+      - name: Upload service evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraguard-v3-service-evidence
+          path: |
+            guardrail-service-response.json
+            .guardrail/enterprise/evidence/*.json
