@@ -1,0 +1,21 @@
+current:
+  major: "v3.0 Ecosystem"
+  status: "in development"
+  delivered:
+    - "Enterprise policy packs"
+    - "Guardrails-as-a-Service API"
+    - "Cross-provider invariant enforcement"
+    - "Reference implementations across tools"
+    - "Contributor governance + public roadmap"
+  next:
+    - "v4.0 Intelligent: context-aware evaluation"
+    - "v4.0 Intelligent: suggested fixes and recommendations"
+labels:
+  v3-ecosystem:
+    description: "Ecosystem integrations, packs, service API, roadmap, governance"
+  v4-intelligent:
+    description: "Context-aware evaluation and suggested fixes"
+  policy-pack:
+    description: "Enterprise policy pack content or metadata"
+  integration:
+    description: "CI/CD, cloud, package, or tool integration"

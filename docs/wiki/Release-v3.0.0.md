@@ -20,7 +20,7 @@ Guardrails-as-a-Service API, and public contributor governance.
 | Guardrails-as-a-Service API | Delivered | `/service/evaluate` contract with request ID, pack context, evidence links |
 | Cross-provider invariant enforcement | Delivered | TG021-TG023 common exposure, encryption, and ownership controls |
 | Reference implementations across tools | Delivered | GitHub, GitLab, Azure DevOps, and AWS CodePipeline v3 examples |
-| Contributor governance + public roadmap | Planned | Issue templates, contribution workflow, roadmap hygiene |
+| Contributor governance + public roadmap | Delivered | Contribution docs, issue/PR templates, security policy, roadmap metadata |
 
 ## Delivered: Enterprise Policy Packs
 
@@ -98,3 +98,27 @@ Each example uses `POST /service/evaluate`, a CI-native `request_id`, `policy_pa
 JSON evidence export, and block/warn/pass enforcement.
 
 Detailed guide: [Reference Implementations](Reference-Implementations).
+
+## Delivered: Contributor Governance + Public Roadmap
+
+The final v3.0 capability adds the project governance layer:
+
+- `CONTRIBUTING.md`
+- `CODE_OF_CONDUCT.md`
+- `SECURITY.md`
+- GitHub issue templates
+- Pull request template
+- `.github/ROADMAP.yml`
+- Wiki governance guide
+
+Detailed guide: [Governance](Governance).
+
+## v3.0 Ecosystem Completion
+
+All planned v3.0 Ecosystem items are now implemented:
+
+- Enterprise policy packs.
+- Guardrails-as-a-Service API.
+- Cross-provider invariant enforcement.
+- Reference implementations across tools.
+- Contributor governance and public roadmap.

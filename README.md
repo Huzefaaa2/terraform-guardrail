@@ -21,6 +21,8 @@ GitHub, GitLab, Azure DevOps, and AWS CodePipeline.
 
 - Release notes: https://github.com/Huzefaaa2/terraform-guardrail/releases/tag/v2.0.0
 - Enterprise wiki: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Release-v2.0.0
+- v3 Ecosystem docs: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Release-v3.0.0
+- Contributing: https://github.com/Huzefaaa2/terraform-guardrail/blob/main/CONTRIBUTING.md
 - v1 Foundation live app: https://terraform-guardrail.streamlit.app/
 - v2 Enterprise live app: https://terraform-guardrail-enterprise.streamlit.app/
 - Author: Huzefa Husain — https://www.linkedin.com/in/huzefaaa
@@ -316,7 +318,7 @@ Legend: <span style="color: green">✅ Delivered</span> • <span style="color: 
 | Org-wide baselines |  | <span style="color: green">✅ Delivered (2.0.0)</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Org-Wide-Baselines) |
 | Group-level enforcement |  | <span style="color: green">✅ Delivered (2.0.0)</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Group-Level-Enforcement) |
 | Evidence export (SOC2 / ISO / PCI) |  | <span style="color: green">✅ Delivered (2.0.0)</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Evidence-Export) |
-| Contributor governance + public roadmap |  |  | <span style="color: orange">🚧 Planned</span> |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Governance) |
+| Contributor governance + public roadmap |  |  | <span style="color: green">✅ Delivered (v3.0 development)</span> |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Governance) |
 | Reference implementations across tools |  |  | <span style="color: green">✅ Delivered (v3.0 development)</span> |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Reference-Implementations) |
 | Cross-provider invariant enforcement |  |  | <span style="color: green">✅ Delivered (v3.0 development)</span> |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Cross-Provider-Invariants) |
 | Guardrails-as-a-Service API |  |  | <span style="color: green">✅ Delivered (v3.0 development)</span> |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Guardrails-as-a-Service) |

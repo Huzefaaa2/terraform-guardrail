@@ -3,8 +3,8 @@
 Minor releases deliver increments within each major deliverable. Major releases group outcomes by
 phase.
 
-Latest delivered major release: [v2.0.0 Enterprise Release](Release-v2.0.0).
-Current development track: [v3.0.0 Ecosystem Development](Release-v3.0.0).
+Latest delivered major release: [v3.0.0 Ecosystem Development](Release-v3.0.0).
+Next development track: v4.0 Intelligent.
 
 Legend: <span style="color: green">✅ Delivered</span> • <span style="color: orange">🚧 Planned</span>
 
@@ -31,7 +31,7 @@ Legend: <span style="color: green">✅ Delivered</span> • <span style="color: 
 | Org-wide baselines |  | <span style="color: green">✅ Delivered (2.0.0)</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Org-Wide-Baselines) |
 | Group-level enforcement |  | <span style="color: green">✅ Delivered (2.0.0)</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Group-Level-Enforcement) |
 | Evidence export (SOC2 / ISO / PCI) |  | <span style="color: green">✅ Delivered (2.0.0)</span> |  |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Evidence-Export) |
-| Contributor governance + public roadmap |  |  | <span style="color: orange">🚧 Planned</span> |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Governance) |
+| Contributor governance + public roadmap |  |  | <span style="color: green">✅ Delivered (v3.0 development)</span> |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Governance) |
 | Reference implementations across tools |  |  | <span style="color: green">✅ Delivered (v3.0 development)</span> |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Reference-Implementations) |
 | Cross-provider invariant enforcement |  |  | <span style="color: green">✅ Delivered (v3.0 development)</span> |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Cross-Provider-Invariants) |
 | Guardrails-as-a-Service API |  |  | <span style="color: green">✅ Delivered (v3.0 development)</span> |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Guardrails-as-a-Service) |
