@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import json
 import os
+import subprocess
 import uuid
 from datetime import datetime, timezone
 from importlib import resources
@@ -272,6 +273,29 @@ class RemediationPatchBundle(BaseModel):
     body: str
     files: list[RemediationPatchFile] = Field(default_factory=list)
     artifact_dir: str
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class RemediationPullRequest(BaseModel):
+    id: str = Field(default_factory=lambda: new_id("pr"))
+    bundle_id: str
+    plan_id: str
+    result_id: str
+    created_at: str = Field(default_factory=utc_now)
+    actor: str = "system"
+    provider: Literal["github"] = "github"
+    repository: str
+    base_branch: str = "main"
+    head_branch: str
+    title: str
+    body_file: str
+    draft: bool = True
+    status: Literal["planned", "created", "failed"] = "planned"
+    url: str | None = None
+    number: int | None = None
+    command: list[str] = Field(default_factory=list)
+    dry_run: bool = True
+    error: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -891,6 +915,53 @@ class EnterpriseStore:
         if plan_id:
             bundles = [bundle for bundle in bundles if bundle.plan_id == plan_id]
         return bundles
+
+    def save_pull_request(
+        self,
+        pull_request: RemediationPullRequest,
+        actor: str = "system",
+    ) -> RemediationPullRequest:
+        pull_requests = [
+            RemediationPullRequest.model_validate(item)
+            for item in self._read_list("pull_requests")
+        ]
+        pull_requests.append(pull_request)
+        self._write_models("pull_requests", pull_requests)
+        self.add_audit(
+            actor,
+            "remediation.pull_request.github",
+            pull_request.id,
+            {
+                "bundle_id": pull_request.bundle_id,
+                "repository": pull_request.repository,
+                "status": pull_request.status,
+                "dry_run": pull_request.dry_run,
+                "url": pull_request.url,
+            },
+        )
+        return pull_request
+
+    def get_pull_request(self, pull_request_id: str) -> RemediationPullRequest:
+        for pull_request in self._read_list("pull_requests"):
+            if pull_request.get("id") == pull_request_id:
+                return RemediationPullRequest.model_validate(pull_request)
+        raise KeyError(f"Pull request record not found: {pull_request_id}")
+
+    def list_pull_requests(
+        self,
+        bundle_id: str | None = None,
+    ) -> list[RemediationPullRequest]:
+        pull_requests = [
+            RemediationPullRequest.model_validate(item)
+            for item in self._read_list("pull_requests")
+        ]
+        if bundle_id:
+            pull_requests = [
+                pull_request
+                for pull_request in pull_requests
+                if pull_request.bundle_id == bundle_id
+            ]
+        return pull_requests
 
     def list_scheduled_scan_targets(self) -> list[ScheduledScanTarget]:
         return [
@@ -1692,6 +1763,86 @@ def create_remediation_patch_bundle(
     return store.save_patch_bundle(bundle, actor=actor)
 
 
+def create_github_pull_request(
+    bundle_id: str,
+    repository: str,
+    store: EnterpriseStore | None = None,
+    actor: str = "system",
+    base_branch: str = "main",
+    draft: bool = True,
+    dry_run: bool = True,
+) -> RemediationPullRequest:
+    store = store or EnterpriseStore()
+    bundle = store.get_patch_bundle(bundle_id)
+    body_file = Path(bundle.artifact_dir) / "PULL_REQUEST.md"
+    command = [
+        "gh",
+        "pr",
+        "create",
+        "--repo",
+        repository,
+        "--base",
+        base_branch,
+        "--head",
+        bundle.branch_name,
+        "--title",
+        bundle.title,
+        "--body-file",
+        str(body_file),
+    ]
+    if draft:
+        command.append("--draft")
+    status: Literal["planned", "created", "failed"] = "planned"
+    url: str | None = None
+    number: int | None = None
+    error: str | None = None
+    if not dry_run:
+        try:
+            completed = subprocess.run(
+                command,
+                capture_output=True,
+                check=False,
+                text=True,
+            )
+        except OSError as exc:
+            status = "failed"
+            error = str(exc)
+        else:
+            output = completed.stdout.strip()
+            if completed.returncode == 0:
+                status = "created"
+                url = _first_url(output)
+                number = _github_pr_number(url)
+            else:
+                status = "failed"
+                error = completed.stderr.strip() or output or "gh pr create failed"
+    pull_request = RemediationPullRequest(
+        bundle_id=bundle.id,
+        plan_id=bundle.plan_id,
+        result_id=bundle.result_id,
+        actor=actor,
+        repository=repository,
+        base_branch=base_branch,
+        head_branch=bundle.branch_name,
+        title=bundle.title,
+        body_file=str(body_file),
+        draft=draft,
+        status=status,
+        url=url,
+        number=number,
+        command=command,
+        dry_run=dry_run,
+        error=error,
+        metadata={
+            "artifact_dir": bundle.artifact_dir,
+            "commit_message": bundle.commit_message,
+            "files": len(bundle.files),
+        },
+    )
+    _write_github_pr_record(bundle, pull_request)
+    return store.save_pull_request(pull_request, actor=actor)
+
+
 def governance_health_report(
     store: EnterpriseStore | None = None,
     window: str = "all",
@@ -1728,6 +1879,7 @@ def governance_health_report(
             "policies": len(store.list_policies()),
             "baselines": len(store.list_baselines()),
             "remediation_plans": len(store.list_remediation_plans()),
+            "pull_requests": len(store.list_pull_requests()),
             "scheduled_targets": len(store.list_scheduled_scan_targets()),
             "scheduled_runs": len(store.list_scheduled_scan_runs()),
             "evidence_schedules": len(store.list_evidence_schedules()),
@@ -2375,6 +2527,44 @@ def _patch_file_content(action: RemediationAction) -> str:
         f"# Review before applying to a Terraform module.\n\n"
         f"{action.patch_preview.rstrip()}\n"
     )
+
+
+def _write_github_pr_record(
+    bundle: RemediationPatchBundle,
+    pull_request: RemediationPullRequest,
+) -> None:
+    artifact_dir = Path(bundle.artifact_dir)
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    (artifact_dir / "github-pr.json").write_text(
+        json.dumps(pull_request.model_dump(mode="json"), indent=2),
+        encoding="utf-8",
+    )
+    (artifact_dir / "github-pr-command.sh").write_text(
+        "#!/usr/bin/env bash\nset -euo pipefail\n"
+        + " ".join(_shell_quote(part) for part in pull_request.command)
+        + "\n",
+        encoding="utf-8",
+    )
+
+
+def _shell_quote(value: str) -> str:
+    return "'" + value.replace("'", "'\"'\"'") + "'"
+
+
+def _first_url(value: str) -> str | None:
+    for part in value.split():
+        if part.startswith("http://") or part.startswith("https://"):
+            return part.rstrip()
+    return None
+
+
+def _github_pr_number(url: str | None) -> int | None:
+    if not url:
+        return None
+    try:
+        return int(url.rstrip("/").split("/")[-1])
+    except ValueError:
+        return None
 
 
 def _remediation_confidence(

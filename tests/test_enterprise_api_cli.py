@@ -231,10 +231,23 @@ resource "aws_s3_bucket" "logs" {
     assert bundles.status_code == 200
     assert bundles.json()["bundles"][0]["id"] == bundle.json()["id"]
 
+    github_pr = client.post(
+        f"/remediation/patch-bundles/{bundle.json()['id']}/github-pr",
+        json={"repository": "acme/payments-infra", "actor": "platform"},
+    )
+    assert github_pr.status_code == 200
+    assert github_pr.json()["status"] == "planned"
+    assert github_pr.json()["repository"] == "acme/payments-infra"
+
+    github_prs = client.get(f"/remediation/github-prs?bundle_id={bundle.json()['id']}")
+    assert github_prs.status_code == 200
+    assert github_prs.json()["pull_requests"][0]["id"] == github_pr.json()["id"]
+
     health = client.get("/governance/health")
     assert health.status_code == 200
     assert health.json()["totals"]["evaluations"] == 1
     assert health.json()["totals"]["remediation_plans"] == 1
+    assert health.json()["totals"]["pull_requests"] == 1
 
     scheduled = client.post(
         "/scheduled-scans",
@@ -407,6 +420,25 @@ resource "aws_s3_bucket" "logs" {
     bundles = runner.invoke(app, ["enterprise", "remediation", "patch-bundles"])
     assert bundles.exit_code == 0
     assert plan.id in bundles.output
+
+    stored_bundle = EnterpriseStore().list_patch_bundles()[0]
+    github_pr = runner.invoke(
+        app,
+        [
+            "enterprise",
+            "remediation",
+            "github-pr",
+            stored_bundle.id,
+            "--repository",
+            "acme/payments-infra",
+        ],
+    )
+    assert github_pr.exit_code == 0
+    assert "Status: planned" in github_pr.output
+
+    github_prs = runner.invoke(app, ["enterprise", "remediation", "github-prs"])
+    assert github_prs.exit_code == 0
+    assert "acme/payments-infra" in github_prs.output
 
 
 def test_enterprise_cli_scheduled_scan(monkeypatch, tmp_path: Path) -> None:

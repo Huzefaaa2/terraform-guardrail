@@ -20,6 +20,7 @@ from terraform_guardrail.enterprise import (
     RiskProfile,
     ScheduledScanTarget,
     check_drift,
+    create_github_pull_request,
     create_remediation_patch_bundle,
     create_remediation_plan,
     ensure_policy_pack_installed,
@@ -189,6 +190,14 @@ class PatchBundleRequest(BaseModel):
     plan_id: str
     actor: str = "system"
     branch_prefix: str = "guardrail/remediate"
+
+
+class GitHubPullRequestRequest(BaseModel):
+    repository: str
+    actor: str = "system"
+    base_branch: str = "main"
+    draft: bool = True
+    dry_run: bool = True
 
 
 class AutomationRunRequest(BaseModel):
@@ -600,6 +609,34 @@ def create_app() -> FastAPI:
             return EnterpriseStore().get_patch_bundle(bundle_id).model_dump(mode="json")
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.post("/remediation/patch-bundles/{bundle_id}/github-pr")
+    def create_patch_bundle_github_pr(
+        bundle_id: str,
+        request: GitHubPullRequestRequest,
+    ) -> dict[str, Any]:
+        try:
+            pull_request = create_github_pull_request(
+                bundle_id,
+                repository=request.repository,
+                actor=request.actor,
+                base_branch=request.base_branch,
+                draft=request.draft,
+                dry_run=request.dry_run,
+            )
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        return pull_request.model_dump(mode="json")
+
+    @app.get("/remediation/github-prs")
+    def github_pull_requests(bundle_id: str | None = None) -> dict[str, Any]:
+        pull_requests = EnterpriseStore().list_pull_requests(bundle_id=bundle_id)
+        return {
+            "pull_requests": [
+                pull_request.model_dump(mode="json")
+                for pull_request in pull_requests
+            ]
+        }
 
     @app.get("/governance/health")
     def governance_health(window: str = "all") -> dict[str, Any]:

@@ -6,6 +6,7 @@
 - Governance health summarizes stored evaluations, decisions, recurring rules, waivers, evidence exports, and risk signals.
 - Scheduled governance scan targets define path, cadence, context, baseline, and fail threshold, with manual execution records.
 - Remediation patch bundles generate provider-neutral PR scaffolds from remediation plans.
+- GitHub pull request automation records safe dry-run PR plans and can call `gh pr create` on demand.
 - Evidence schedules define recurring audit exports by result, context, standard, or control.
 - Background runner scaffold executes enabled scan and evidence schedules from one command or API call.
 
@@ -15,6 +16,7 @@
 - API endpoints for remediation plans and governance health.
 - API and CLI support for scheduled scan targets and on-demand scheduled runs.
 - API and CLI support for remediation patch bundle scaffolds.
+- API and CLI support for GitHub pull request records from patch bundles.
 - API and CLI support for evidence schedules and on-demand evidence schedule runs.
 - API and CLI support for automation runner history and execution.
 

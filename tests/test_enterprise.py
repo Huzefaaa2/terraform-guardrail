@@ -15,6 +15,7 @@ from terraform_guardrail.enterprise import (
     RiskProfile,
     ScheduledScanTarget,
     check_drift,
+    create_github_pull_request,
     create_remediation_patch_bundle,
     create_remediation_plan,
     ensure_policy_pack_installed,
@@ -311,6 +312,42 @@ resource "aws_s3_bucket" "logs" {
     assert "aws_s3_bucket_server_side_encryption_configuration" in bundle.files[0].content
     assert store.get_patch_bundle(bundle.id).id == bundle.id
     assert store.audit_events()[-1].action == "remediation.patch_bundle.create"
+
+
+def test_github_pull_request_dry_run_records_command(tmp_path: Path) -> None:
+    infra = tmp_path / "main.tf"
+    infra.write_text(
+        """
+resource "aws_s3_bucket" "logs" {
+  bucket = "logs"
+}
+""",
+        encoding="utf-8",
+    )
+    store = EnterpriseStore(tmp_path / "store")
+    result = evaluate_enterprise(infra, store=store)
+    plan = create_remediation_plan(result.id, store=store, actor="platform")
+    bundle = create_remediation_patch_bundle(plan.id, store=store, actor="platform")
+
+    pull_request = create_github_pull_request(
+        bundle.id,
+        repository="acme/payments-infra",
+        store=store,
+        actor="platform",
+    )
+    health = governance_health_report(store=store)
+
+    assert pull_request.status == "planned"
+    assert pull_request.dry_run is True
+    assert pull_request.repository == "acme/payments-infra"
+    assert pull_request.head_branch == bundle.branch_name
+    assert "--draft" in pull_request.command
+    assert Path(pull_request.body_file).exists()
+    assert (Path(bundle.artifact_dir) / "github-pr.json").exists()
+    assert (Path(bundle.artifact_dir) / "github-pr-command.sh").exists()
+    assert store.list_pull_requests()[0].id == pull_request.id
+    assert health.totals["pull_requests"] == 1
+    assert store.audit_events()[-1].action == "remediation.pull_request.github"
 
 
 def test_scheduled_scan_target_runs_and_updates_health(tmp_path: Path) -> None:

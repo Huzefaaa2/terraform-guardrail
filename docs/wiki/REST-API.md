@@ -43,6 +43,8 @@ Terraform Guardrail Multi-Cloud Policy (MCP) (TerraGuard) exposes a REST API for
 | `POST /remediation/patch-bundles` | Generate a PR-ready patch bundle scaffold |
 | `GET /remediation/patch-bundles` | List patch bundle scaffolds |
 | `GET /remediation/patch-bundles/{bundle_id}` | Inspect a patch bundle scaffold |
+| `POST /remediation/patch-bundles/{bundle_id}/github-pr` | Plan or create a GitHub pull request from a patch bundle |
+| `GET /remediation/github-prs` | List GitHub pull request records |
 | `GET /governance/health` | Summarize governance health and recurring risk |
 | `POST /scheduled-scans` | Create a scheduler-ready governance scan target |
 | `GET /scheduled-scans` | List scheduled scan targets |
@@ -102,6 +104,6 @@ adjustments, and suggested fixes.
 Delivered as part of the Dockerized Multi-Cloud Policy (MCP) + REST API milestone and extended
 in v3.0 development with policy pack and Guardrails-as-a-Service endpoints. v4.0 development adds
 context risk profiles and recommendation endpoints. v5.0 development adds remediation plans,
-patch bundle scaffolds, governance health reporting, scheduled scan target APIs, and evidence
-schedule APIs. The v5 background runner scaffold executes enabled scan and evidence schedules from
-one external scheduler entrypoint.
+patch bundle scaffolds, GitHub pull request records, governance health reporting, scheduled scan
+target APIs, and evidence schedule APIs. The v5 background runner scaffold executes enabled scan
+and evidence schedules from one external scheduler entrypoint.

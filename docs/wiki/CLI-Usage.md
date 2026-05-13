@@ -91,6 +91,9 @@ terraform-guardrail enterprise remediation create <evaluation-result-id> \
   --output guardrail-remediation.md
 terraform-guardrail enterprise remediation patch-bundle <plan-id>
 terraform-guardrail enterprise remediation patch-bundles --plan-id <plan-id>
+terraform-guardrail enterprise remediation github-pr <bundle-id> \
+  --repository Huzefaaa2/terraform-guardrail
+terraform-guardrail enterprise remediation github-prs --bundle-id <bundle-id>
 terraform-guardrail enterprise health
 terraform-guardrail enterprise schedule create \
   --name daily-prod \

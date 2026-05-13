@@ -29,6 +29,7 @@ from terraform_guardrail.enterprise import (
     RiskProfile,
     ScheduledScanTarget,
     check_drift,
+    create_github_pull_request,
     create_remediation_patch_bundle,
     create_remediation_plan,
     evaluate_enterprise,
@@ -1070,6 +1071,76 @@ def enterprise_remediation_patch_bundles(
         console.print(
             f"- {bundle.id} plan={bundle.plan_id} branch={bundle.branch_name} "
             f"files={len(bundle.files)}"
+        )
+
+
+@enterprise_remediation_app.command("github-pr")
+def enterprise_remediation_github_pr(
+    bundle_id: Annotated[str, typer.Argument(help="Remediation patch bundle ID")],
+    repository: Annotated[str, typer.Option(help="GitHub repository, e.g. owner/repo")],
+    base_branch: Annotated[str, typer.Option(help="Base branch for the pull request")] = "main",
+    actor: Annotated[str, typer.Option(help="Actor creating the PR record")] = "system",
+    draft: Annotated[bool, typer.Option(help="Create a draft pull request")] = True,
+    create: Annotated[
+        bool,
+        typer.Option(help="Execute gh pr create instead of writing a dry-run plan"),
+    ] = False,
+    format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
+) -> None:
+    try:
+        pull_request = create_github_pull_request(
+            bundle_id,
+            repository=repository,
+            actor=actor,
+            base_branch=base_branch,
+            draft=draft,
+            dry_run=not create,
+        )
+    except KeyError as exc:
+        console.print(str(exc))
+        raise typer.Exit(code=1) from exc
+    if format == "json":
+        console.print(JSON(json.dumps(pull_request.model_dump(mode="json"), indent=2)))
+        return
+    console.print(f"GitHub PR record: {pull_request.id}")
+    console.print(f"Status: {pull_request.status}")
+    console.print(f"Repository: {pull_request.repository}")
+    console.print(f"Branch: {pull_request.head_branch} -> {pull_request.base_branch}")
+    if pull_request.url:
+        console.print(f"URL: {pull_request.url}")
+    else:
+        console.print("Command:")
+        console.print(" ".join(pull_request.command))
+    if pull_request.error:
+        console.print(f"Error: {pull_request.error}")
+    if pull_request.status == "failed":
+        raise typer.Exit(code=1)
+
+
+@enterprise_remediation_app.command("github-prs")
+def enterprise_remediation_github_prs(
+    bundle_id: Annotated[str | None, typer.Option(help="Filter by patch bundle ID")] = None,
+    format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
+) -> None:
+    pull_requests = EnterpriseStore().list_pull_requests(bundle_id=bundle_id)
+    if format == "json":
+        console.print(
+            JSON(
+                json.dumps(
+                    [
+                        pull_request.model_dump(mode="json")
+                        for pull_request in pull_requests
+                    ],
+                    indent=2,
+                )
+            )
+        )
+        return
+    for pull_request in pull_requests:
+        suffix = f" url={pull_request.url}" if pull_request.url else ""
+        console.print(
+            f"- {pull_request.id} bundle={pull_request.bundle_id} "
+            f"status={pull_request.status} repo={pull_request.repository}{suffix}"
         )
 
 
