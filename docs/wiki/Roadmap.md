@@ -4,7 +4,7 @@ Minor releases deliver increments within each major deliverable. Major releases 
 phase.
 
 Latest delivered major release: [v5.0.0 Autonomous Governance Release](Release-v5.0.0).
-Current release-hardening track: v5.0.0 package verification, final documentation, and publishing.
+Current status: v5.0.0 is published; the next major roadmap track has not started yet.
 
 ## Version Overview
 
