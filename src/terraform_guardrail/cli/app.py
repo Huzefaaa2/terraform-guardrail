@@ -44,6 +44,7 @@ from terraform_guardrail.enterprise import (
     render_explanation_markdown,
     render_remediation_markdown,
     resolve_policy_set,
+    run_automation_cycle,
     run_drift_gate,
     run_evidence_schedule,
     run_scheduled_scan,
@@ -73,6 +74,7 @@ enterprise_risk_app = typer.Typer(help="Enterprise context risk profile commands
 enterprise_waiver_app = typer.Typer(help="Enterprise policy waiver commands.")
 enterprise_remediation_app = typer.Typer(help="Enterprise remediation plan commands.")
 enterprise_schedule_app = typer.Typer(help="Enterprise scheduled governance scan commands.")
+enterprise_automation_app = typer.Typer(help="Enterprise automation runner commands.")
 enterprise_aws_app = typer.Typer(help="AWS enterprise integration commands.")
 enterprise_aws_codepipeline_app = typer.Typer(help="AWS CodePipeline scaffold commands.")
 evidence_app = typer.Typer(help="Evidence export commands.")
@@ -90,6 +92,7 @@ enterprise_app.add_typer(enterprise_risk_app, name="risk-profile")
 enterprise_app.add_typer(enterprise_waiver_app, name="waiver")
 enterprise_app.add_typer(enterprise_remediation_app, name="remediation")
 enterprise_app.add_typer(enterprise_schedule_app, name="schedule")
+enterprise_app.add_typer(enterprise_automation_app, name="automation")
 enterprise_app.add_typer(enterprise_aws_app, name="aws")
 enterprise_aws_app.add_typer(enterprise_aws_codepipeline_app, name="codepipeline")
 console = Console()
@@ -1187,6 +1190,48 @@ def enterprise_schedule_runs(
         console.print(
             f"- {run.id} target={run.target_id} status={run.status} "
             f"decision={run.decision or 'none'}"
+        )
+
+
+@enterprise_automation_app.command("run")
+def enterprise_automation_run(
+    actor: Annotated[str, typer.Option(help="Automation actor identity")] = "automation",
+    include_scans: Annotated[bool, typer.Option(help="Run enabled scheduled scan targets")] = True,
+    include_evidence: Annotated[bool, typer.Option(help="Run enabled evidence schedules")] = True,
+    limit: Annotated[int | None, typer.Option(help="Optional max items per schedule type")] = None,
+    format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
+) -> None:
+    result = run_automation_cycle(
+        actor=actor,
+        include_scans=include_scans,
+        include_evidence=include_evidence,
+        limit=limit,
+    )
+    if format == "json":
+        console.print(JSON(json.dumps(result.model_dump(mode="json"), indent=2)))
+        return
+    console.print(f"Automation run: {result.id}")
+    console.print(f"Status: {result.status}")
+    console.print(f"Scheduled scan runs: {len(result.scan_runs)}")
+    console.print(f"Evidence schedule runs: {len(result.evidence_runs)}")
+    for error in result.errors:
+        console.print(f"- {error}")
+    if result.status == "failed":
+        raise typer.Exit(code=1)
+
+
+@enterprise_automation_app.command("runs")
+def enterprise_automation_runs(
+    format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
+) -> None:
+    runs = EnterpriseStore().list_automation_runner_results()
+    if format == "json":
+        console.print(JSON(json.dumps([run.model_dump(mode="json") for run in runs], indent=2)))
+        return
+    for run in runs:
+        console.print(
+            f"- {run.id} status={run.status} scans={len(run.scan_runs)} "
+            f"evidence={len(run.evidence_runs)}"
         )
 
 

@@ -7,7 +7,12 @@ from typer.testing import CliRunner
 
 from terraform_guardrail.api.app import create_app
 from terraform_guardrail.cli.app import app
-from terraform_guardrail.enterprise import EnterpriseStore, evaluate_enterprise
+from terraform_guardrail.enterprise import (
+    EnterpriseStore,
+    EvidenceSchedule,
+    ScheduledScanTarget,
+    evaluate_enterprise,
+)
 
 
 def test_enterprise_api_evaluate_and_export(monkeypatch, tmp_path: Path) -> None:
@@ -283,6 +288,19 @@ resource "aws_s3_bucket" "logs" {
     assert evidence_runs.status_code == 200
     assert evidence_runs.json()["runs"][0]["schedule_id"] == schedule_id
 
+    automation = client.post(
+        "/automation/run",
+        json={"actor": "cron", "include_scans": True, "include_evidence": True},
+    )
+    assert automation.status_code == 200
+    assert automation.json()["status"] == "completed"
+    assert automation.json()["scan_runs"]
+    assert automation.json()["evidence_runs"]
+
+    automation_runs = client.get("/automation/runs")
+    assert automation_runs.status_code == 200
+    assert automation_runs.json()["runs"][0]["id"] == automation.json()["id"]
+
 
 def test_context_risk_profile_and_recommendation_api(monkeypatch, tmp_path: Path) -> None:
     monkeypatch.setenv("GUARDRAIL_ENTERPRISE_DATA_DIR", str(tmp_path / "store"))
@@ -490,6 +508,32 @@ resource "aws_s3_bucket" "logs" {
     runs = runner.invoke(app, ["evidence", "schedule", "runs", "--schedule-id", schedule.id])
     assert runs.exit_code == 0
     assert schedule.id in runs.output
+
+
+def test_enterprise_cli_automation_runner(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("GUARDRAIL_ENTERPRISE_DATA_DIR", str(tmp_path / "store"))
+    infra = tmp_path / "main.tf"
+    infra.write_text(
+        """
+resource "aws_s3_bucket" "logs" {
+  bucket = "logs"
+}
+""",
+        encoding="utf-8",
+    )
+    store = EnterpriseStore()
+    result = evaluate_enterprise(infra, context={"repo": "payments"}, store=store)
+    store.save_scheduled_scan_target(ScheduledScanTarget(name="daily-prod", path=str(infra)))
+    store.save_evidence_schedule(EvidenceSchedule(name="monthly", result_id=result.id))
+    runner = CliRunner()
+
+    run = runner.invoke(app, ["enterprise", "automation", "run", "--format", "json"])
+    assert run.exit_code == 0
+    assert "completed" in run.output
+
+    runs = runner.invoke(app, ["enterprise", "automation", "runs"])
+    assert runs.exit_code == 0
+    assert "status=completed" in runs.output
 
 
 def test_enterprise_api_waiver_lifecycle(monkeypatch, tmp_path: Path) -> None:

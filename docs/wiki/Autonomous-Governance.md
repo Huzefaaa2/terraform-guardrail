@@ -156,8 +156,30 @@ API:
 - `POST /evidence/schedules/{schedule_id}/run`
 - `GET /evidence/schedules/{schedule_id}/runs`
 
+## Background Runner Scaffold
+
+The v5 runner gives external schedulers one command/API call that executes enabled scheduled scan
+targets and evidence schedules. This is intentionally scheduler-neutral: run it from cron, GitHub
+Actions `schedule`, CodeBuild, Kubernetes CronJob, or any enterprise orchestrator.
+
+```bash
+terraform-guardrail enterprise automation run
+terraform-guardrail enterprise automation runs
+```
+
+Run only one side of the loop when needed:
+
+```bash
+terraform-guardrail enterprise automation run --no-include-evidence
+terraform-guardrail enterprise automation run --no-include-scans
+```
+
+API:
+
+- `POST /automation/run`
+- `GET /automation/runs`
+
 ## Next v5 Steps
 
 - GitHub pull request creation from patch bundles.
-- Background runners for scheduled scans and evidence schedules.
 - Dashboard trend charts for waiver aging and evidence coverage.

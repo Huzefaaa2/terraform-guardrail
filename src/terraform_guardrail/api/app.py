@@ -37,6 +37,7 @@ from terraform_guardrail.enterprise import (
     render_explanation_markdown,
     render_remediation_markdown,
     resolve_policy_set,
+    run_automation_cycle,
     run_drift_gate,
     run_evidence_schedule,
     run_scheduled_scan,
@@ -188,6 +189,13 @@ class PatchBundleRequest(BaseModel):
     plan_id: str
     actor: str = "system"
     branch_prefix: str = "guardrail/remediate"
+
+
+class AutomationRunRequest(BaseModel):
+    actor: str = "automation"
+    include_scans: bool = True
+    include_evidence: bool = True
+    limit: int | None = None
 
 
 def create_app() -> FastAPI:
@@ -596,6 +604,20 @@ def create_app() -> FastAPI:
     @app.get("/governance/health")
     def governance_health(window: str = "all") -> dict[str, Any]:
         return governance_health_report(window=window).model_dump(mode="json")
+
+    @app.post("/automation/run")
+    def automation_run(request: AutomationRunRequest) -> dict[str, Any]:
+        return run_automation_cycle(
+            actor=request.actor,
+            include_scans=request.include_scans,
+            include_evidence=request.include_evidence,
+            limit=request.limit,
+        ).model_dump(mode="json")
+
+    @app.get("/automation/runs")
+    def automation_runs() -> dict[str, Any]:
+        runs = EnterpriseStore().list_automation_runner_results()
+        return {"runs": [run.model_dump(mode="json") for run in runs]}
 
     @app.post("/scheduled-scans")
     def create_scheduled_scan(target: ScheduledScanTarget) -> dict[str, Any]:

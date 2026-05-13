@@ -108,6 +108,8 @@ terraform-guardrail evidence schedule create \
   --repo payments-infra
 terraform-guardrail evidence schedule run <schedule-id>
 terraform-guardrail evidence schedule runs --schedule-id <schedule-id>
+terraform-guardrail enterprise automation run
+terraform-guardrail enterprise automation runs
 terraform-guardrail enterprise waiver create \
   --rule-id TG011 \
   --reason "Legacy module migration" \

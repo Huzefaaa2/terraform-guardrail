@@ -54,6 +54,8 @@ Terraform Guardrail Multi-Cloud Policy (MCP) (TerraGuard) exposes a REST API for
 | `GET /evidence/schedules/{schedule_id}` | Inspect an evidence schedule |
 | `POST /evidence/schedules/{schedule_id}/run` | Run an evidence schedule on demand |
 | `GET /evidence/schedules/{schedule_id}/runs` | List runs for an evidence schedule |
+| `POST /automation/run` | Run enabled scheduled scans and evidence schedules |
+| `GET /automation/runs` | List automation runner history |
 
 ## Policy Pack Install Example
 
@@ -101,4 +103,5 @@ Delivered as part of the Dockerized Multi-Cloud Policy (MCP) + REST API mileston
 in v3.0 development with policy pack and Guardrails-as-a-Service endpoints. v4.0 development adds
 context risk profiles and recommendation endpoints. v5.0 development adds remediation plans,
 patch bundle scaffolds, governance health reporting, scheduled scan target APIs, and evidence
-schedule APIs.
+schedule APIs. The v5 background runner scaffold executes enabled scan and evidence schedules from
+one external scheduler entrypoint.

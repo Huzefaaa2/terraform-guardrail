@@ -7,6 +7,7 @@
 - Scheduled governance scan targets define path, cadence, context, baseline, and fail threshold, with manual execution records.
 - Remediation patch bundles generate provider-neutral PR scaffolds from remediation plans.
 - Evidence schedules define recurring audit exports by result, context, standard, or control.
+- Background runner scaffold executes enabled scan and evidence schedules from one command or API call.
 
 ## Added
 - `terraform-guardrail enterprise remediation create/list/show` commands.
@@ -15,6 +16,7 @@
 - API and CLI support for scheduled scan targets and on-demand scheduled runs.
 - API and CLI support for remediation patch bundle scaffolds.
 - API and CLI support for evidence schedules and on-demand evidence schedule runs.
+- API and CLI support for automation runner history and execution.
 
 ## Changed
 - Version updated to 5.0.0 for the Autonomous Governance development track.

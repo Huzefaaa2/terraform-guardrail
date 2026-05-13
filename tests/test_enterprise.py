@@ -34,6 +34,7 @@ from terraform_guardrail.enterprise import (
     render_remediation_markdown,
     resolve_policy_ids,
     resolve_policy_set,
+    run_automation_cycle,
     run_drift_gate,
     run_evidence_schedule,
     run_scheduled_scan,
@@ -388,6 +389,39 @@ resource "aws_s3_bucket" "logs" {
     assert health.totals["evidence_schedules"] == 1
     assert health.totals["evidence_schedule_runs"] == 1
     assert store.audit_events()[-1].action == "evidence_schedule.run"
+
+
+def test_automation_cycle_runs_enabled_schedules(tmp_path: Path) -> None:
+    infra = tmp_path / "main.tf"
+    infra.write_text(
+        """
+resource "aws_s3_bucket" "logs" {
+  bucket = "logs"
+}
+""",
+        encoding="utf-8",
+    )
+    store = EnterpriseStore(tmp_path / "store")
+    result = evaluate_enterprise(infra, context={"repo": "payments"}, store=store)
+    store.save_scheduled_scan_target(
+        ScheduledScanTarget(name="daily-prod", path=str(infra), provider="aws"),
+        actor="platform",
+    )
+    store.save_evidence_schedule(
+        EvidenceSchedule(name="monthly-payments", result_id=result.id, format="json"),
+        actor="platform",
+    )
+
+    runner = run_automation_cycle(store=store, actor="cron")
+    health = governance_health_report(store=store)
+
+    assert runner.status == "completed"
+    assert len(runner.scan_runs) == 1
+    assert len(runner.evidence_runs) == 1
+    assert runner.evidence_runs[0].export_ids
+    assert store.list_automation_runner_results()[0].id == runner.id
+    assert health.totals["automation_runs"] == 1
+    assert store.audit_events()[-1].action == "automation.runner"
 
 
 def test_context_aware_evaluation_escalates_production_findings(tmp_path: Path) -> None:

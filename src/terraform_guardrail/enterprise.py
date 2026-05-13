@@ -345,6 +345,17 @@ class EvidenceScheduleRun(BaseModel):
     error: str | None = None
 
 
+class AutomationRunnerResult(BaseModel):
+    id: str = Field(default_factory=lambda: new_id("runner"))
+    created_at: str = Field(default_factory=utc_now)
+    actor: str = "system"
+    status: Literal["completed", "partial", "failed"] = "completed"
+    scan_runs: list[ScheduledScanRun] = Field(default_factory=list)
+    evidence_runs: list[EvidenceScheduleRun] = Field(default_factory=list)
+    errors: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
 class EvidenceExport(BaseModel):
     id: str = Field(default_factory=lambda: new_id("evid"))
     result_id: str
@@ -1008,6 +1019,36 @@ class EnterpriseStore:
             },
         )
         return run
+
+    def save_automation_runner_result(
+        self,
+        result: AutomationRunnerResult,
+        actor: str = "system",
+    ) -> AutomationRunnerResult:
+        results = [
+            AutomationRunnerResult.model_validate(item)
+            for item in self._read_list("automation_runner_results")
+        ]
+        results.append(result)
+        self._write_models("automation_runner_results", results)
+        self.add_audit(
+            actor,
+            "automation.runner",
+            result.id,
+            {
+                "status": result.status,
+                "scan_runs": len(result.scan_runs),
+                "evidence_runs": len(result.evidence_runs),
+                "errors": len(result.errors),
+            },
+        )
+        return result
+
+    def list_automation_runner_results(self) -> list[AutomationRunnerResult]:
+        return [
+            AutomationRunnerResult.model_validate(item)
+            for item in self._read_list("automation_runner_results")
+        ]
 
     def save_export(self, export: EvidenceExport, actor: str = "system") -> EvidenceExport:
         exports = [EvidenceExport.model_validate(item) for item in self._read_list("exports")]
@@ -1691,6 +1732,7 @@ def governance_health_report(
             "scheduled_runs": len(store.list_scheduled_scan_runs()),
             "evidence_schedules": len(store.list_evidence_schedules()),
             "evidence_schedule_runs": len(store.list_evidence_schedule_runs()),
+            "automation_runs": len(store.list_automation_runner_results()),
         },
         decisions=decisions,
         top_rules=sorted(rule_counts.values(), key=lambda item: item["count"], reverse=True)[:10],
@@ -1801,6 +1843,54 @@ def run_evidence_schedule(
             error=str(exc),
         )
     return store.save_evidence_schedule_run(run, actor=actor)
+
+
+def run_automation_cycle(
+    store: EnterpriseStore | None = None,
+    actor: str = "automation",
+    include_scans: bool = True,
+    include_evidence: bool = True,
+    limit: int | None = None,
+) -> AutomationRunnerResult:
+    store = store or EnterpriseStore()
+    scan_runs: list[ScheduledScanRun] = []
+    evidence_runs: list[EvidenceScheduleRun] = []
+    errors: list[str] = []
+    if include_scans:
+        targets = [target for target in store.list_scheduled_scan_targets() if target.enabled]
+        for target in _limit_items(targets, limit):
+            run = run_scheduled_scan(target.id, store=store, actor=actor)
+            scan_runs.append(run)
+            if run.status == "failed" and run.error:
+                errors.append(f"scheduled_scan:{target.id}: {run.error}")
+    if include_evidence:
+        schedules = [
+            schedule for schedule in store.list_evidence_schedules() if schedule.enabled
+        ]
+        for schedule in _limit_items(schedules, limit):
+            run = run_evidence_schedule(schedule.id, store=store, actor=actor)
+            evidence_runs.append(run)
+            if run.status == "failed" and run.error:
+                errors.append(f"evidence_schedule:{schedule.id}: {run.error}")
+    status: Literal["completed", "partial", "failed"] = "completed"
+    total_runs = len(scan_runs) + len(evidence_runs)
+    if errors and total_runs == len(errors):
+        status = "failed"
+    elif errors:
+        status = "partial"
+    result = AutomationRunnerResult(
+        actor=actor,
+        status=status,
+        scan_runs=scan_runs,
+        evidence_runs=evidence_runs,
+        errors=errors,
+        metadata={
+            "include_scans": include_scans,
+            "include_evidence": include_evidence,
+            "limit": limit,
+        },
+    )
+    return store.save_automation_runner_result(result, actor=actor)
 
 
 def install_policy_pack(
@@ -2303,6 +2393,12 @@ def _count_by(values: list[str]) -> dict[str, int]:
     for value in values:
         counts[value] = counts.get(value, 0) + 1
     return counts
+
+
+def _limit_items(items: list[Any], limit: int | None) -> list[Any]:
+    if limit is None or limit < 1:
+        return items
+    return items[:limit]
 
 
 def _governance_risk_signals(

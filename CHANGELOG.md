@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 - Scheduler-ready governance scan targets with manual run records through CLI and REST API.
 - Remediation patch bundle scaffolds with branch metadata, PR body, manifest, and Terraform snippets.
 - Evidence schedules for recurring audit exports by result, context, standard, or control.
+- Automation runner scaffold for executing enabled scan and evidence schedules from cron or external orchestrators.
 
 ### Changed
 - Package/API versions updated to 5.0.0 for v5 development.
