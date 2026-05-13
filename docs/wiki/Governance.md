@@ -27,6 +27,7 @@ The roadmap is tracked in:
 
 - [Roadmap](Roadmap)
 - [v3.0.0 Ecosystem Release](Release-v3.0.0)
+- [v4.0.0 Intelligent Release](Release-v4.0.0)
 - [`.github/ROADMAP.yml`](https://github.com/Huzefaaa2/terraform-guardrail/blob/main/.github/ROADMAP.yml)
 
 When a roadmap item ships, update all three locations plus the README roadmap table.

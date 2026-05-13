@@ -9,7 +9,7 @@ pip install -e .
 streamlit run streamlit_app.py
 ```
 
-Run the v2 Enterprise demo:
+Run the v2 Enterprise + Intelligence demo:
 
 ```bash
 pip install -e .
@@ -21,7 +21,7 @@ streamlit run streamlit_app_v2.py
 | App | Purpose | URL |
 | --- | --- | --- |
 | v1 Foundation | Terraform scanning, state leak checks, schema-aware validation | https://terraform-guardrail.streamlit.app/ |
-| v2 Enterprise | Policy authoring, org baselines, drift gates, evidence export | https://terraform-guardrail-enterprise.streamlit.app/ |
+| v2 Enterprise + Intelligence | Policy authoring, org baselines, drift gates, evidence export, risk profiles, suggested fixes, waiver demos | https://terraform-guardrail-enterprise.streamlit.app/ |
 
 Both apps link to each other and to the author profile:
 https://www.linkedin.com/in/huzefaaa
@@ -55,7 +55,7 @@ docker build -f Dockerfile.streamlit -t terraform-guardrail-streamlit:v1 .
 docker run --rm -p 8501:8501 terraform-guardrail-streamlit:v1
 ```
 
-Run the v2 Enterprise app:
+Run the v2 Enterprise + Intelligence app:
 
 ```bash
 docker build -f Dockerfile.streamlit.v2 -t terraform-guardrail-streamlit:v2 .

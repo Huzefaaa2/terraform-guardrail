@@ -1,3 +1,28 @@
+# v4.0.0
+
+## Highlights
+- v4.0 Intelligent release with context-aware evaluation, suggested fixes, explainability reports, SARIF/JUnit reporting, and policy waivers.
+- Risk profiles let enterprise teams tune severity and fail-on behavior by environment and risk tier without changing Terraform code.
+- Findings now carry practical suggested fixes and richer explanations so developers can understand what failed, why it failed, and what to do next.
+- CI systems can publish Markdown decision comments, SARIF code scanning reports, and JUnit test reports from the same evaluation result.
+- Policy waivers provide approved, expiring exceptions that remain visible in reports while being excluded from pass/warn/block decisions.
+
+## Added
+- `terraform-guardrail enterprise risk-profile list/show/create` commands.
+- `terraform-guardrail enterprise recommendations` for rule-level suggested fixes.
+- `terraform-guardrail enterprise explain` with `pretty`, `json`, and `markdown` output.
+- `terraform-guardrail enterprise report` for SARIF and JUnit exports.
+- `terraform-guardrail enterprise waiver create/list/approve/revoke` commands.
+- API endpoints for risk profiles, recommendations, explainability, Markdown comments, SARIF/JUnit reports, and waiver lifecycle.
+- Web UI and Streamlit Enterprise panels for context intelligence, suggested fixes, and waivers.
+
+## Changed
+- Version updated to 4.0.0 for the Intelligent release.
+- README and wiki roadmap now mark v4.0 Intelligent roadmap items as delivered.
+- v3 reference implementations now generate explainability comments, SARIF reports, and JUnit reports.
+
+---
+
 # v3.0.0
 
 ## Highlights

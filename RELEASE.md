@@ -2,6 +2,7 @@
 
 | Version | Date (UTC) | Highlights |
 | --- | --- | --- |
+| 4.0.0 | 2026-05-13 | Intelligent release: context-aware evaluation, suggested fixes, explainability, SARIF/JUnit, waivers |
 | 3.0.0 | 2026-05-11 | Ecosystem release: policy packs, service API, invariants, reference implementations, governance |
 | 2.0.0 | 2026-05-07 | Enterprise foundation: policy lifecycle, baselines, drift gates, evidence export |
 | 1.0.5 | 2026-01-27 | Chocolatey release bump after local verification |

@@ -7,6 +7,7 @@ from typer.testing import CliRunner
 
 from terraform_guardrail.api.app import create_app
 from terraform_guardrail.cli.app import app
+from terraform_guardrail.enterprise import EnterpriseStore, evaluate_enterprise
 
 
 def test_enterprise_api_evaluate_and_export(monkeypatch, tmp_path: Path) -> None:
@@ -174,6 +175,254 @@ resource "aws_s3_bucket" "logs" {
     stored = client.get(payload["links"]["result"])
     assert stored.status_code == 200
     assert stored.json()["request_id"] == "ci-123"
+    assert stored.json()["service_metadata"]["intelligence"]["profile"]["id"] == (
+        "default-prod-high-risk"
+    )
+
+    explanation = client.get(f"/results/{payload['result_id']}/explain")
+    assert explanation.status_code == 200
+    assert explanation.json()["decision"] == "block"
+    assert explanation.json()["risk_profile"]["id"] == "default-prod-high-risk"
+    assert explanation.json()["finding_explanations"]
+
+    comment = client.get(f"/results/{payload['result_id']}/comment")
+    assert comment.status_code == 200
+    assert comment.headers["content-type"].startswith("text/plain")
+    assert "## Terraform Guardrail Evaluation" in comment.text
+    assert "**Decision:** `BLOCK`" in comment.text
+
+    sarif = client.get(f"/results/{payload['result_id']}/reports/sarif")
+    assert sarif.status_code == 200
+    assert sarif.headers["content-type"].startswith("application/sarif+json")
+    assert sarif.json()["version"] == "2.1.0"
+
+    junit = client.get(f"/results/{payload['result_id']}/reports/junit")
+    assert junit.status_code == 200
+    assert junit.headers["content-type"].startswith("application/xml")
+    assert "<testsuite" in junit.text
+
+
+def test_context_risk_profile_and_recommendation_api(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("GUARDRAIL_ENTERPRISE_DATA_DIR", str(tmp_path / "store"))
+    client = TestClient(create_app())
+
+    profiles = client.get("/risk-profiles")
+    assert profiles.status_code == 200
+    assert "default-prod-high-risk" in {
+        profile["id"] for profile in profiles.json()["risk_profiles"]
+    }
+
+    created = client.post(
+        "/risk-profiles",
+        json={
+            "name": "regulated-prod",
+            "environments": ["prod"],
+            "risk_tiers": ["critical"],
+            "rule_severity_overrides": {"TG016": "medium"},
+            "default_fail_on": "medium",
+        },
+    )
+    assert created.status_code == 200
+    assert created.json()["name"] == "regulated-prod"
+
+    recommendation = client.get("/recommendations/TG011")
+    assert recommendation.status_code == 200
+    assert recommendation.json()["suggested_fix"].startswith("Add an")
+
+
+def test_context_risk_profile_cli(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("GUARDRAIL_ENTERPRISE_DATA_DIR", str(tmp_path / "store"))
+    runner = CliRunner()
+
+    create_result = runner.invoke(
+        app,
+        [
+            "enterprise",
+            "risk-profile",
+            "create",
+            "--name",
+            "regulated-dev",
+            "--environment",
+            "dev",
+            "--risk-tier",
+            "medium",
+            "--severity-override",
+            "TG014=medium",
+            "--default-fail-on",
+            "medium",
+            "--format",
+            "json",
+        ],
+    )
+    assert create_result.exit_code == 0
+    assert "regulated-dev" in create_result.output
+
+    recommendations = runner.invoke(
+        app,
+        ["enterprise", "recommendations", "--rule-id", "TG011"],
+    )
+    assert recommendations.exit_code == 0
+    assert "aws_s3_bucket_server_side_encryption_configuration" in recommendations.output
+
+
+def test_enterprise_api_waiver_lifecycle(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("GUARDRAIL_ENTERPRISE_DATA_DIR", str(tmp_path / "store"))
+    infra = tmp_path / "main.tf"
+    infra.write_text(
+        'variable "db_password" { type = string sensitive = true }',
+        encoding="utf-8",
+    )
+    client = TestClient(create_app())
+
+    created = client.post(
+        "/waivers",
+        json={
+            "rule_id": "TG001",
+            "reason": "Migration window",
+            "owner": "platform",
+            "expires_at": "2099-01-01T00:00:00Z",
+            "requested_by": "alice",
+        },
+    )
+    assert created.status_code == 200
+    waiver_id = created.json()["id"]
+
+    approved = client.post(f"/waivers/{waiver_id}/approve", json={"actor": "security"})
+    assert approved.status_code == 200
+    assert approved.json()["status"] == "approved"
+
+    listed = client.get("/waivers?status=approved&rule_id=TG001")
+    assert listed.status_code == 200
+    assert listed.json()["waivers"][0]["id"] == waiver_id
+
+    evaluated = client.post(
+        "/evaluate",
+        json={"path": str(infra), "fail_on": "medium"},
+    )
+    assert evaluated.status_code == 200
+    assert evaluated.json()["decision"] == "pass"
+    assert evaluated.json()["report"]["findings"][0]["waiver_id"] == waiver_id
+
+    revoked = client.post(f"/waivers/{waiver_id}/revoke", json={"actor": "security"})
+    assert revoked.status_code == 200
+    assert revoked.json()["status"] == "revoked"
+
+
+def test_enterprise_cli_waiver_lifecycle(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("GUARDRAIL_ENTERPRISE_DATA_DIR", str(tmp_path / "store"))
+    infra = tmp_path / "main.tf"
+    infra.write_text(
+        'variable "db_password" { type = string sensitive = true }',
+        encoding="utf-8",
+    )
+    runner = CliRunner()
+
+    created = runner.invoke(
+        app,
+        [
+            "enterprise",
+            "waiver",
+            "create",
+            "--rule-id",
+            "TG001",
+            "--reason",
+            "Migration window",
+            "--owner",
+            "platform",
+            "--expires-at",
+            "2099-01-01T00:00:00Z",
+            "--requested-by",
+            "alice",
+            "--approve",
+            "--format",
+            "json",
+        ],
+    )
+    assert created.exit_code == 0
+    assert "TG001" in created.output
+
+    waiver = EnterpriseStore().list_waivers()[0]
+    assert waiver.status == "approved"
+
+    listed = runner.invoke(app, ["enterprise", "waiver", "list", "--rule-id", "TG001"])
+    assert listed.exit_code == 0
+    assert waiver.id in listed.output
+
+    result = evaluate_enterprise(infra, fail_on="medium", store=EnterpriseStore())
+    assert result.decision == "pass"
+
+
+def test_enterprise_cli_explain(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("GUARDRAIL_ENTERPRISE_DATA_DIR", str(tmp_path / "store"))
+    infra = tmp_path / "main.tf"
+    infra.write_text(
+        'resource "aws_s3_bucket" "logs" { bucket = "logs" }',
+        encoding="utf-8",
+    )
+    store = EnterpriseStore()
+    result = evaluate_enterprise(
+        infra,
+        context={"environment": "prod", "risk_tier": "high"},
+        store=store,
+    )
+    runner = CliRunner()
+
+    response = runner.invoke(app, ["enterprise", "explain", result.id])
+
+    assert response.exit_code == 0
+    assert f"Result: {result.id}" in response.output
+    assert "Decision: block" in response.output
+    assert "Risk profile: Production high-risk" in response.output
+    assert "Next actions:" in response.output
+
+    markdown_path = tmp_path / "guardrail-comment.md"
+    markdown_response = runner.invoke(
+        app,
+        [
+            "enterprise",
+            "explain",
+            result.id,
+            "--format",
+            "markdown",
+            "--output",
+            str(markdown_path),
+        ],
+    )
+    assert markdown_response.exit_code == 0
+    assert markdown_path.exists()
+    assert "**Decision:** `BLOCK`" in markdown_path.read_text(encoding="utf-8")
+
+    sarif_path = tmp_path / "guardrail-report.sarif"
+    sarif_response = runner.invoke(
+        app,
+        [
+            "enterprise",
+            "report",
+            result.id,
+            "--format",
+            "sarif",
+            "--output",
+            str(sarif_path),
+        ],
+    )
+    assert sarif_response.exit_code == 0
+    assert '"version": "2.1.0"' in sarif_path.read_text(encoding="utf-8")
+
+    junit_path = tmp_path / "guardrail-report.junit.xml"
+    junit_response = runner.invoke(
+        app,
+        [
+            "enterprise",
+            "report",
+            result.id,
+            "--format",
+            "junit",
+            "--output",
+            str(junit_path),
+        ],
+    )
+    assert junit_response.exit_code == 0
+    assert "<testsuite" in junit_path.read_text(encoding="utf-8")
 
 
 def test_enterprise_api_baseline_lifecycle(monkeypatch, tmp_path: Path) -> None:

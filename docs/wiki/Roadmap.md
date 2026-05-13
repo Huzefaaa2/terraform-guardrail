@@ -3,8 +3,8 @@
 Minor releases deliver increments within each major deliverable. Major releases group outcomes by
 phase.
 
-Latest delivered major release: [v3.0.0 Ecosystem Release](Release-v3.0.0).
-Next development track: v4.0 Intelligent.
+Latest delivered major release: [v4.0.0 Intelligent Release](Release-v4.0.0).
+Current development track: v5.0 Autonomous Governance.
 
 Legend: <span style="color: green">✅ Delivered</span> • <span style="color: orange">🚧 Planned</span>
 
@@ -36,5 +36,8 @@ Legend: <span style="color: green">✅ Delivered</span> • <span style="color: 
 | Cross-provider invariant enforcement |  |  | <span style="color: green">✅ Delivered (v3.0 development)</span> |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Cross-Provider-Invariants) |
 | Guardrails-as-a-Service API |  |  | <span style="color: green">✅ Delivered (v3.0 development)</span> |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Guardrails-as-a-Service) |
 | Enterprise policy packs |  |  | <span style="color: green">✅ Delivered (v3.0 development)</span> |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Policy-Packs) |
-| Context-aware evaluation |  |  |  | <span style="color: orange">🚧 Planned</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Context-Aware-Evaluation) |
-| Suggested fixes + recommendations |  |  |  | <span style="color: orange">🚧 Planned</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Suggested-Fixes) |
+| Context-aware evaluation |  |  |  | <span style="color: green">✅ Delivered (v4.0 development)</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Context-Aware-Evaluation) |
+| Suggested fixes + recommendations |  |  |  | <span style="color: green">✅ Delivered (v4.0 development)</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Suggested-Fixes) |
+| Explainability reports + CI comment output |  |  |  | <span style="color: green">✅ Delivered (v4.0 development)</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Explainability-Reports) |
+| Enterprise SARIF/JUnit bridge |  |  |  | <span style="color: green">✅ Delivered (v4.0 development)</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Enterprise-SARIF-JUnit) |
+| Policy waivers and exceptions |  |  |  | <span style="color: green">✅ Delivered (v4.0 development)</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Policy-Waivers) |

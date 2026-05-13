@@ -10,14 +10,22 @@ from terraform_guardrail.enterprise import (
     EvaluationContext,
     GroupPolicyBinding,
     PolicyMetadata,
+    PolicyWaiver,
+    RiskProfile,
     check_drift,
     ensure_policy_pack_installed,
     evaluate_enterprise,
+    explain_evaluation,
     export_evidence,
     get_builtin_policy_pack,
+    get_rule_recommendation,
     install_policy_pack,
     list_builtin_policy_packs,
+    list_rule_recommendations,
     preview_policy,
+    render_evaluation_junit,
+    render_evaluation_sarif,
+    render_explanation_markdown,
     resolve_policy_ids,
     resolve_policy_set,
     run_drift_gate,
@@ -233,6 +241,171 @@ resource "aws_s3_bucket" "logs" {
     assert finding["rule_id"] == "TG011"
     assert finding["risk"] == "medium"
     assert finding["remediation"] == "Enable S3 default encryption with KMS or AES256."
+    assert finding["suggested_fix"] == (
+        "Add an `aws_s3_bucket_server_side_encryption_configuration` resource."
+    )
+
+
+def test_context_aware_evaluation_escalates_production_findings(tmp_path: Path) -> None:
+    infra = tmp_path / "main.tf"
+    infra.write_text(
+        """
+resource "aws_s3_bucket" "logs" {
+  bucket = "logs"
+}
+""",
+        encoding="utf-8",
+    )
+    store = EnterpriseStore(tmp_path / "store")
+
+    result = evaluate_enterprise(
+        infra,
+        context={"environment": "prod", "risk_tier": "high", "repo": "payments"},
+        store=store,
+    )
+
+    finding = result.report["findings"][0]
+    intelligence = result.service_metadata["intelligence"]
+    assert result.decision == "block"
+    assert result.context.environment == "prod"
+    assert result.context.risk_tier == "high"
+    assert finding["rule_id"] == "TG011"
+    assert finding["severity"] == "high"
+    assert finding["detail"]["context_severity"]["from"] == "medium"
+    assert intelligence["profile"]["id"] == "default-prod-high-risk"
+    assert intelligence["adjustments"][0]["to"] == "high"
+    assert intelligence["recommendations"][0]["suggested_fix"]
+
+
+def test_explainability_report_describes_decision_context_and_actions(tmp_path: Path) -> None:
+    infra = tmp_path / "main.tf"
+    infra.write_text(
+        """
+resource "aws_s3_bucket" "logs" {
+  bucket = "logs"
+}
+""",
+        encoding="utf-8",
+    )
+    store = EnterpriseStore(tmp_path / "store")
+    policy = store.save_policy(
+        EnterprisePolicy(
+            name="S3 encryption",
+            rule_id="TG011",
+            severity="block",
+            metadata=PolicyMetadata(owner="security", standard="SOC2"),
+        )
+    )
+    store.approve_policy(policy.id)
+    store.save_baseline(Baseline(name="org-baseline", policy_ids=[policy.id], approved=True))
+
+    result = evaluate_enterprise(
+        infra,
+        baseline="org-baseline",
+        context={"environment": "prod", "risk_tier": "high"},
+        store=store,
+    )
+    explanation = explain_evaluation(result.id, store=store)
+
+    assert explanation.result_id == result.id
+    assert explanation.decision == "block"
+    assert explanation.risk_profile
+    assert explanation.risk_profile["id"] == "default-prod-high-risk"
+    assert explanation.baseline_ids
+    assert explanation.applied_policy_ids == [policy.id]
+    assert explanation.finding_explanations[0].policy_name == "S3 encryption"
+    assert explanation.finding_explanations[0].context_adjustment
+    assert explanation.next_actions[0].startswith("TG011:")
+    assert any("High-severity" in reason for reason in explanation.reasons)
+    markdown = render_explanation_markdown(explanation)
+    assert markdown.startswith("## Terraform Guardrail Evaluation")
+    assert "**Decision:** `BLOCK`" in markdown
+    assert "TG011" in markdown
+    assert "Next Actions" in markdown
+    sarif = render_evaluation_sarif(result)
+    assert sarif["version"] == "2.1.0"
+    assert sarif["runs"][0]["results"][0]["ruleId"] == "TG011"
+    junit = render_evaluation_junit(result)
+    assert "<testsuite" in junit
+    assert 'failures="' in junit
+    assert "TG011" in junit
+
+
+def test_custom_risk_profile_can_override_rule_severity(tmp_path: Path) -> None:
+    infra = tmp_path / "main.tf"
+    infra.write_text(
+        """
+resource "aws_instance" "app" {
+  ami           = "ami-123"
+  instance_type = "t3.nano"
+}
+""",
+        encoding="utf-8",
+    )
+    store = EnterpriseStore(tmp_path / "store")
+    profile = store.save_risk_profile(
+        RiskProfile(
+            name="regulated-dev",
+            environments=["dev"],
+            risk_tiers=["medium"],
+            rule_severity_overrides={"TG014": "medium"},
+            default_fail_on="medium",
+        )
+    )
+
+    result = evaluate_enterprise(
+        infra,
+        context={"environment": "dev", "risk_tier": "medium", "risk_profile": profile.id},
+        store=store,
+    )
+
+    finding = next(item for item in result.report["findings"] if item["rule_id"] == "TG014")
+    assert finding["severity"] == "medium"
+    assert result.decision == "block"
+    assert result.service_metadata["intelligence"]["profile"]["id"] == profile.id
+
+
+def test_approved_waiver_suppresses_matching_finding_for_decision(tmp_path: Path) -> None:
+    infra = tmp_path / "main.tf"
+    infra.write_text(
+        """
+variable "db_password" {
+  type      = string
+  sensitive = true
+}
+""",
+        encoding="utf-8",
+    )
+    store = EnterpriseStore(tmp_path / "store")
+    waiver = store.save_waiver(
+        PolicyWaiver(
+            rule_id="TG001",
+            reason="Legacy module migration",
+            owner="platform",
+            expires_at="2099-01-01T00:00:00Z",
+            requested_by="alice",
+        ),
+        actor="alice",
+    )
+    store.approve_waiver(waiver.id, actor="security")
+
+    result = evaluate_enterprise(infra, fail_on="medium", store=store)
+    finding = result.report["findings"][0]
+    explanation = explain_evaluation(result.id, store=store)
+
+    assert result.decision == "pass"
+    assert finding["waiver_id"] == waiver.id
+    assert result.service_metadata["waivers"]["applied"][0]["waiver_id"] == waiver.id
+    assert explanation.applied_waivers[0]["waiver_id"] == waiver.id
+    assert explanation.finding_explanations[0].waiver_id == waiver.id
+    assert any("waivers suppressed" in reason for reason in explanation.reasons)
+    assert store.audit_events()[-1].action == "evaluation.create"
+
+
+def test_rule_recommendations_are_available() -> None:
+    recommendations = list_rule_recommendations()
+    assert {item.rule_id for item in recommendations} >= {"TG001", "TG011", "TG023"}
+    assert get_rule_recommendation("TG011").suggested_fix.startswith("Add an")
 
 
 def test_policy_preview_filters_to_selected_policy_rule(tmp_path: Path) -> None:

@@ -338,10 +338,16 @@ button:hover {
 .policy-form,
 .policy-edit-form,
 .binding-form,
-.baseline-form {
+.baseline-form,
+.waiver-form,
+.context-strip {
   display: grid;
   gap: 10px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.context-strip {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .authoring-guide {
@@ -373,8 +379,73 @@ button:hover {
 .policy-form button,
 .policy-edit-form button,
 .binding-form button,
-.baseline-form button {
+.baseline-form button,
+.waiver-form button {
   grid-column: 1 / -1;
+}
+
+.checkbox-row {
+  align-items: center;
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--muted);
+  display: flex;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0.55rem 0.75rem;
+}
+
+.checkbox-row input {
+  margin: 0;
+}
+
+.waiver-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.waiver-card {
+  align-items: start;
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--warning);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 12px;
+}
+
+.waiver-card.status-approved {
+  border-left-color: var(--success);
+}
+
+.waiver-card.status-revoked {
+  border-left-color: var(--danger);
+  opacity: 0.72;
+}
+
+.waiver-card strong,
+.waiver-card small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.waiver-card small,
+.waiver-card p {
+  color: var(--muted);
+}
+
+.waiver-card p {
+  line-height: 1.45;
+  margin: 6px 0;
+}
+
+.waiver-actions {
+  display: flex;
+  gap: 8px;
 }
 
 .baseline-list {
@@ -425,7 +496,8 @@ button:hover {
 }
 
 .detail-grid,
-.summary {
+.summary,
+.intelligence-panel {
   display: grid;
   gap: 10px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -433,7 +505,8 @@ button:hover {
 }
 
 .detail-grid div,
-.summary div {
+.summary div,
+.intelligence-panel div {
   background: var(--panel-soft);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -442,16 +515,60 @@ button:hover {
 }
 
 .detail-grid strong,
-.summary strong {
+.summary strong,
+.intelligence-panel strong {
   display: block;
   overflow-wrap: anywhere;
 }
 
-.summary span {
+.summary span,
+.intelligence-panel span {
   color: var(--muted);
   display: block;
   font-size: 0.8rem;
   margin-top: 3px;
+}
+
+.intelligence-panel {
+  margin-bottom: 10px;
+}
+
+.adjustment-list,
+.risk-profile-list {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.adjustment-list span,
+.risk-profile-card {
+  background: #f7fbfb;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  color: var(--muted);
+  padding: 10px 12px;
+}
+
+.risk-profile-card {
+  border-left-color: #345e7c;
+  margin-bottom: 0;
+}
+
+.risk-profile-card strong,
+.risk-profile-card small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.risk-profile-card strong {
+  color: var(--ink);
+}
+
+.risk-profile-card small {
+  color: var(--muted);
+  line-height: 1.35;
+  margin-top: 4px;
 }
 
 .approve-form {
@@ -521,9 +638,41 @@ button:hover {
 }
 
 .message,
-.path {
+.path,
+.fix {
   color: var(--muted);
   overflow-wrap: anywhere;
+}
+
+.fix,
+.waiver-note {
+  background: #f7fbfb;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  grid-column: 3 / -1;
+  padding: 8px 10px;
+}
+
+.waiver-note {
+  border-left-color: var(--warning);
+  color: var(--warning);
+  font-weight: 800;
+}
+
+.decision-pass {
+  background: #dcfae6;
+  color: var(--success);
+}
+
+.decision-warn {
+  background: #fef0c7;
+  color: var(--warning);
+}
+
+.decision-block {
+  background: #fee4e2;
+  color: var(--danger);
 }
 
 .side-panel {
@@ -648,10 +797,19 @@ button:hover {
   .policy-edit-form,
   .binding-form,
   .baseline-form,
+  .waiver-form,
+  .context-strip,
   .baseline-list form,
   .detail-grid,
   .summary,
+  .intelligence-panel,
+  .waiver-card,
   .finding {
     grid-template-columns: 1fr;
+  }
+
+  .fix,
+  .waiver-note {
+    grid-column: auto;
   }
 }

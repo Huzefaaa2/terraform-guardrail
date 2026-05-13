@@ -53,11 +53,55 @@ steps:
       PY
     displayName: Enforce TerraGuard decision
 
+  - script: |
+      python - <<'PY'
+      import json
+      import urllib.request
+
+      with open("guardrail-service-response.json", encoding="utf-8") as handle:
+          payload = json.load(handle)
+      url = "$(GUARDRAIL_API_URL)/results/" + payload["result_id"] + "/comment"
+      with urllib.request.urlopen(url) as response:
+          comment = response.read().decode("utf-8")
+      with open("guardrail-comment.md", "w", encoding="utf-8") as handle:
+          handle.write(comment)
+      print(comment)
+      base = "$(GUARDRAIL_API_URL)/results/" + payload["result_id"] + "/reports/"
+      for name, suffix in {
+          "guardrail-report.sarif": "sarif",
+          "guardrail-report.junit.xml": "junit",
+      }.items():
+          with urllib.request.urlopen(base + suffix) as response:
+              content = response.read().decode("utf-8")
+          with open(name, "w", encoding="utf-8") as handle:
+              handle.write(content)
+      PY
+    condition: always()
+    displayName: Render v4 PR comment markdown
+
   - task: PublishBuildArtifacts@1
     condition: always()
     inputs:
       PathtoPublish: "guardrail-service-response.json"
       ArtifactName: "terraguard-v3-service-response"
+
+  - task: PublishBuildArtifacts@1
+    condition: always()
+    inputs:
+      PathtoPublish: "guardrail-comment.md"
+      ArtifactName: "terraguard-v4-comment"
+
+  - task: PublishBuildArtifacts@1
+    condition: always()
+    inputs:
+      PathtoPublish: "guardrail-report.sarif"
+      ArtifactName: "terraguard-v4-sarif"
+
+  - task: PublishTestResults@2
+    condition: always()
+    inputs:
+      testResultsFormat: "JUnit"
+      testResultsFiles: "guardrail-report.junit.xml"
 
   - task: PublishBuildArtifacts@1
     condition: always()

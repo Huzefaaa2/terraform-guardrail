@@ -42,9 +42,39 @@ guardrails_service_v3:
       if payload["decision"] == "block":
           sys.exit(1)
       PY
+  after_script:
+    - |
+      python - <<'PY'
+      import json
+      import os
+      import urllib.request
+
+      with open("guardrail-service-response.json", encoding="utf-8") as handle:
+          payload = json.load(handle)
+      url = os.environ["GUARDRAIL_API_URL"] + "/results/" + payload["result_id"] + "/comment"
+      with urllib.request.urlopen(url) as response:
+          comment = response.read().decode("utf-8")
+      with open("guardrail-comment.md", "w", encoding="utf-8") as handle:
+          handle.write(comment)
+      print(comment)
+      base = os.environ["GUARDRAIL_API_URL"] + "/results/" + payload["result_id"] + "/reports/"
+      for name, suffix in {
+          "guardrail-report.sarif": "sarif",
+          "guardrail-report.junit.xml": "junit",
+      }.items():
+          with urllib.request.urlopen(base + suffix) as response:
+              content = response.read().decode("utf-8")
+          with open(name, "w", encoding="utf-8") as handle:
+              handle.write(content)
+      PY
   artifacts:
     when: always
     paths:
       - guardrail-service-response.json
+      - guardrail-comment.md
+      - guardrail-report.sarif
+      - guardrail-report.junit.xml
       - .guardrail/enterprise/evidence/*.json
+    reports:
+      junit: guardrail-report.junit.xml
     expire_in: 14 days

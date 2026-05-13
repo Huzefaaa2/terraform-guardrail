@@ -14,7 +14,7 @@ pip install -e ".[dev]"
 pip install terraform-guardrail
 ```
 
-PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 3.0.0)
+PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 4.0.0)
 
 ## Scan
 
@@ -50,4 +50,48 @@ Policy bundle evaluation requires the `opa` CLI on your PATH.
 
 ```bash
 terraform-guardrail registry-api --host 0.0.0.0 --port 8090
+```
+
+## Enterprise context intelligence
+
+```bash
+terraform-guardrail evaluate ./infra \
+  --context environment=prod \
+  --context risk_tier=high \
+  --format json
+```
+
+```bash
+terraform-guardrail enterprise risk-profile list
+terraform-guardrail enterprise risk-profile show default-prod-high-risk
+terraform-guardrail enterprise risk-profile create \
+  --name regulated-prod \
+  --environment prod \
+  --risk-tier critical \
+  --severity-override TG011=high \
+  --default-fail-on medium
+```
+
+```bash
+terraform-guardrail enterprise recommendations
+terraform-guardrail enterprise recommendations --rule-id TG011
+terraform-guardrail enterprise explain <evaluation-result-id>
+terraform-guardrail enterprise explain <evaluation-result-id> --format json
+terraform-guardrail enterprise explain <evaluation-result-id> \
+  --format markdown \
+  --output guardrail-comment.md
+terraform-guardrail enterprise report <evaluation-result-id> \
+  --format sarif \
+  --output guardrail-report.sarif
+terraform-guardrail enterprise report <evaluation-result-id> \
+  --format junit \
+  --output guardrail-report.junit.xml
+terraform-guardrail enterprise waiver create \
+  --rule-id TG011 \
+  --reason "Legacy module migration" \
+  --owner platform-security \
+  --expires-at 2026-12-31T00:00:00Z
+terraform-guardrail enterprise waiver approve <waiver-id> --actor security-reviewer
+terraform-guardrail enterprise waiver list --status approved
+terraform-guardrail enterprise waiver revoke <waiver-id> --actor security-reviewer
 ```

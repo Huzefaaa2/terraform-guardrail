@@ -24,12 +24,19 @@ from terraform_guardrail.enterprise import (
     EvaluationContext,
     GroupPolicyBinding,
     PolicyMetadata,
+    PolicyWaiver,
+    RiskProfile,
     check_drift,
     evaluate_enterprise,
+    explain_evaluation,
     export_evidence,
     get_builtin_policy_pack,
+    get_rule_recommendation,
     install_policy_pack,
     list_builtin_policy_packs,
+    list_rule_recommendations,
+    render_evaluation_report,
+    render_explanation_markdown,
     resolve_policy_set,
     run_drift_gate,
 )
@@ -54,6 +61,8 @@ enterprise_policy_app = typer.Typer(help="Enterprise policy commands.")
 enterprise_baseline_app = typer.Typer(help="Enterprise baseline commands.")
 enterprise_binding_app = typer.Typer(help="Enterprise group/repo binding commands.")
 enterprise_pack_app = typer.Typer(help="Enterprise policy pack commands.")
+enterprise_risk_app = typer.Typer(help="Enterprise context risk profile commands.")
+enterprise_waiver_app = typer.Typer(help="Enterprise policy waiver commands.")
 enterprise_aws_app = typer.Typer(help="AWS enterprise integration commands.")
 enterprise_aws_codepipeline_app = typer.Typer(help="AWS CodePipeline scaffold commands.")
 evidence_app = typer.Typer(help="Evidence export commands.")
@@ -65,6 +74,8 @@ enterprise_app.add_typer(enterprise_policy_app, name="policy")
 enterprise_app.add_typer(enterprise_baseline_app, name="baseline")
 enterprise_app.add_typer(enterprise_binding_app, name="binding")
 enterprise_app.add_typer(enterprise_pack_app, name="pack")
+enterprise_app.add_typer(enterprise_risk_app, name="risk-profile")
+enterprise_app.add_typer(enterprise_waiver_app, name="waiver")
 enterprise_app.add_typer(enterprise_aws_app, name="aws")
 enterprise_aws_app.add_typer(enterprise_aws_codepipeline_app, name="codepipeline")
 console = Console()
@@ -749,6 +760,265 @@ def enterprise_pack_install(
     _print_model(result, format)
 
 
+@enterprise_risk_app.command("list")
+def enterprise_risk_profile_list(
+    format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
+) -> None:
+    profiles = EnterpriseStore().list_risk_profiles()
+    if format == "json":
+        console.print(
+            JSON(json.dumps([profile.model_dump(mode="json") for profile in profiles], indent=2))
+        )
+        return
+    for profile in profiles:
+        console.print(
+            f"- {profile.id} {profile.name} "
+            f"env={','.join(profile.environments) or 'any'} "
+            f"risk={','.join(profile.risk_tiers) or 'any'}"
+        )
+
+
+@enterprise_risk_app.command("show")
+def enterprise_risk_profile_show(
+    profile_id: Annotated[str, typer.Argument(help="Risk profile ID or name")],
+    format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
+) -> None:
+    try:
+        profile = EnterpriseStore().get_risk_profile(profile_id)
+    except KeyError as exc:
+        console.print(str(exc))
+        raise typer.Exit(code=1) from exc
+    _print_model(profile, format)
+
+
+@enterprise_risk_app.command("create")
+def enterprise_risk_profile_create(
+    name: Annotated[str, typer.Option(help="Risk profile name")],
+    environment: Annotated[
+        list[str] | None,
+        typer.Option(help="Matching environment, repeatable"),
+    ] = None,
+    risk_tier: Annotated[
+        list[str] | None,
+        typer.Option(help="Matching risk tier, repeatable"),
+    ] = None,
+    severity_override: Annotated[
+        list[str] | None,
+        typer.Option(help="Rule severity override as TG011=high, repeatable"),
+    ] = None,
+    default_fail_on: Annotated[
+        str | None,
+        typer.Option(help="Default fail threshold: low, medium, or high"),
+    ] = None,
+    description: Annotated[str, typer.Option(help="Risk profile description")] = "",
+    format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
+) -> None:
+    try:
+        overrides = _parse_severity_overrides(severity_override)
+        if default_fail_on and default_fail_on not in {"low", "medium", "high"}:
+            raise ValueError("default-fail-on must be low, medium, or high")
+        profile = RiskProfile(
+            name=name,
+            description=description,
+            environments=environment or [],
+            risk_tiers=risk_tier or [],
+            rule_severity_overrides=overrides,
+            default_fail_on=default_fail_on,  # type: ignore[arg-type]
+        )
+        saved = EnterpriseStore().save_risk_profile(profile)
+    except Exception as exc:  # noqa: BLE001
+        console.print(f"Risk profile create failed: {exc}")
+        raise typer.Exit(code=1) from exc
+    _print_model(saved, format)
+
+
+@enterprise_app.command("recommendations")
+def enterprise_recommendations(
+    rule_id: Annotated[str | None, typer.Option(help="Filter to a single rule ID")] = None,
+    format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
+) -> None:
+    try:
+        recommendations = (
+            [get_rule_recommendation(rule_id)] if rule_id else list_rule_recommendations()
+        )
+    except KeyError as exc:
+        console.print(str(exc))
+        raise typer.Exit(code=1) from exc
+    if format == "json":
+        console.print(
+            JSON(
+                json.dumps(
+                    [item.model_dump(mode="json") for item in recommendations],
+                    indent=2,
+                )
+            )
+        )
+        return
+    for item in recommendations:
+        console.print(f"- {item.rule_id}: {item.suggested_fix}")
+
+
+@enterprise_app.command("explain")
+def enterprise_explain(
+    result_id: Annotated[str, typer.Argument(help="Stored evaluation result ID")],
+    format: Annotated[str, typer.Option(help="pretty, json, or markdown")] = "pretty",
+    output: Annotated[
+        Path | None,
+        typer.Option(help="Write markdown output to a file"),
+    ] = None,
+) -> None:
+    try:
+        report = explain_evaluation(result_id)
+    except KeyError as exc:
+        console.print(str(exc))
+        raise typer.Exit(code=1) from exc
+    if format == "markdown":
+        content = render_explanation_markdown(report)
+        if output:
+            output.write_text(content, encoding="utf-8")
+            console.print(str(output))
+            return
+        console.print(content.rstrip())
+        return
+    if format == "json":
+        console.print(JSON(json.dumps(report.model_dump(mode="json"), indent=2)))
+        return
+    console.print(f"Result: {report.result_id}")
+    console.print(f"Decision: {report.decision}")
+    console.print(f"Reasons: {'; '.join(report.reasons) or 'none'}")
+    if report.risk_profile:
+        console.print(f"Risk profile: {report.risk_profile.get('name')}")
+    if report.baseline_ids:
+        console.print(f"Baselines: {', '.join(report.baseline_ids)}")
+    if report.applied_policy_ids:
+        console.print(f"Policies: {', '.join(report.applied_policy_ids)}")
+    if report.finding_explanations:
+        console.print("Findings:")
+        for finding in report.finding_explanations:
+            console.print(f"- {finding.rule_id} [{finding.severity}] {finding.reason}")
+    if report.next_actions:
+        console.print("Next actions:")
+        for action in report.next_actions:
+            console.print(f"- {action}")
+
+
+@enterprise_app.command("report")
+def enterprise_report(
+    result_id: Annotated[str, typer.Argument(help="Stored evaluation result ID")],
+    format: Annotated[str, typer.Option(help="sarif or junit")] = "sarif",
+    output: Annotated[
+        Path | None,
+        typer.Option(help="Write report output to a file"),
+    ] = None,
+) -> None:
+    if format not in {"sarif", "junit"}:
+        console.print("Report format must be sarif or junit.")
+        raise typer.Exit(code=2)
+    try:
+        content = render_evaluation_report(result_id, format=format)  # type: ignore[arg-type]
+    except KeyError as exc:
+        console.print(str(exc))
+        raise typer.Exit(code=1) from exc
+    if output:
+        output.write_text(content, encoding="utf-8")
+        console.print(str(output))
+        return
+    if format == "sarif":
+        console.print(JSON(content))
+    else:
+        console.print(content)
+
+
+@enterprise_waiver_app.command("create")
+def enterprise_waiver_create(
+    rule_id: Annotated[str, typer.Option(help="Rule ID to waive, e.g. TG011")],
+    reason: Annotated[str, typer.Option(help="Business reason for the exception")],
+    owner: Annotated[str, typer.Option(help="Owner accountable for the waiver")],
+    expires_at: Annotated[str, typer.Option(help="Expiry timestamp, e.g. 2026-12-31T00:00:00Z")],
+    path: Annotated[str | None, typer.Option(help="Optional exact finding path")] = None,
+    policy_id: Annotated[str | None, typer.Option(help="Optional enterprise policy ID")] = None,
+    target_type: Annotated[
+        str | None,
+        typer.Option(help="Optional target type: org, group, repo, or app"),
+    ] = None,
+    target: Annotated[str | None, typer.Option(help="Optional target identifier")] = None,
+    requested_by: Annotated[str, typer.Option(help="Requester identity")] = "system",
+    approve: Annotated[bool, typer.Option(help="Approve immediately")] = False,
+    format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
+) -> None:
+    try:
+        waiver = PolicyWaiver(
+            rule_id=rule_id,
+            reason=reason,
+            owner=owner,
+            expires_at=expires_at,
+            path=path,
+            policy_id=policy_id,
+            target_type=target_type,  # type: ignore[arg-type]
+            target=target,
+            requested_by=requested_by,
+        )
+        store = EnterpriseStore()
+        saved = store.save_waiver(waiver, actor=requested_by)
+        if approve:
+            saved = store.approve_waiver(saved.id, actor=requested_by)
+    except Exception as exc:  # noqa: BLE001
+        console.print(f"Waiver create failed: {exc}")
+        raise typer.Exit(code=1) from exc
+    _print_model(saved, format)
+
+
+@enterprise_waiver_app.command("list")
+def enterprise_waiver_list(
+    status: Annotated[str | None, typer.Option(help="Filter by status")] = None,
+    rule_id: Annotated[str | None, typer.Option(help="Filter by rule ID")] = None,
+    format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
+) -> None:
+    waivers = EnterpriseStore().list_waivers()
+    if status:
+        waivers = [waiver for waiver in waivers if waiver.status == status]
+    if rule_id:
+        waivers = [waiver for waiver in waivers if waiver.rule_id == rule_id]
+    if format == "json":
+        console.print(
+            JSON(json.dumps([waiver.model_dump(mode="json") for waiver in waivers], indent=2))
+        )
+        return
+    for waiver in waivers:
+        console.print(
+            f"- {waiver.id} {waiver.rule_id} status={waiver.status} "
+            f"owner={waiver.owner} expires={waiver.expires_at}"
+        )
+
+
+@enterprise_waiver_app.command("approve")
+def enterprise_waiver_approve(
+    waiver_id: Annotated[str, typer.Argument(help="Waiver ID")],
+    actor: Annotated[str, typer.Option(help="Approver identity")] = "system",
+    format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
+) -> None:
+    try:
+        waiver = EnterpriseStore().approve_waiver(waiver_id, actor=actor)
+    except KeyError as exc:
+        console.print(str(exc))
+        raise typer.Exit(code=1) from exc
+    _print_model(waiver, format)
+
+
+@enterprise_waiver_app.command("revoke")
+def enterprise_waiver_revoke(
+    waiver_id: Annotated[str, typer.Argument(help="Waiver ID")],
+    actor: Annotated[str, typer.Option(help="Revoker identity")] = "system",
+    format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
+) -> None:
+    try:
+        waiver = EnterpriseStore().revoke_waiver(waiver_id, actor=actor)
+    except KeyError as exc:
+        console.print(str(exc))
+        raise typer.Exit(code=1) from exc
+    _print_model(waiver, format)
+
+
 @enterprise_aws_codepipeline_app.command("init")
 def enterprise_aws_codepipeline_init(
     destination: Annotated[
@@ -913,6 +1183,19 @@ def _parse_key_values(values: list[str] | None) -> dict[str, Any]:
         key, value = item.split("=", 1)
         parsed[key.strip()] = value.strip()
     return parsed
+
+
+def _parse_severity_overrides(values: list[str] | None) -> dict[str, str]:
+    overrides: dict[str, str] = {}
+    for item in values or []:
+        if "=" not in item:
+            raise ValueError(f"Severity overrides must use RULE_ID=severity: {item}")
+        rule_id, severity = item.split("=", 1)
+        severity = severity.strip().lower()
+        if severity not in {"low", "medium", "high"}:
+            raise ValueError(f"Invalid severity override for {rule_id}: {severity}")
+        overrides[rule_id.strip()] = severity
+    return overrides
 
 
 def _print_model(model, format: str) -> None:

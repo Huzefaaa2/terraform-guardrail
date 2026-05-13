@@ -13,6 +13,13 @@ The FastAPI web UI includes an enterprise workspace for policy authoring and rev
 - Browse default rules and enterprise policies from the right-side catalog.
 - Create org, group, and repo bindings for enforcement.
 - Open task-first wiki guides from the top-right How-To Guides panel.
+- Run intelligent enterprise evaluation from the upload panel with provider, environment,
+  risk-tier, baseline, and fail-threshold context.
+- Review matched risk profiles, context severity adjustments, and suggested fixes directly in
+  the findings panel.
+- Browse built-in risk profiles from the right-side Intelligence section.
+- Request, approve, revoke, and inspect time-bound policy waivers.
+- See waived findings annotated directly in the intelligent evaluation report.
 
 ## Example
 
@@ -32,6 +39,15 @@ The UI assigns the next available rule ID, such as `TG021`.
 3. Click **Preview Policy**.
 4. Review findings filtered to that policy rule ID.
 5. Approve the policy only after the preview matches the expected behavior.
+
+## Waiver workflow
+
+1. Open **Policy waivers**.
+2. Select the rule ID, owner, reason, expiry, and optional exact finding path.
+3. Submit the waiver request.
+4. Approve the waiver when the exception is reviewed.
+5. Re-run the evaluation. Matching findings remain visible but show the waiver ID and expiry.
+6. Revoke the waiver when the migration window closes.
 
 ## API preview
 

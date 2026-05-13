@@ -19,3 +19,8 @@ def test_v3_reference_implementations_use_service_contract() -> None:
         assert "request_id" in text
         assert "evidence_format" in text
         assert "guardrail-service-response.json" in text
+        assert "/comment" in text
+        assert "guardrail-comment.md" in text
+        assert "/reports/" in text
+        assert "guardrail-report.sarif" in text
+        assert "guardrail-report.junit.xml" in text

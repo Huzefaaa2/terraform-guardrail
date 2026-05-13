@@ -5,6 +5,7 @@ major releases.
 
 - [v2.0.0 Enterprise Release](Release-v2.0.0)
 - [v3.0.0 Ecosystem Release](Release-v3.0.0)
+- [v4.0.0 Intelligent Release](Release-v4.0.0)
 - [Roadmap](Roadmap)
 - [How-To Guides](How-To-Guides)
 
@@ -26,6 +27,11 @@ major releases.
 
 - [Drift Prevention](Drift-Prevention.md)
 - [Guardrails-as-a-Service API](Guardrails-as-a-Service.md)
+- [Context-Aware Evaluation](Context-Aware-Evaluation.md)
+- [Suggested Fixes](Suggested-Fixes.md)
+- [Explainability Reports](Explainability-Reports.md)
+- [Enterprise SARIF/JUnit](Enterprise-SARIF-JUnit.md)
+- [Policy Waivers](Policy-Waivers.md)
 
 ## Integrations & Delivery
 

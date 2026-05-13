@@ -11,6 +11,7 @@ from terraform_guardrail.enterprise import (
     EnterprisePolicy,
     EnterpriseStore,
     PolicyMetadata,
+    PolicyWaiver,
     check_drift,
     evaluate_enterprise,
     export_evidence,
@@ -53,7 +54,7 @@ DRIFT_CHANGED = """resource "aws_s3_bucket" "logs" {
 """
 
 st.set_page_config(
-    page_title="TerraGuard v2 Enterprise",
+    page_title="TerraGuard Enterprise + Intelligence",
     page_icon="TG",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -210,13 +211,19 @@ def finding_rows(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
         "control_id",
         "risk",
         "remediation",
+        "suggested_fix",
+        "waiver_id",
+        "waiver_expires_at",
     ]
     return [{key: finding.get(key) for key in columns} for finding in findings]
 
 
 with st.sidebar:
-    st.markdown("## TerraGuard v2 Enterprise")
-    st.markdown("Enterprise governance demo for policy lifecycle, baselines, drift, and evidence.")
+    st.markdown("## TerraGuard Enterprise + Intelligence")
+    st.markdown(
+        "Enterprise governance demo for policy lifecycle, baselines, drift, evidence, "
+        "risk profiles, and suggested fixes."
+    )
     st.divider()
     st.markdown("### Live app versions")
     st.markdown(f"- [v1 Foundation demo]({LIVE_V1_URL})")
@@ -282,7 +289,7 @@ tab_evaluate, tab_authoring, tab_drift, tab_pipeline = st.tabs(
 )
 
 with tab_evaluate:
-    st.subheader("Evaluate a Terraform workspace against an approved baseline")
+    st.subheader("Evaluate a Terraform workspace with enterprise intelligence")
     left, right = st.columns([1.1, 0.9])
     with left:
         terraform_text = st.text_area(
@@ -299,33 +306,66 @@ with tab_evaluate:
     with right:
         st.markdown("#### Evaluation context")
         provider = st.selectbox("Provider", ["aws", "azure", "gcp", "kubernetes", "helm"])
+        environment = st.selectbox("Environment", ["prod", "dev", "sandbox", "production"])
+        risk_tier = st.selectbox("Risk tier", ["high", "medium", "low", "critical"])
         baseline = st.text_input("Baseline", value="org-baseline")
         group = st.text_input("Group", value="platform")
         repo = st.text_input("Repository", value="payments-infra")
         fail_on = st.selectbox("Fail on severity", ["high", "medium", "low"])
+        waiver_rule = st.selectbox("Demo waiver", ["None", "TG006", "TG011", "TG016"])
+        waiver_reason = st.text_input("Waiver reason", value="Approved migration window")
 
     if st.button("Run Enterprise Evaluation", type="primary"):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             store = build_demo_store(root / "enterprise-store")
+            if waiver_rule != "None":
+                waiver = store.save_waiver(
+                    PolicyWaiver(
+                        rule_id=waiver_rule,
+                        reason=waiver_reason,
+                        owner="platform-security",
+                        expires_at="2099-01-01T00:00:00Z",
+                        requested_by="streamlit-demo",
+                    ),
+                    actor="streamlit-demo",
+                )
+                store.approve_waiver(waiver.id, actor="streamlit-demo")
             workspace = write_workspace(root, terraform_text, uploaded_files or [])
             result = evaluate_enterprise(
                 workspace,
                 provider=provider,
                 baseline=baseline,
-                context={"group": group, "repo": repo},
+                context={
+                    "group": group,
+                    "repo": repo,
+                    "environment": environment,
+                    "risk_tier": risk_tier,
+                },
                 fail_on=fail_on,
                 store=store,
                 actor="streamlit-demo",
             )
             findings = result.report.get("findings", [])
             decision = result.decision
+            intelligence = result.service_metadata.get("intelligence", {})
+            profile = intelligence.get("profile") or {}
+            adjustments = intelligence.get("adjustments") or []
+            recommendations = intelligence.get("recommendations") or []
+            waivers = result.service_metadata.get("waivers", {}).get("applied", [])
 
             st.markdown(
                 "### Decision: "
                 f"<span style='color:{decision_color(decision)}'>{decision.upper()}</span>",
                 unsafe_allow_html=True,
             )
+            profile_cols = st.columns(4)
+            profile_cols[0].metric("Risk profile", profile.get("name", "No match"))
+            profile_cols[1].metric("Environment", environment)
+            profile_cols[2].metric("Risk tier", risk_tier)
+            profile_cols[3].metric("Severity adjustments", len(adjustments))
+            if waivers:
+                st.info(f"{len(waivers)} approved waiver(s) applied to this evaluation.")
             st.write(
                 {
                     "evaluation_id": result.id,
@@ -333,6 +373,15 @@ with tab_evaluate:
                     "summary": result.report.get("summary", {}),
                 }
             )
+            if adjustments:
+                st.markdown("#### Context adjustments")
+                st.dataframe(adjustments, use_container_width=True, hide_index=True)
+            if recommendations:
+                st.markdown("#### Suggested fixes")
+                st.dataframe(recommendations, use_container_width=True, hide_index=True)
+            if waivers:
+                st.markdown("#### Applied waivers")
+                st.dataframe(waivers, use_container_width=True, hide_index=True)
             if findings:
                 st.dataframe(finding_rows(findings), use_container_width=True)
             else:
@@ -401,6 +450,11 @@ with tab_authoring:
                 "  --name org-baseline \\",
                 "  --policy-id <policy-id> \\",
                 "  --approved",
+                "terraform-guardrail enterprise waiver create \\",
+                "  --rule-id TG011 \\",
+                '  --reason "Approved migration window" \\',
+                "  --owner platform-security \\",
+                "  --expires-at 2026-12-31T00:00:00Z",
             ]
         ),
         language="bash",

@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from importlib import resources
 from pathlib import Path
 from typing import Any, Literal
+from xml.etree import ElementTree as ET
 
 from pydantic import BaseModel, Field
 
@@ -76,6 +77,24 @@ class PolicyApproval(BaseModel):
     created_at: str = Field(default_factory=utc_now)
 
 
+class PolicyWaiver(BaseModel):
+    id: str = Field(default_factory=lambda: new_id("waiver"))
+    rule_id: str
+    reason: str
+    owner: str
+    expires_at: str
+    path: str | None = None
+    policy_id: str | None = None
+    target_type: Literal["org", "group", "repo", "app"] | None = None
+    target: str | None = None
+    status: Literal["requested", "approved", "revoked"] = "requested"
+    requested_by: str = "system"
+    approved_by: str | None = None
+    revoked_by: str | None = None
+    created_at: str = Field(default_factory=utc_now)
+    updated_at: str = Field(default_factory=utc_now)
+
+
 class Baseline(BaseModel):
     id: str = Field(default_factory=lambda: new_id("base"))
     name: str
@@ -130,6 +149,7 @@ class EvaluationContext(BaseModel):
     policy_set: str | None = None
     baseline: str | None = None
     environment: str | None = None
+    risk_tier: str | None = None
     app: str | None = None
     org: str | None = None
     group: str | None = None
@@ -147,6 +167,66 @@ class EvaluationResult(BaseModel):
     report: dict[str, Any]
     evidence_id: str | None = None
     service_metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class RiskProfile(BaseModel):
+    id: str = Field(default_factory=lambda: new_id("risk"))
+    name: str
+    description: str = ""
+    environments: list[str] = Field(default_factory=list)
+    risk_tiers: list[str] = Field(default_factory=list)
+    rule_severity_overrides: dict[str, Literal["low", "medium", "high"]] = Field(
+        default_factory=dict
+    )
+    default_fail_on: Literal["low", "medium", "high"] | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    created_at: str = Field(default_factory=utc_now)
+    updated_at: str = Field(default_factory=utc_now)
+
+
+class Recommendation(BaseModel):
+    rule_id: str
+    title: str
+    remediation: str
+    suggested_fix: str
+    severity: Literal["low", "medium", "high"] | None = None
+    references: list[str] = Field(default_factory=list)
+
+
+class FindingExplanation(BaseModel):
+    rule_id: str
+    severity: Literal["low", "medium", "high"]
+    message: str
+    path: str | None = None
+    policy_id: str | None = None
+    policy_name: str | None = None
+    policy_status: str | None = None
+    baseline_ids: list[str] = Field(default_factory=list)
+    context_adjustment: dict[str, Any] | None = None
+    waiver_id: str | None = None
+    waiver_expires_at: str | None = None
+    remediation: str | None = None
+    suggested_fix: str | None = None
+    reason: str
+
+
+class ExplainabilityReport(BaseModel):
+    id: str = Field(default_factory=lambda: new_id("explain"))
+    result_id: str
+    created_at: str = Field(default_factory=utc_now)
+    decision: Literal["pass", "warn", "block"]
+    summary: dict[str, Any] = Field(default_factory=dict)
+    context: EvaluationContext = Field(default_factory=EvaluationContext)
+    reasons: list[str] = Field(default_factory=list)
+    applied_policy_ids: list[str] = Field(default_factory=list)
+    applied_policies: list[dict[str, Any]] = Field(default_factory=list)
+    binding_targets: list[str] = Field(default_factory=list)
+    baseline_ids: list[str] = Field(default_factory=list)
+    risk_profile: dict[str, Any] | None = None
+    context_adjustments: list[dict[str, Any]] = Field(default_factory=list)
+    applied_waivers: list[dict[str, Any]] = Field(default_factory=list)
+    finding_explanations: list[FindingExplanation] = Field(default_factory=list)
+    next_actions: list[str] = Field(default_factory=list)
 
 
 class EvidenceExport(BaseModel):
@@ -333,6 +413,47 @@ class EnterpriseStore:
         self.add_audit(actor, "policy.approve", policy.id, {"version": policy.version})
         return approval
 
+    def list_waivers(self) -> list[PolicyWaiver]:
+        return [PolicyWaiver.model_validate(item) for item in self._read_list("waivers")]
+
+    def get_waiver(self, waiver_id: str) -> PolicyWaiver:
+        for waiver in self.list_waivers():
+            if waiver.id == waiver_id:
+                return waiver
+        raise KeyError(f"Waiver not found: {waiver_id}")
+
+    def save_waiver(self, waiver: PolicyWaiver, actor: str = "system") -> PolicyWaiver:
+        waivers = self.list_waivers()
+        for idx, current in enumerate(waivers):
+            if current.id == waiver.id:
+                waiver.updated_at = utc_now()
+                waivers[idx] = waiver
+                self._write_models("waivers", waivers)
+                self.add_audit(actor, "waiver.update", waiver.id, waiver.model_dump())
+                return waiver
+        waivers.append(waiver)
+        self._write_models("waivers", waivers)
+        self.add_audit(actor, "waiver.request", waiver.id, waiver.model_dump())
+        return waiver
+
+    def approve_waiver(self, waiver_id: str, actor: str = "system") -> PolicyWaiver:
+        waiver = self.get_waiver(waiver_id)
+        waiver.status = "approved"
+        waiver.approved_by = actor
+        waiver.updated_at = utc_now()
+        saved = self.save_waiver(waiver, actor=actor)
+        self.add_audit(actor, "waiver.approve", waiver.id, waiver.model_dump())
+        return saved
+
+    def revoke_waiver(self, waiver_id: str, actor: str = "system") -> PolicyWaiver:
+        waiver = self.get_waiver(waiver_id)
+        waiver.status = "revoked"
+        waiver.revoked_by = actor
+        waiver.updated_at = utc_now()
+        saved = self.save_waiver(waiver, actor=actor)
+        self.add_audit(actor, "waiver.revoke", waiver.id, waiver.model_dump())
+        return saved
+
     def list_baselines(self) -> list[Baseline]:
         return [Baseline.model_validate(item) for item in self._read_list("baselines")]
 
@@ -433,6 +554,36 @@ class EnterpriseStore:
 
     def list_bindings(self) -> list[GroupPolicyBinding]:
         return [GroupPolicyBinding.model_validate(item) for item in self._read_list("bindings")]
+
+    def list_risk_profiles(self) -> list[RiskProfile]:
+        stored = [RiskProfile.model_validate(item) for item in self._read_list("risk_profiles")]
+        return stored or default_risk_profiles()
+
+    def get_risk_profile(self, profile_id_or_name: str) -> RiskProfile:
+        for profile in self.list_risk_profiles():
+            if profile.id == profile_id_or_name or profile.name == profile_id_or_name:
+                return profile
+        raise KeyError(f"Risk profile not found: {profile_id_or_name}")
+
+    def save_risk_profile(
+        self,
+        profile: RiskProfile,
+        actor: str = "system",
+    ) -> RiskProfile:
+        profiles = [
+            RiskProfile.model_validate(item) for item in self._read_list("risk_profiles")
+        ]
+        for idx, current in enumerate(profiles):
+            if current.id == profile.id:
+                profile.updated_at = utc_now()
+                profiles[idx] = profile
+                self._write_models("risk_profiles", profiles)
+                self.add_audit(actor, "risk_profile.update", profile.id, profile.model_dump())
+                return profile
+        profiles.append(profile)
+        self._write_models("risk_profiles", profiles)
+        self.add_audit(actor, "risk_profile.create", profile.id, profile.model_dump())
+        return profile
 
     def list_installed_pack_results(self) -> list[PolicyPackInstallResult]:
         return [
@@ -666,6 +817,346 @@ def get_builtin_policy_pack(pack_id: str) -> PolicyPack:
     raise KeyError(f"Policy pack not found: {pack_id}")
 
 
+def default_risk_profiles() -> list[RiskProfile]:
+    return [
+        RiskProfile(
+            id="default-prod-high-risk",
+            name="Production high-risk",
+            description=(
+                "Stricter context for production or high-risk workloads. "
+                "Encryption, public exposure, and ownership issues are treated as higher impact."
+            ),
+            environments=["prod", "production"],
+            risk_tiers=["high", "critical"],
+            rule_severity_overrides={
+                "TG010": "high",
+                "TG011": "high",
+                "TG012": "high",
+                "TG013": "high",
+                "TG016": "medium",
+                "TG019": "high",
+                "TG020": "high",
+                "TG022": "high",
+                "TG023": "medium",
+            },
+            default_fail_on="high",
+        ),
+        RiskProfile(
+            id="default-dev-sandbox",
+            name="Development sandbox",
+            description="Lenient context for early development and sandbox experimentation.",
+            environments=["dev", "development", "sandbox"],
+            risk_tiers=["low"],
+            default_fail_on="high",
+        ),
+    ]
+
+
+def list_rule_recommendations() -> list[Recommendation]:
+    return [
+        Recommendation(
+            rule_id=rule_id,
+            title=f"Fix {rule_id}",
+            remediation=str(metadata.get("remediation") or ""),
+            suggested_fix=_suggested_fix_for_rule(rule_id, str(metadata.get("remediation") or "")),
+            severity=_metadata_severity(rule_id),
+        )
+        for rule_id, metadata in RULE_METADATA.items()
+    ]
+
+
+def get_rule_recommendation(rule_id: str) -> Recommendation:
+    for recommendation in list_rule_recommendations():
+        if recommendation.rule_id == rule_id:
+            return recommendation
+    raise KeyError(f"Recommendation not found: {rule_id}")
+
+
+def explain_evaluation(
+    result_id: str,
+    store: EnterpriseStore | None = None,
+) -> ExplainabilityReport:
+    store = store or EnterpriseStore()
+    result = store.get_evaluation(result_id)
+    resolved = resolve_policy_set(store, result.context)
+    policies_by_id = {
+        policy.id: policy
+        for policy in (
+            store.get_policy(policy_id)
+            for policy_id in result.resolved_policy_ids
+            if _policy_exists(store, policy_id)
+        )
+    }
+    intelligence = result.service_metadata.get("intelligence", {})
+    waivers = result.service_metadata.get("waivers", {})
+    adjustments = intelligence.get("adjustments", [])
+    adjustment_by_rule_path = {
+        (item.get("rule_id"), item.get("path")): item
+        for item in adjustments
+        if isinstance(item, dict)
+    }
+    explanations = [
+        _explain_finding(
+            finding,
+            policies_by_id,
+            resolved.baseline_ids,
+            adjustment_by_rule_path,
+        )
+        for finding in result.report.get("findings", [])
+    ]
+    reasons = _decision_reasons(result, explanations)
+    return ExplainabilityReport(
+        result_id=result.id,
+        decision=result.decision,
+        summary=result.report.get("summary", {}),
+        context=result.context,
+        reasons=reasons,
+        applied_policy_ids=result.resolved_policy_ids,
+        applied_policies=[
+            _policy_explain_payload(policy)
+            for policy in policies_by_id.values()
+        ],
+        binding_targets=resolved.binding_targets,
+        baseline_ids=resolved.baseline_ids,
+        risk_profile=intelligence.get("profile"),
+        context_adjustments=[
+            item for item in adjustments if isinstance(item, dict)
+        ],
+        applied_waivers=[
+            item for item in waivers.get("applied", []) if isinstance(item, dict)
+        ],
+        finding_explanations=explanations,
+        next_actions=_next_actions(result, explanations),
+    )
+
+
+def render_explanation_markdown(report: ExplainabilityReport) -> str:
+    icon = {"pass": "PASS", "warn": "WARN", "block": "BLOCK"}[report.decision]
+    lines = [
+        "## Terraform Guardrail Evaluation",
+        "",
+        f"**Decision:** `{icon}`",
+        f"**Result ID:** `{report.result_id}`",
+        "",
+        "### Summary",
+        "",
+        "| Total | High | Medium | Low |",
+        "| ---: | ---: | ---: | ---: |",
+        (
+            f"| {report.summary.get('findings', 0)} | {report.summary.get('high', 0)} | "
+            f"{report.summary.get('medium', 0)} | {report.summary.get('low', 0)} |"
+        ),
+        "",
+    ]
+    if report.risk_profile:
+        lines.extend(
+            [
+                "### Context",
+                "",
+                f"- Risk profile: `{report.risk_profile.get('name')}`",
+                f"- Environment: `{report.context.environment or 'not set'}`",
+                f"- Risk tier: `{report.context.risk_tier or 'not set'}`",
+                "",
+            ]
+        )
+    if report.reasons:
+        lines.extend(["### Why", ""])
+        lines.extend(f"- {reason}" for reason in report.reasons)
+        lines.append("")
+    if report.applied_waivers:
+        lines.extend(["### Approved Waivers", ""])
+        for waiver in report.applied_waivers:
+            lines.append(
+                f"- `{waiver.get('rule_id')}` waived by `{waiver.get('waiver_id')}` "
+                f"until `{waiver.get('expires_at')}`"
+            )
+        lines.append("")
+    if report.finding_explanations:
+        lines.extend(
+            [
+                "### Findings",
+                "",
+                "| Rule | Severity | Path | Explanation | Suggested Fix |",
+                "| --- | --- | --- | --- | --- |",
+            ]
+        )
+        for finding in report.finding_explanations[:10]:
+            lines.append(
+                "| "
+                f"`{_md_escape(finding.rule_id)}` | "
+                f"`{_md_escape(finding.severity)}` | "
+                f"{_md_escape(finding.path or 'n/a')} | "
+                f"{_md_escape(finding.reason)} | "
+                f"{_md_escape(finding.suggested_fix or finding.remediation or 'Review finding.')} |"
+            )
+        if len(report.finding_explanations) > 10:
+            lines.append(
+                f"| ... | ... | ... | {len(report.finding_explanations) - 10} more findings | ... |"
+            )
+        lines.append("")
+    if report.next_actions:
+        lines.extend(["### Next Actions", ""])
+        lines.extend(f"- {action}" for action in report.next_actions[:8])
+        lines.append("")
+    if report.applied_policy_ids or report.baseline_ids:
+        lines.extend(["### Enforcement Context", ""])
+        if report.baseline_ids:
+            lines.append(f"- Baselines: `{', '.join(report.baseline_ids)}`")
+        if report.applied_policy_ids:
+            lines.append(f"- Policies: `{', '.join(report.applied_policy_ids)}`")
+        lines.append("")
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def render_evaluation_sarif(result: EvaluationResult) -> dict[str, Any]:
+    findings = result.report.get("findings", [])
+    rules_by_id: dict[str, dict[str, Any]] = {}
+    results = []
+    for finding in findings:
+        rule_id = str(finding.get("rule_id") or "TG000")
+        rules_by_id.setdefault(
+            rule_id,
+            {
+                "id": rule_id,
+                "name": rule_id,
+                "shortDescription": {"text": str(finding.get("message") or rule_id)},
+                "help": {
+                    "text": str(
+                        finding.get("suggested_fix")
+                        or finding.get("remediation")
+                        or "Review the Terraform Guardrail finding."
+                    )
+                },
+                "properties": {
+                    "severity": finding.get("severity"),
+                    "risk": finding.get("risk"),
+                    "standard": finding.get("standard"),
+                    "control_id": finding.get("control_id"),
+                },
+            },
+        )
+        results.append(
+            {
+                "ruleId": rule_id,
+                "level": _sarif_level(str(finding.get("severity") or "low")),
+                "message": {"text": str(finding.get("message") or "")},
+                "locations": [
+                    _sarif_location(str(finding.get("path") or result.report["scanned_path"]))
+                ],
+                "properties": {
+                    "decision": result.decision,
+                    "owner": finding.get("owner"),
+                    "remediation": finding.get("remediation"),
+                    "suggested_fix": finding.get("suggested_fix"),
+                    "waiver_id": finding.get("waiver_id"),
+                    "waiver_expires_at": finding.get("waiver_expires_at"),
+                },
+            }
+        )
+    return {
+        "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+        "version": "2.1.0",
+        "runs": [
+            {
+                "tool": {
+                    "driver": {
+                        "name": "Terraform Guardrail",
+                        "informationUri": "https://github.com/Huzefaaa2/terraform-guardrail",
+                        "rules": list(rules_by_id.values()),
+                    }
+                },
+                "invocations": [
+                    {
+                        "executionSuccessful": result.decision != "block",
+                        "properties": {
+                            "evaluation_id": result.id,
+                            "decision": result.decision,
+                            "resolved_policy_ids": result.resolved_policy_ids,
+                        },
+                    }
+                ],
+                "results": results,
+            }
+        ],
+    }
+
+
+def render_evaluation_junit(result: EvaluationResult) -> str:
+    findings = result.report.get("findings", [])
+    failures = [
+        finding
+        for finding in findings
+        if finding.get("severity") == "high" and not _finding_is_waived(finding)
+    ]
+    testsuite = ET.Element(
+        "testsuite",
+        {
+            "name": "terraform-guardrail-enterprise",
+            "tests": str(max(len(findings), 1)),
+            "failures": str(len(failures)),
+            "errors": "0",
+            "skipped": "0",
+            "timestamp": result.created_at,
+        },
+    )
+    if not findings:
+        ET.SubElement(
+            testsuite,
+            "testcase",
+            {"classname": "terraform_guardrail", "name": f"evaluation-{result.id}"},
+        )
+    for finding in findings:
+        testcase = ET.SubElement(
+            testsuite,
+            "testcase",
+            {
+                "classname": str(finding.get("rule_id") or "terraform_guardrail"),
+                "name": str(finding.get("path") or finding.get("message") or "finding"),
+            },
+        )
+        if finding.get("severity") == "high" and not _finding_is_waived(finding):
+            failure = ET.SubElement(
+                testcase,
+                "failure",
+                {
+                    "message": str(finding.get("message") or ""),
+                    "type": str(finding.get("rule_id") or "finding"),
+                },
+            )
+            failure.text = str(
+                finding.get("suggested_fix")
+                or finding.get("remediation")
+                or "Review the Terraform Guardrail finding."
+            )
+        else:
+            system_out = ET.SubElement(testcase, "system-out")
+            system_out.text = str(
+                f"Waived until {finding.get('waiver_expires_at')}. "
+                if _finding_is_waived(finding)
+                else ""
+            ) + str(
+                finding.get("suggested_fix")
+                or finding.get("remediation")
+                or finding.get("message")
+                or ""
+            )
+    return ET.tostring(testsuite, encoding="unicode")
+
+
+def render_evaluation_report(
+    result_id: str,
+    format: Literal["sarif", "junit"],
+    store: EnterpriseStore | None = None,
+) -> str:
+    store = store or EnterpriseStore()
+    result = store.get_evaluation(result_id)
+    if format == "sarif":
+        return json.dumps(render_evaluation_sarif(result), indent=2)
+    if format == "junit":
+        return render_evaluation_junit(result)
+    raise ValueError("Report format must be sarif or junit.")
+
+
 def install_policy_pack(
     pack_id: str,
     store: EnterpriseStore | None = None,
@@ -712,7 +1203,7 @@ def evaluate_enterprise(
     store = store or EnterpriseStore()
     ctx = EvaluationContext(provider=provider, policy_set=policy_set, baseline=baseline)
     if context:
-        for key in ("environment", "app", "org", "group", "repo"):
+        for key in ("environment", "risk_tier", "app", "org", "group", "repo"):
             if key in context:
                 setattr(ctx, key, context[key])
         ctx.extra = {key: value for key, value in context.items() if not hasattr(ctx, key)}
@@ -720,14 +1211,19 @@ def evaluate_enterprise(
     report = scan_path(Path(path), state_path=state_path)
     resolved_policy_ids = resolve_policy_ids(store, ctx)
     enrich_report_findings(report, store, resolved_policy_ids)
-    decision = decide(report, resolved_policy_ids, store, fail_on=fail_on)
+    intelligence = apply_contextual_intelligence(report, store, ctx)
+    waiver_metadata = apply_active_waivers(report, store, ctx)
+    effective_fail_on = fail_on or intelligence.get("default_fail_on")
+    decision = decide(report, resolved_policy_ids, store, fail_on=effective_fail_on)
+    metadata = service_metadata or {}
+    metadata = {**metadata, "intelligence": intelligence, "waivers": waiver_metadata}
     result = EvaluationResult(
         request_id=request_id,
         decision=decision,
         context=ctx,
         resolved_policy_ids=resolved_policy_ids,
         report=report.model_dump(mode="json"),
-        service_metadata=service_metadata or {},
+        service_metadata=metadata,
     )
     return store.save_evaluation(result, actor=actor)
 
@@ -817,6 +1313,8 @@ def enrich_report_findings(
         else:
             finding.risk = rule_metadata.get("risk")
             finding.remediation = rule_metadata.get("remediation")
+        if finding.remediation:
+            finding.suggested_fix = _suggested_fix_for_rule(finding.rule_id, finding.remediation)
         detail = finding.detail or {}
         if policy:
             detail.setdefault("policy_id", policy.id)
@@ -824,7 +1322,138 @@ def enrich_report_findings(
         if rule_metadata:
             detail.setdefault("default_risk", rule_metadata.get("risk"))
             detail.setdefault("recommendation", rule_metadata.get("remediation"))
+        if finding.suggested_fix:
+            detail.setdefault("suggested_fix", finding.suggested_fix)
         finding.detail = detail
+
+
+def apply_contextual_intelligence(
+    report: ScanReport,
+    store: EnterpriseStore,
+    context: EvaluationContext,
+) -> dict[str, Any]:
+    profile = resolve_risk_profile(store, context)
+    adjustments: list[dict[str, Any]] = []
+    for finding in report.findings:
+        original = finding.severity
+        target = profile.rule_severity_overrides.get(finding.rule_id) if profile else None
+        if target and SEVERITY_ORDER[target] > SEVERITY_ORDER[original]:
+            finding.severity = target
+            detail = finding.detail or {}
+            detail["context_severity"] = {
+                "from": original,
+                "to": target,
+                "profile": profile.name,
+            }
+            finding.detail = detail
+            adjustments.append(
+                {
+                    "rule_id": finding.rule_id,
+                    "path": finding.path,
+                    "from": original,
+                    "to": target,
+                    "profile": profile.name,
+                }
+            )
+    if adjustments:
+        report.summary.high = sum(1 for finding in report.findings if finding.severity == "high")
+        report.summary.medium = sum(
+            1 for finding in report.findings if finding.severity == "medium"
+        )
+        report.summary.low = sum(1 for finding in report.findings if finding.severity == "low")
+    recommendations = [
+        {
+            "rule_id": finding.rule_id,
+            "path": finding.path,
+            "severity": finding.severity,
+            "remediation": finding.remediation,
+            "suggested_fix": finding.suggested_fix,
+        }
+        for finding in report.findings
+        if finding.suggested_fix
+    ]
+    intelligence = {
+        "context": {
+            "environment": context.environment,
+            "risk_tier": context.risk_tier,
+            "app": context.app,
+            "org": context.org,
+            "group": context.group,
+            "repo": context.repo,
+        },
+        "profile": profile.model_dump(mode="json") if profile else None,
+        "adjustments": adjustments,
+        "recommendations": recommendations,
+    }
+    if profile and profile.default_fail_on:
+        intelligence["default_fail_on"] = profile.default_fail_on
+    report.metadata["intelligence"] = intelligence
+    return intelligence
+
+
+def resolve_risk_profile(
+    store: EnterpriseStore,
+    context: EvaluationContext,
+) -> RiskProfile | None:
+    explicit = context.extra.get("risk_profile") or context.extra.get("risk_profile_id")
+    if explicit:
+        try:
+            return store.get_risk_profile(str(explicit))
+        except KeyError:
+            return None
+    environment = (context.environment or "").lower()
+    risk_tier = (context.risk_tier or str(context.extra.get("risk_tier") or "")).lower()
+    best: tuple[int, RiskProfile] | None = None
+    for profile in store.list_risk_profiles():
+        score = 0
+        if environment and environment in {item.lower() for item in profile.environments}:
+            score += 2
+        if risk_tier and risk_tier in {item.lower() for item in profile.risk_tiers}:
+            score += 2
+        if not environment and not risk_tier:
+            continue
+        if score and (best is None or score > best[0]):
+            best = (score, profile)
+    return best[1] if best else None
+
+
+def apply_active_waivers(
+    report: ScanReport,
+    store: EnterpriseStore,
+    context: EvaluationContext,
+) -> dict[str, Any]:
+    active = [
+        waiver
+        for waiver in store.list_waivers()
+        if waiver.status == "approved" and _waiver_is_active(waiver)
+    ]
+    applied: list[dict[str, Any]] = []
+    for finding in report.findings:
+        for waiver in active:
+            if not _waiver_matches_finding(waiver, finding.model_dump(mode="json"), context):
+                continue
+            finding.waiver_id = waiver.id
+            finding.waiver_expires_at = waiver.expires_at
+            detail = finding.detail or {}
+            detail["waiver"] = {
+                "id": waiver.id,
+                "owner": waiver.owner,
+                "reason": waiver.reason,
+                "expires_at": waiver.expires_at,
+            }
+            finding.detail = detail
+            applied.append(
+                {
+                    "waiver_id": waiver.id,
+                    "rule_id": finding.rule_id,
+                    "path": finding.path,
+                    "expires_at": waiver.expires_at,
+                }
+            )
+            break
+    metadata = {"applied": applied, "active_count": len(active)}
+    report.metadata["waivers"] = metadata
+    return metadata
 
 
 def _policy_for_invariant_finding(
@@ -863,6 +1492,204 @@ def _policy_resource_matches(rule_id: str | None, resource: str) -> bool:
     return True
 
 
+def _suggested_fix_for_rule(rule_id: str, remediation: str) -> str:
+    examples = {
+        "TG001": "Set `ephemeral = true` on sensitive variables where supported.",
+        "TG002": (
+            "Replace the literal secret with a variable, CI secret, "
+            "or secret-manager reference."
+        ),
+        "TG006": "Set bucket ACLs to private and remove public-read/public-read-write grants.",
+        "TG007": "Enable all S3 public access block flags on the bucket or account boundary.",
+        "TG008": (
+            "Replace `0.0.0.0/0` ingress with approved CIDR ranges "
+            "or security group references."
+        ),
+        "TG009": (
+            "Replace wildcard IAM actions/resources with the minimum actions "
+            "and ARNs required."
+        ),
+        "TG010": "Move the instance to a private subnet or set public IP association to false.",
+        "TG011": "Add an `aws_s3_bucket_server_side_encryption_configuration` resource.",
+        "TG012": "Set `storage_encrypted = true` and configure a managed KMS key.",
+        "TG013": "Use an HTTPS listener and attach an ACM or managed TLS certificate.",
+        "TG015": "Set `publicly_accessible = false` on database resources.",
+        "TG016": "Add required ownership, environment, and cost-center tags.",
+        "TG019": "Disable public network access and route access through private endpoints.",
+        "TG020": "Set `encrypted = true` and configure a KMS key for EBS volumes.",
+        "TG021": "Remove public exposure or document an approved ingress exception.",
+        "TG022": (
+            "Enable encryption using the cloud provider's managed storage "
+            "encryption controls."
+        ),
+        "TG023": "Add consistent ownership tags or labels to every managed resource.",
+    }
+    return examples.get(rule_id, remediation)
+
+
+def _metadata_severity(rule_id: str) -> Literal["low", "medium", "high"] | None:
+    risk = str(RULE_METADATA.get(rule_id, {}).get("risk") or "")
+    if risk in {"low", "medium", "high"}:
+        return risk  # type: ignore[return-value]
+    return None
+
+
+def _waiver_is_active(waiver: PolicyWaiver) -> bool:
+    try:
+        expires = datetime.fromisoformat(waiver.expires_at.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    return expires > datetime.now(timezone.utc)
+
+
+def _waiver_matches_finding(
+    waiver: PolicyWaiver,
+    finding: dict[str, Any],
+    context: EvaluationContext,
+) -> bool:
+    if waiver.rule_id != finding.get("rule_id"):
+        return False
+    if waiver.path and waiver.path != finding.get("path"):
+        return False
+    detail = finding.get("detail") or {}
+    if waiver.policy_id and waiver.policy_id != detail.get("policy_id"):
+        return False
+    if waiver.target_type and waiver.target:
+        context_target = getattr(context, waiver.target_type, None)
+        if context_target != waiver.target:
+            return False
+    return True
+
+
+def _finding_is_waived(finding: Any) -> bool:
+    if isinstance(finding, dict):
+        return bool(finding.get("waiver_id") or (finding.get("detail") or {}).get("waiver"))
+    return bool(
+        getattr(finding, "waiver_id", None)
+        or ((getattr(finding, "detail", None) or {}).get("waiver"))
+    )
+
+
+def _md_escape(value: str) -> str:
+    return value.replace("|", "\\|").replace("\n", " ")
+
+
+def _sarif_level(severity: str) -> str:
+    if severity == "high":
+        return "error"
+    if severity == "medium":
+        return "warning"
+    return "note"
+
+
+def _sarif_location(path: str) -> dict[str, Any]:
+    return {
+        "physicalLocation": {
+            "artifactLocation": {"uri": path},
+            "region": {"startLine": 1},
+        }
+    }
+
+
+def _explain_finding(
+    finding: dict[str, Any],
+    policies_by_id: dict[str, EnterprisePolicy],
+    baseline_ids: list[str],
+    adjustment_by_rule_path: dict[tuple[Any, Any], dict[str, Any]],
+) -> FindingExplanation:
+    detail = finding.get("detail") or {}
+    policy_id = detail.get("policy_id")
+    policy = policies_by_id.get(policy_id) if isinstance(policy_id, str) else None
+    adjustment = adjustment_by_rule_path.get((finding.get("rule_id"), finding.get("path")))
+    severity = finding.get("severity") if finding.get("severity") in SEVERITY_ORDER else "low"
+    reason_parts = [f"{finding.get('rule_id')} reported {severity} severity"]
+    if policy:
+        reason_parts.append(f"matched policy {policy.name}")
+    if adjustment:
+        reason_parts.append(
+            f"context raised severity from {adjustment.get('from')} to {adjustment.get('to')}"
+        )
+    waiver = detail.get("waiver")
+    if waiver:
+        reason_parts.append(f"approved waiver {waiver.get('id')} applies")
+    if finding.get("suggested_fix"):
+        reason_parts.append("a suggested fix is available")
+    return FindingExplanation(
+        rule_id=str(finding.get("rule_id")),
+        severity=severity,
+        message=str(finding.get("message")),
+        path=finding.get("path"),
+        policy_id=policy.id if policy else policy_id,
+        policy_name=policy.name if policy else None,
+        policy_status=policy.status if policy else detail.get("policy_status"),
+        baseline_ids=baseline_ids,
+        context_adjustment=adjustment,
+        waiver_id=finding.get("waiver_id"),
+        waiver_expires_at=finding.get("waiver_expires_at"),
+        remediation=finding.get("remediation"),
+        suggested_fix=finding.get("suggested_fix"),
+        reason="; ".join(reason_parts) + ".",
+    )
+
+
+def _policy_explain_payload(policy: EnterprisePolicy) -> dict[str, Any]:
+    return {
+        "id": policy.id,
+        "rule_id": policy.rule_id,
+        "name": policy.name,
+        "severity": policy.severity,
+        "status": policy.status,
+        "owner": policy.metadata.owner,
+        "standard": policy.metadata.standard,
+        "control_id": policy.metadata.control_id,
+    }
+
+
+def _decision_reasons(
+    result: EvaluationResult,
+    explanations: list[FindingExplanation],
+) -> list[str]:
+    summary = result.report.get("summary", {})
+    reasons: list[str] = []
+    if result.decision == "pass":
+        reasons.append("No blocking or warning findings were present after policy resolution.")
+        if any(item.waiver_id for item in explanations):
+            reasons.append("Approved waivers suppressed one or more otherwise actionable findings.")
+    if result.decision == "warn":
+        reasons.append("Medium-severity findings were present but no blocking threshold was met.")
+    if result.decision == "block":
+        if summary.get("high", 0) > 0:
+            reasons.append("High-severity findings require blocking before apply.")
+        if any(item.context_adjustment for item in explanations):
+            reasons.append("Context-aware evaluation raised one or more finding severities.")
+        if not reasons:
+            reasons.append("The resolved enterprise policy set required a blocking decision.")
+    if result.resolved_policy_ids:
+        reasons.append(
+            f"{len(result.resolved_policy_ids)} enterprise policies were resolved for this context."
+        )
+    return reasons
+
+
+def _next_actions(
+    result: EvaluationResult,
+    explanations: list[FindingExplanation],
+) -> list[str]:
+    actions = []
+    for explanation in explanations:
+        if explanation.waiver_id:
+            continue
+        if explanation.suggested_fix:
+            actions.append(f"{explanation.rule_id}: {explanation.suggested_fix}")
+    if not actions and result.decision == "pass":
+        actions.append("No action required. Keep the evaluation result as deployment evidence.")
+    if result.decision in {"warn", "block"}:
+        actions.append(
+            "Re-run evaluation after applying fixes and keep the new result as evidence."
+        )
+    return list(dict.fromkeys(actions))
+
+
 def decide(
     report: ScanReport,
     policy_ids: list[str],
@@ -883,9 +1710,12 @@ def decide(
         policy.status in {"approved", "active"} and policy.severity == "block"
         for policy in policies
     ):
-        if report.summary.findings > 0:
+        if any(not _finding_is_waived(finding) for finding in report.findings):
             return "block"
-    if report.summary.medium > 0:
+    if any(
+        finding.severity == "medium" and not _finding_is_waived(finding)
+        for finding in report.findings
+    ):
         return "warn"
     return "pass"
 
@@ -1185,7 +2015,11 @@ def _replace_evaluation(store: EnterpriseStore, result: EvaluationResult) -> Non
 
 def _findings_at_or_above(report: ScanReport, level: str) -> bool:
     threshold = SEVERITY_ORDER[level]
-    return any(SEVERITY_ORDER[finding.severity] >= threshold for finding in report.findings)
+    return any(
+        SEVERITY_ORDER[finding.severity] >= threshold
+        for finding in report.findings
+        if not _finding_is_waived(finding)
+    )
 
 
 def _policy_exists(store: EnterpriseStore, policy_id: str) -> bool:

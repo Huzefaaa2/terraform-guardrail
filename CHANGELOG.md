@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.0.0] - 2026-05-13
+
+### Added
+- Context-aware enterprise evaluation with risk profiles, environment-aware severity overrides, and decision metadata.
+- Suggested remediation guidance attached to findings and exposed through CLI, REST API, Web UI, and Streamlit Enterprise.
+- Explainability reports with human-readable decision reasons, finding explanations, next actions, and CI-ready Markdown comment output.
+- Enterprise SARIF and JUnit report generation for code scanning and CI test result surfaces.
+- Policy waiver lifecycle for temporary exceptions with approval/revocation, expiry handling, audit records, and evaluation suppression.
+- Web UI and Streamlit Enterprise waiver visibility, applied waiver summaries, and policy intelligence panels.
+
+### Changed
+- Roadmap, README, wiki home page, release notes, and package/API versions updated for v4.0.0 Intelligent.
+- Reference CI implementations now publish explainability comments plus SARIF and JUnit artifacts.
+
 ## [3.0.0] - 2026-05-11
 
 ### Added

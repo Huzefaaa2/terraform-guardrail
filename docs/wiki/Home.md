@@ -7,11 +7,12 @@ that prevent bad state before apply.
 
 ## Latest Release and Roadmap
 
-**Latest release: v3.0.0 Ecosystem**
+**Latest release: v4.0.0 Intelligent**
 
-v3.0.0 expands Terraform Guardrail from an enterprise control plane into an ecosystem layer. The
-release adds enterprise policy packs, Guardrails-as-a-Service evaluation, cross-provider
-invariants, reference implementations across CI/CD tools, and contributor governance.
+v4.0.0 adds the intelligent governance layer: context-aware evaluation, suggested fixes,
+explainability reports, SARIF/JUnit CI artifacts, and approved policy waivers. The release keeps the
+v2 enterprise control plane and v3 ecosystem integrations, then makes every pass/warn/block decision
+easier to understand, automate, and audit.
 
 ![Terraform Guardrail v2 Enterprise feature map](https://raw.githubusercontent.com/Huzefaaa2/terraform-guardrail/main/docs/assets/terraguard-v2-enterprise.svg)
 
@@ -21,6 +22,7 @@ Start with the release detail page, then follow the roadmap and task guides:
 
 - [v2.0.0 Enterprise Release](Release-v2.0.0)
 - [v3.0.0 Ecosystem Release](Release-v3.0.0)
+- [v4.0.0 Intelligent Release](Release-v4.0.0)
 - [Roadmap](Roadmap)
 - [Governance](Governance)
 - [Enterprise Features](Enterprise-Features)
@@ -35,7 +37,7 @@ The current roadmap status is:
 | v1.0 Foundation | Delivered | Registry, packaging, CI templates, policy layering, custom rules |
 | v2.0 Enterprise | Delivered | Authoring UI, baselines, group enforcement, drift gates, evidence export |
 | v3.0 Ecosystem | Delivered | Policy packs, service API, invariants, reference implementations, governance |
-| v4.0 Intelligent | Planned | Context-aware evaluation and suggested fixes |
+| v4.0 Intelligent | Delivered | Context-aware evaluation, suggested fixes, explainability reports, SARIF/JUnit bridge, policy waivers |
 
 ## Quick Install
 
@@ -201,9 +203,9 @@ flowchart LR
 
 ## Latest Release
 
-- Version: 3.0.0
-- Release: https://github.com/Huzefaaa2/terraform-guardrail/releases/tag/v3.0.0
-- PyPI: https://pypi.org/project/terraform-guardrail/3.0.0/
+- Version: 4.0.0
+- Release: https://github.com/Huzefaaa2/terraform-guardrail/releases/tag/v4.0.0
+- PyPI: https://pypi.org/project/terraform-guardrail/4.0.0/
 - Container image: https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail
 - Registry image: https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail-registry
 - Supported providers: AWS, Azure, GCP, Kubernetes, Helm, OCI, Vault, Alicloud, vSphere

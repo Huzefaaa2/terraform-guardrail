@@ -70,6 +70,38 @@
                   required
                 />
               </label>
+              <div class="context-strip" aria-label="Evaluation context">
+                <select name="provider" aria-label="Provider">
+                  <option value="aws" selected>AWS</option>
+                  <option value="azure">Azure</option>
+                  <option value="gcp">GCP</option>
+                  <option value="kubernetes">Kubernetes</option>
+                  <option value="helm">Helm</option>
+                </select>
+                <select name="environment" aria-label="Environment">
+                  <option value="prod" selected>Production</option>
+                  <option value="dev">Development</option>
+                  <option value="sandbox">Sandbox</option>
+                </select>
+                <select name="risk_tier" aria-label="Risk tier">
+                  <option value="high" selected>High risk</option>
+                  <option value="medium">Medium risk</option>
+                  <option value="low">Low risk</option>
+                  <option value="critical">Critical risk</option>
+                </select>
+                <select name="baseline" aria-label="Evaluation baseline">
+                  <option value="">Auto baseline</option>
+                  {% for baseline in baselines %}
+                  <option value="{{ baseline.id }}">{{ baseline.name }}</option>
+                  {% endfor %}
+                </select>
+                <select name="fail_on" aria-label="Fail on severity">
+                  <option value="">Profile threshold</option>
+                  <option value="high">Fail on high</option>
+                  <option value="medium">Fail on medium</option>
+                  <option value="low">Fail on low</option>
+                </select>
+              </div>
               <button type="submit">Scan Workspace</button>
             </form>
           </section>
@@ -219,6 +251,65 @@
             </div>
           </section>
 
+          <section class="panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Exceptions</p>
+                <h2>Policy waivers</h2>
+              </div>
+              <span class="count-pill">{{ waivers | length }}</span>
+            </div>
+            <form action="/waivers" method="post" class="waiver-form">
+              <select name="rule_id" aria-label="Waiver rule">
+                {% for rule in default_rules %}
+                <option value="{{ rule.rule_id }}">{{ rule.rule_id }} · {{ rule.name }}</option>
+                {% endfor %}
+                {% for policy in policies %}
+                {% if policy.rule_id %}
+                <option value="{{ policy.rule_id }}">{{ policy.rule_id }} · {{ policy.name }}</option>
+                {% endif %}
+                {% endfor %}
+              </select>
+              <input type="text" name="owner" placeholder="Owner, e.g. platform-security" required />
+              <input type="text" name="reason" placeholder="Reason for temporary exception" required />
+              <input type="text" name="expires_at" placeholder="Expires, e.g. 2026-12-31T00:00:00Z" required />
+              <input type="text" name="path" placeholder="Optional exact finding path" />
+              <label class="checkbox-row">
+                <input type="checkbox" name="approve" value="true" />
+                <span>Approve immediately</span>
+              </label>
+              <button type="submit">Request Waiver</button>
+            </form>
+            {% if waivers %}
+            <div class="waiver-list">
+              {% for waiver in waivers %}
+              <div class="waiver-card status-{{ waiver.status }}">
+                <div>
+                  <strong>{{ waiver.rule_id }} · {{ waiver.owner }}</strong>
+                  <small>{{ waiver.status }} · expires {{ waiver.expires_at }}</small>
+                  <p>{{ waiver.reason }}</p>
+                  {% if waiver.path %}<small>path={{ waiver.path }}</small>{% endif %}
+                </div>
+                <div class="waiver-actions">
+                  {% if waiver.status == "requested" %}
+                  <form action="/waivers/{{ waiver.id }}/approve" method="post">
+                    <button type="submit">Approve</button>
+                  </form>
+                  {% endif %}
+                  {% if waiver.status != "revoked" %}
+                  <form action="/waivers/{{ waiver.id }}/revoke" method="post">
+                    <button type="submit">Revoke</button>
+                  </form>
+                  {% endif %}
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+            {% else %}
+            <p class="detail-copy">No policy waivers have been requested.</p>
+            {% endif %}
+          </section>
+
           {% if resolved %}
           <section class="panel report">
             <div class="section-heading">
@@ -357,6 +448,15 @@
                 <span class="rule">{{ finding.rule_id }}</span>
                 <span class="message">{{ finding.message }}</span>
                 <span class="path">{{ finding.path }}</span>
+                {% if finding.waiver_id or (finding.detail and finding.detail.waiver) %}
+                <span class="waiver-note">
+                  Waived by {{ finding.waiver_id or finding.detail.waiver.id }}
+                  until {{ finding.waiver_expires_at or finding.detail.waiver.expires_at }}
+                </span>
+                {% endif %}
+                {% if finding.suggested_fix %}
+                <span class="fix">{{ finding.suggested_fix }}</span>
+                {% endif %}
               </li>
               {% endfor %}
             </ul>
@@ -370,10 +470,53 @@
           <section class="panel report">
             <div class="section-heading">
               <div>
-                <p class="eyebrow">Scan report</p>
+                <p class="eyebrow">Intelligent evaluation</p>
                 <h2>{{ report.scanned_path }}</h2>
               </div>
+              {% if evaluation %}
+              <span class="status-badge decision-{{ evaluation.decision }}">{{ evaluation.decision }}</span>
+              {% endif %}
             </div>
+            {% if report.metadata and report.metadata.intelligence %}
+            {% set intelligence = report.metadata.intelligence %}
+            <div class="intelligence-panel">
+              <div>
+                <span>Risk profile</span>
+                <strong>
+                  {% if intelligence.profile %}
+                  {{ intelligence.profile.name }}
+                  {% else %}
+                  No profile matched
+                  {% endif %}
+                </strong>
+              </div>
+              <div>
+                <span>Context</span>
+                <strong>
+                  {{ intelligence.context.environment or "any" }} ·
+                  {{ intelligence.context.risk_tier or "any" }}
+                </strong>
+              </div>
+              <div>
+                <span>Adjustments</span>
+                <strong>{{ intelligence.adjustments | length }}</strong>
+              </div>
+              <div>
+                <span>Suggested fixes</span>
+                <strong>{{ intelligence.recommendations | length }}</strong>
+              </div>
+            </div>
+            {% if intelligence.adjustments %}
+            <div class="adjustment-list">
+              {% for adjustment in intelligence.adjustments %}
+              <span>
+                {{ adjustment.rule_id }} raised from {{ adjustment["from"] }} to {{ adjustment.to }}
+                {% if adjustment.path %}at {{ adjustment.path }}{% endif %}
+              </span>
+              {% endfor %}
+            </div>
+            {% endif %}
+            {% endif %}
             <div class="summary">
               <div><strong>{{ report.summary.findings }}</strong><span>Total</span></div>
               <div><strong>{{ report.summary.high }}</strong><span>High</span></div>
@@ -387,6 +530,15 @@
                 <span class="rule">{{ finding.rule_id }}</span>
                 <span class="message">{{ finding.message }}</span>
                 <span class="path">{{ finding.path }}</span>
+                {% if finding.waiver_id or (finding.detail and finding.detail.waiver) %}
+                <span class="waiver-note">
+                  Waived by {{ finding.waiver_id or finding.detail.waiver.id }}
+                  until {{ finding.waiver_expires_at or finding.detail.waiver.expires_at }}
+                </span>
+                {% endif %}
+                {% if finding.suggested_fix %}
+                <span class="fix">{{ finding.suggested_fix }}</span>
+                {% endif %}
               </li>
               {% endfor %}
             </ul>
@@ -442,6 +594,25 @@
           {% else %}
           <p class="empty-state">No enterprise policies yet.</p>
           {% endif %}
+
+          <div class="section-heading compact-heading enterprise-heading">
+            <div>
+              <p class="eyebrow">Intelligence</p>
+              <h2>Risk Profiles</h2>
+            </div>
+            <span class="count-pill">{{ risk_profiles | length }}</span>
+          </div>
+          <div class="risk-profile-list">
+            {% for profile in risk_profiles %}
+            <div class="risk-profile-card">
+              <strong>{{ profile.name }}</strong>
+              <small>
+                env={{ profile.environments | join(", ") or "any" }} ·
+                risk={{ profile.risk_tiers | join(", ") or "any" }}
+              </small>
+            </div>
+            {% endfor %}
+          </div>
         </aside>
       </section>
     </main>

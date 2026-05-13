@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import Response
+from fastapi.responses import PlainTextResponse, Response
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 from pydantic import BaseModel
 
@@ -15,14 +15,21 @@ from terraform_guardrail.enterprise import (
     EnterpriseStore,
     EvaluationContext,
     GroupPolicyBinding,
+    PolicyWaiver,
+    RiskProfile,
     check_drift,
     ensure_policy_pack_installed,
     evaluate_enterprise,
+    explain_evaluation,
     export_evidence,
     get_builtin_policy_pack,
+    get_rule_recommendation,
     install_policy_pack,
     list_builtin_policy_packs,
+    list_rule_recommendations,
     preview_policy,
+    render_evaluation_report,
+    render_explanation_markdown,
     resolve_policy_set,
     run_drift_gate,
 )
@@ -79,6 +86,10 @@ class PolicyVersionRequest(BaseModel):
 class PolicyApprovalRequest(BaseModel):
     actor: str = "system"
     comment: str | None = None
+
+
+class WaiverActionRequest(BaseModel):
+    actor: str = "system"
 
 
 class BaselineVersionRequest(BaseModel):
@@ -161,7 +172,7 @@ class PolicyPackInstallRequest(BaseModel):
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="Terraform Guardrail MCP (TerraGuard) API", version="3.0.0")
+    app = FastAPI(title="Terraform Guardrail MCP (TerraGuard) API", version="4.0.0")
 
     @app.middleware("http")
     async def record_metrics(request, call_next):  # type: ignore[no-untyped-def]
@@ -327,6 +338,45 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
         return approval.model_dump(mode="json")
 
+    @app.post("/waivers")
+    def create_waiver(waiver: PolicyWaiver) -> dict[str, Any]:
+        try:
+            return EnterpriseStore().save_waiver(
+                waiver,
+                actor=waiver.requested_by,
+            ).model_dump(mode="json")
+        except Exception as exc:  # noqa: BLE001
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.get("/waivers")
+    def waivers(status: str | None = None, rule_id: str | None = None) -> dict[str, Any]:
+        items = EnterpriseStore().list_waivers()
+        if status:
+            items = [waiver for waiver in items if waiver.status == status]
+        if rule_id:
+            items = [waiver for waiver in items if waiver.rule_id == rule_id]
+        return {"waivers": [waiver.model_dump(mode="json") for waiver in items]}
+
+    @app.post("/waivers/{waiver_id}/approve")
+    def approve_waiver(waiver_id: str, request: WaiverActionRequest) -> dict[str, Any]:
+        try:
+            return EnterpriseStore().approve_waiver(
+                waiver_id,
+                actor=request.actor,
+            ).model_dump(mode="json")
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.post("/waivers/{waiver_id}/revoke")
+    def revoke_waiver(waiver_id: str, request: WaiverActionRequest) -> dict[str, Any]:
+        try:
+            return EnterpriseStore().revoke_waiver(
+                waiver_id,
+                actor=request.actor,
+            ).model_dump(mode="json")
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
     @app.post("/policies/{policy_id}/preview")
     def preview_enterprise_policy(
         policy_id: str,
@@ -432,6 +482,45 @@ def create_app() -> FastAPI:
             ),
         )
         return result.model_dump(mode="json")
+
+    @app.get("/risk-profiles")
+    def risk_profiles() -> dict[str, Any]:
+        store = EnterpriseStore()
+        return {
+            "risk_profiles": [
+                profile.model_dump(mode="json") for profile in store.list_risk_profiles()
+            ]
+        }
+
+    @app.post("/risk-profiles")
+    def create_risk_profile(profile: RiskProfile) -> dict[str, Any]:
+        try:
+            return EnterpriseStore().save_risk_profile(profile).model_dump(mode="json")
+        except Exception as exc:  # noqa: BLE001
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.get("/risk-profiles/{profile_id}")
+    def risk_profile(profile_id: str) -> dict[str, Any]:
+        try:
+            return EnterpriseStore().get_risk_profile(profile_id).model_dump(mode="json")
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.get("/recommendations")
+    def recommendations() -> dict[str, Any]:
+        return {
+            "recommendations": [
+                recommendation.model_dump(mode="json")
+                for recommendation in list_rule_recommendations()
+            ]
+        }
+
+    @app.get("/recommendations/{rule_id}")
+    def recommendation(rule_id: str) -> dict[str, Any]:
+        try:
+            return get_rule_recommendation(rule_id).model_dump(mode="json")
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     @app.post("/integrations/gitlab/groups")
     def create_gitlab_group_binding(binding: GroupPolicyBinding) -> dict[str, Any]:
@@ -550,6 +639,32 @@ def create_app() -> FastAPI:
             return EnterpriseStore().get_evaluation(result_id).model_dump(mode="json")
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.get("/results/{result_id}/explain")
+    def evaluation_explanation(result_id: str) -> dict[str, Any]:
+        try:
+            return explain_evaluation(result_id).model_dump(mode="json")
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.get("/results/{result_id}/comment", response_class=PlainTextResponse)
+    def evaluation_comment(result_id: str) -> PlainTextResponse:
+        try:
+            report = explain_evaluation(result_id)
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        return PlainTextResponse(render_explanation_markdown(report))
+
+    @app.get("/results/{result_id}/reports/{format}", response_class=PlainTextResponse)
+    def evaluation_native_report(result_id: str, format: str) -> PlainTextResponse:
+        if format not in {"sarif", "junit"}:
+            raise HTTPException(status_code=400, detail="Report format must be sarif or junit.")
+        try:
+            content = render_evaluation_report(result_id, format=format)  # type: ignore[arg-type]
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        media_type = "application/sarif+json" if format == "sarif" else "application/xml"
+        return PlainTextResponse(content, media_type=media_type)
 
     @app.post("/drift/check")
     def drift_check(request: DriftCheckRequest) -> dict[str, Any]:

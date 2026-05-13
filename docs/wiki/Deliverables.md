@@ -128,9 +128,32 @@ Planned cross-provider guardrails for consistent controls.
 <a name="context-aware-evaluation"></a>
 ## Context-aware evaluation
 
-Planned evaluation based on environment and risk context.
+Delivered in v4.0 development. Evaluation now resolves risk profiles from environment and risk
+tier context, adjusts severity where the profile is stricter, and records the matched profile plus
+adjustments in result metadata.
 
 <a name="suggested-fixes"></a>
 ## Suggested fixes + recommendations
 
-Planned guidance to suggest fixes instead of blocking only.
+Delivered in v4.0 development. Findings now include concrete `suggested_fix` guidance and the
+recommendation catalog is available through CLI and API surfaces.
+
+<a name="explainability-reports"></a>
+## Explainability reports
+
+Delivered in v4.0 development. Evaluation results can now be explained through CLI and API,
+including decision reasons, applied policies, baseline context, risk profile adjustments, finding
+explanations, and next actions.
+
+<a name="enterprise-sarif-junit"></a>
+## Enterprise SARIF/JUnit bridge
+
+Delivered in v4.0 development. Stored enterprise evaluations can now render SARIF and JUnit XML
+reports through CLI and API, and the reference CI templates publish those artifacts.
+
+<a name="policy-waivers"></a>
+## Policy waivers and exceptions
+
+Delivered in v4.0 development. Teams can request, approve, and revoke time-bound policy waivers
+with owner, reason, expiry, optional path/target scope, audit trail, explainability metadata, and
+decision suppression for active approved waivers.

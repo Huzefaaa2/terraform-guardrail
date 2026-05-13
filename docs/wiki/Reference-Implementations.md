@@ -21,7 +21,13 @@ Each reference implementation:
 3. Calls `POST /service/evaluate`.
 4. Uses a CI-native `request_id`.
 5. Evaluates with `policy_pack=aws-control-tower`.
-6. Stores `guardrail-service-response.json` and generated evidence.
+6. Stores `guardrail-service-response.json`, `guardrail-comment.md`, SARIF/JUnit reports, and
+   generated evidence.
+
+The Markdown comment is rendered from `GET /results/{result_id}/comment` and can be posted into
+pull requests, merge requests, pipeline summaries, or deployment review tickets.
+SARIF and JUnit reports are rendered from `GET /results/{result_id}/reports/sarif` and
+`GET /results/{result_id}/reports/junit`.
 7. Fails the job when the decision is `block`.
 
 For centrally hosted deployments, replace `GUARDRAIL_API_URL` with your TerraGuard service URL and

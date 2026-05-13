@@ -19,6 +19,9 @@ class Finding(BaseModel):
     risk: str | None = None
     expiry: str | None = None
     remediation: str | None = None
+    suggested_fix: str | None = None
+    waiver_id: str | None = None
+    waiver_expires_at: str | None = None
     evidence_id: str | None = None
 
 

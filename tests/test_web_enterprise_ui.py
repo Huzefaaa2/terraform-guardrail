@@ -33,9 +33,11 @@ def test_web_scan_accepts_multiple_files(monkeypatch, tmp_path) -> None:
     )
 
     assert response.status_code == 200
-    assert "Scan report" in response.text
+    assert "Intelligent evaluation" in response.text
     assert "TG001" in response.text
     assert "TG002" in response.text
+    assert "Suggested fixes" in response.text
+    assert "Production high-risk" in response.text
 
 
 def test_web_policy_rule_id_is_allocated_without_conflicts(monkeypatch, tmp_path) -> None:
@@ -78,6 +80,8 @@ def test_web_lists_default_rules_and_renders_rule_detail(monkeypatch, tmp_path) 
     assert "TG021" in response.text
     assert "Security group ingress open to the world" in response.text
     assert "Default rule detail" in response.text
+    assert "Risk Profiles" in response.text
+    assert "Production high-risk" in response.text
 
 
 def test_web_displays_how_to_guide_links(monkeypatch, tmp_path) -> None:
@@ -179,3 +183,47 @@ def test_web_policy_preview(monkeypatch, tmp_path) -> None:
     assert "Policy preview" in response.text
     assert "Bucket encryption" in response.text
     assert "TG011" in response.text
+
+
+def test_web_waiver_lifecycle_and_scan_annotation(monkeypatch, tmp_path) -> None:
+    monkeypatch.setenv("GUARDRAIL_ENTERPRISE_DATA_DIR", str(tmp_path / "store"))
+    client = TestClient(create_app())
+
+    created = client.post(
+        "/waivers",
+        data={
+            "rule_id": "TG001",
+            "reason": "Migration window",
+            "owner": "platform",
+            "expires_at": "2099-01-01T00:00:00Z",
+            "path": "",
+            "approve": "true",
+        },
+    )
+    assert created.status_code == 200
+    waiver = EnterpriseStore().list_waivers()[0]
+    assert waiver.status == "approved"
+    assert "Policy waivers" in created.text
+    assert "Migration window" in created.text
+
+    response = client.post(
+        "/scan",
+        data={"fail_on": "medium"},
+        files=[
+            (
+                "tf_files",
+                (
+                    "main.tf",
+                    b'variable "db_password" { type = string sensitive = true }',
+                    "text/plain",
+                ),
+            )
+        ],
+    )
+    assert response.status_code == 200
+    assert "decision-pass" in response.text
+    assert f"Waived by {waiver.id}" in response.text
+
+    revoked = client.post(f"/waivers/{waiver.id}/revoke")
+    assert revoked.status_code == 200
+    assert EnterpriseStore().get_waiver(waiver.id).status == "revoked"

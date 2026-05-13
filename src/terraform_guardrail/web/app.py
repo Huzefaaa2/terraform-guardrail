@@ -16,11 +16,12 @@ from terraform_guardrail.enterprise import (
     EvaluationContext,
     GroupPolicyBinding,
     PolicyMetadata,
+    PolicyWaiver,
+    evaluate_enterprise,
     preview_policy,
     resolve_policy_set,
 )
 from terraform_guardrail.scanner.rules import RULE_METADATA, RULES
-from terraform_guardrail.scanner.scan import scan_path
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 STATIC_DIR = Path(__file__).parent / "static"
@@ -51,7 +52,7 @@ HOW_TO_GUIDES = [
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="Terraform Guardrail MCP (TerraGuard)", version="3.0.0")
+    app = FastAPI(title="Terraform Guardrail MCP (TerraGuard)", version="4.0.0")
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
     templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
@@ -79,7 +80,13 @@ def create_app() -> FastAPI:
 
     @app.post("/scan", response_class=HTMLResponse)
     async def scan(
-        request: Request, tf_files: Annotated[list[UploadFile], File(...)]
+        request: Request,
+        tf_files: Annotated[list[UploadFile], File(...)],
+        provider: str = Form("aws"),
+        baseline: str = Form(""),
+        environment: str = Form("prod"),
+        risk_tier: str = Form("high"),
+        fail_on: str = Form(""),
     ) -> HTMLResponse:
         store = EnterpriseStore()
         uploads = [upload for upload in tf_files if upload.filename]
@@ -96,7 +103,18 @@ def create_app() -> FastAPI:
                 upload_path.parent.mkdir(parents=True, exist_ok=True)
                 upload_path.write_bytes(await upload.read())
             try:
-                report = scan_path(tmp_path)
+                result = evaluate_enterprise(
+                    path=tmp_path,
+                    provider=provider or None,
+                    baseline=baseline or None,
+                    context={
+                        "environment": environment,
+                        "risk_tier": risk_tier,
+                    },
+                    fail_on=fail_on or None,
+                    store=store,
+                    actor="web",
+                )
             except Exception as exc:  # noqa: BLE001
                 return templates.TemplateResponse(
                     request,
@@ -106,7 +124,7 @@ def create_app() -> FastAPI:
         return templates.TemplateResponse(
             request,
             "index.html",
-            _template_context(request, store, report=report),
+            _template_context(request, store, evaluation=result, report=result.report),
         )
 
     @app.post("/policies", response_class=HTMLResponse)
@@ -295,6 +313,68 @@ def create_app() -> FastAPI:
             _template_context(request, store, error=error, resolved=resolved),
         )
 
+    @app.post("/waivers", response_class=HTMLResponse)
+    async def create_waiver(
+        request: Request,
+        rule_id: str = Form(...),
+        reason: str = Form(...),
+        owner: str = Form(...),
+        expires_at: str = Form(...),
+        path: str = Form(""),
+        approve: bool = Form(False),
+    ) -> HTMLResponse:
+        store = EnterpriseStore()
+        try:
+            waiver = store.save_waiver(
+                PolicyWaiver(
+                    rule_id=rule_id,
+                    reason=reason,
+                    owner=owner,
+                    expires_at=expires_at,
+                    path=path or None,
+                    requested_by="web",
+                ),
+                actor="web",
+            )
+            if approve:
+                store.approve_waiver(waiver.id, actor="web")
+            error = None
+        except Exception as exc:  # noqa: BLE001
+            error = str(exc)
+        return templates.TemplateResponse(
+            request,
+            "index.html",
+            _template_context(request, store, error=error),
+        )
+
+    @app.post("/waivers/{waiver_id}/approve", response_class=HTMLResponse)
+    async def approve_waiver(request: Request, waiver_id: str) -> HTMLResponse:
+        store = EnterpriseStore()
+        try:
+            store.approve_waiver(waiver_id, actor="web")
+            error = None
+        except Exception as exc:  # noqa: BLE001
+            error = str(exc)
+        return templates.TemplateResponse(
+            request,
+            "index.html",
+            _template_context(request, store, error=error),
+        )
+
+    @app.post("/waivers/{waiver_id}/revoke", response_class=HTMLResponse)
+    async def revoke_waiver(request: Request, waiver_id: str) -> HTMLResponse:
+        store = EnterpriseStore()
+        try:
+            store.revoke_waiver(waiver_id, actor="web")
+            error = None
+        except Exception as exc:  # noqa: BLE001
+            error = str(exc)
+        return templates.TemplateResponse(
+            request,
+            "index.html",
+            _template_context(request, store, error=error),
+        )
+
     @app.post("/baselines", response_class=HTMLResponse)
     async def create_baseline(
         request: Request,
@@ -368,6 +448,7 @@ def _template_context(
     request: Request,
     store: EnterpriseStore,
     report=None,  # type: ignore[no-untyped-def]
+    evaluation=None,  # type: ignore[no-untyped-def]
     error: str | None = None,
     selected_policy_id: str | None = None,
     selected_rule_id: str | None = None,
@@ -395,10 +476,13 @@ def _template_context(
     return {
         "request": request,
         "report": report,
+        "evaluation": evaluation,
         "error": error,
         "policies": policies,
         "baselines": store.list_baselines(),
         "bindings": store.list_bindings(),
+        "waivers": store.list_waivers(),
+        "risk_profiles": store.list_risk_profiles(),
         "default_rules": default_rules,
         "selected_policy": selected_policy,
         "selected_default_rule": selected_default_rule,

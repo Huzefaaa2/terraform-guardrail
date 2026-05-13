@@ -2,16 +2,16 @@
 
 [![CI](https://github.com/Huzefaaa2/terraform-guardrail/actions/workflows/ci.yml/badge.svg)](https://github.com/Huzefaaa2/terraform-guardrail/actions/workflows/ci.yml)
 
-**v2.0 Enterprise is live.** Terraform Guardrail has moved from Terraform scanning into an
-enterprise governance control plane: author policies, enforce org baselines, bind controls by group
-or repo, block drift before apply, and export audit evidence for SOC2, ISO, PCI, and internal
-review.
+**v4.0 Intelligent is live.** Terraform Guardrail now pairs enterprise governance with context-aware
+decisions, suggested fixes, explainability reports, SARIF/JUnit CI artifacts, and approved policy
+waivers. It helps platform teams enforce standards while giving developers the reason, remediation,
+and exception path behind every decision.
 
 Terraform Guardrail Multi-Cloud Policy (MCP) (TerraGuard) runs outside Terraform and turns platform
 standards into executable CI/CD guardrails. It gives platform teams policy lifecycle management,
 developers fast feedback, and auditors traceable evidence without slowing delivery.
 
-Use it as a CLI, REST API, web UI, MCP server, or CI gate. Start with the built-in TG001-TG020 rule
+Use it as a CLI, REST API, web UI, MCP server, or CI gate. Start with the built-in TG001-TG023 rule
 catalog, add enterprise metadata and approvals, then roll out pass/warn/block decisions across
 GitHub, GitLab, Azure DevOps, and AWS CodePipeline.
 
@@ -19,9 +19,10 @@ GitHub, GitLab, Azure DevOps, and AWS CodePipeline.
 
 ![Terraform Guardrail v1 Foundation feature map](docs/assets/terraguard-v1-foundation.svg)
 
-- Release notes: https://github.com/Huzefaaa2/terraform-guardrail/releases/tag/v3.0.0
+- Release notes: https://github.com/Huzefaaa2/terraform-guardrail/releases/tag/v4.0.0
 - Enterprise wiki: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Release-v2.0.0
 - v3 Ecosystem release: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Release-v3.0.0
+- v4 Intelligent release: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Release-v4.0.0
 - Contributing: https://github.com/Huzefaaa2/terraform-guardrail/blob/main/CONTRIBUTING.md
 - v1 Foundation live app: https://terraform-guardrail.streamlit.app/
 - v2 Enterprise live app: https://terraform-guardrail-enterprise.streamlit.app/
@@ -323,8 +324,11 @@ Legend: <span style="color: green">✅ Delivered</span> • <span style="color: 
 | Cross-provider invariant enforcement |  |  | <span style="color: green">✅ Delivered (v3.0 development)</span> |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Cross-Provider-Invariants) |
 | Guardrails-as-a-Service API |  |  | <span style="color: green">✅ Delivered (v3.0 development)</span> |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Guardrails-as-a-Service) |
 | Enterprise policy packs |  |  | <span style="color: green">✅ Delivered (v3.0 development)</span> |  | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Policy-Packs) |
-| Context-aware evaluation |  |  |  | <span style="color: orange">🚧 Planned</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Context-Aware-Evaluation) |
-| Suggested fixes + recommendations |  |  |  | <span style="color: orange">🚧 Planned</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Suggested-Fixes) |
+| Context-aware evaluation |  |  |  | <span style="color: green">✅ Delivered (v4.0 development)</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Context-Aware-Evaluation) |
+| Suggested fixes + recommendations |  |  |  | <span style="color: green">✅ Delivered (v4.0 development)</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Suggested-Fixes) |
+| Explainability reports + CI comment output |  |  |  | <span style="color: green">✅ Delivered (v4.0 development)</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Explainability-Reports) |
+| Enterprise SARIF/JUnit bridge |  |  |  | <span style="color: green">✅ Delivered (v4.0 development)</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Enterprise-SARIF-JUnit) |
+| Policy waivers and exceptions |  |  |  | <span style="color: green">✅ Delivered (v4.0 development)</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Policy-Waivers) |
 
 ## Comparison with Other Tools
 
@@ -412,7 +416,7 @@ terraform-guardrail web
 pip install terraform-guardrail
 ```
 
-PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 3.0.0)
+PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 4.0.0)
 
 ## Examples
 
@@ -523,7 +527,9 @@ Full guide: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Custom-Rules
 
 ## Web UI
 
-Visit `http://127.0.0.1:8000` and upload a Terraform file to view a compliance report.
+Visit `http://127.0.0.1:8000` and upload Terraform files or a folder to run an intelligent
+enterprise evaluation. The web UI shows the matched risk profile, context-based severity
+adjustments, and suggested fixes alongside the standard findings.
 
 ## Streamlit App
 
@@ -532,7 +538,7 @@ Terraform Guardrail keeps two Streamlit demos:
 | App | Purpose | Main file | Live URL |
 | --- | --- | --- | --- |
 | v1 Foundation | Scanner, state leak checks, schema-aware validation | `streamlit_app.py` | https://terraform-guardrail.streamlit.app/ |
-| v2 Enterprise | Policy authoring, org baselines, drift gates, evidence export | `streamlit_app_v2.py` | https://terraform-guardrail-enterprise.streamlit.app/ |
+| v2 Enterprise + Intelligence | Policy authoring, org baselines, drift gates, evidence export, risk profiles, suggested fixes, waiver demos | `streamlit_app_v2.py` | https://terraform-guardrail-enterprise.streamlit.app/ |
 
 Run the v1 Foundation demo:
 
@@ -832,7 +838,7 @@ secrets are set:
 - PyPI: https://pypi.org/project/terraform-guardrail/
 - GitHub Releases: https://github.com/Huzefaaa2/terraform-guardrail/releases
 - Container Image: https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail
-- Latest release: v3.0.0
+- Latest release: v4.0.0
 - Release history: `RELEASE.md`
 - Enterprise Features: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Enterprise-Features
 
@@ -906,8 +912,8 @@ make changelog
 ### Release Helpers
 
 ```bash
-make release-dry VERSION=3.0.0
-make version-bump VERSION=3.0.0
+make release-dry VERSION=4.0.0
+make version-bump VERSION=4.0.0
 ```
 
 ## Multi-Cloud Policy (MCP) tools (current)
