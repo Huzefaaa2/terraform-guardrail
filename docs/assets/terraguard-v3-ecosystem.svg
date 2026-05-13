@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
+  <title id="title">Terraform Guardrail v3 Ecosystem feature map</title>
+  <desc id="desc">An ecosystem diagram showing policy packs, Guardrails as a Service, cross-provider invariants, CI reference implementations, and contributor governance.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#07131f"/>
+      <stop offset="0.5" stop-color="#143044"/>
+      <stop offset="1" stop-color="#12333a"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.15"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.06"/>
+    </linearGradient>
+    <linearGradient id="hub" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#22c55e"/>
+      <stop offset="1" stop-color="#38bdf8"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000000" flood-opacity="0.34"/>
+    </filter>
+    <style>
+      .title { font: 800 42px Inter, Segoe UI, Arial, sans-serif; fill: #f8fafc; }
+      .subtitle { font: 500 18px Inter, Segoe UI, Arial, sans-serif; fill: #cbd5e1; }
+      .label { font: 800 18px Inter, Segoe UI, Arial, sans-serif; fill: #f8fafc; }
+      .small { font: 600 13px Inter, Segoe UI, Arial, sans-serif; fill: #bed2e5; }
+      .tiny { font: 800 12px Inter, Segoe UI, Arial, sans-serif; fill: #e7fff2; }
+      .panel { fill: url(#panel); stroke: rgba(255,255,255,0.2); stroke-width: 1.5; rx: 16; }
+      .wire { stroke: #5eead4; stroke-width: 2.5; stroke-linecap: round; opacity: 0.62; }
+      .node { fill: #0d2433; stroke: #38bdf8; stroke-width: 2; }
+      .nodeGreen { fill: #0e2b25; stroke: #22c55e; stroke-width: 2; }
+      .chip { fill: rgba(34,197,94,0.15); stroke: rgba(34,197,94,0.45); stroke-width: 1; rx: 11; }
+    </style>
+  </defs>
+  <rect width="1200" height="520" fill="url(#bg)"/>
+  <path d="M86 398 C214 342 268 392 382 326 C520 246 541 126 678 162 C808 197 839 306 956 270 C1037 245 1076 179 1136 205" fill="none" stroke="#38bdf8" stroke-opacity="0.14" stroke-width="76" stroke-linecap="round"/>
+  <g transform="translate(58 56)">
+    <text class="title" x="0" y="0">v3 Ecosystem Layer</text>
+    <text class="subtitle" x="0" y="34">Policy packs, service evaluation, multi-cloud invariants, and delivery-tool reference implementations.</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect class="panel" x="412" y="142" width="376" height="236"/>
+    <circle cx="600" cy="232" r="62" fill="url(#hub)"/>
+    <path d="M568 232 h64 M600 200 v64" stroke="#06202b" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="600" cy="232" r="25" fill="#06202b" opacity="0.85"/>
+    <text class="label" x="493" y="316">Guardrails-as-a-Service</text>
+    <text class="small" x="477" y="342">repeatable evaluation contract for CI/CD</text>
+  </g>
+  <g>
+    <line class="wire" x1="412" y1="192" x2="304" y2="134"/>
+    <line class="wire" x1="412" y1="260" x2="292" y2="260"/>
+    <line class="wire" x1="412" y1="328" x2="304" y2="402"/>
+    <line class="wire" x1="788" y1="192" x2="904" y2="134"/>
+    <line class="wire" x1="788" y1="260" x2="918" y2="260"/>
+    <line class="wire" x1="788" y1="328" x2="904" y2="402"/>
+  </g>
+  <g filter="url(#shadow)">
+    <rect class="panel" x="82" y="92" width="258" height="92"/>
+    <circle class="nodeGreen" cx="124" cy="138" r="22"/>
+    <path d="M112 131 h24 v16 h-24z M117 126 h14" fill="none" stroke="#b8f7ce" stroke-width="3" stroke-linecap="round"/>
+    <text class="label" x="158" y="132">Policy Packs</text>
+    <text class="small" x="158" y="156">PCI, landing zones, resiliency</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect class="panel" x="64" y="214" width="270" height="92"/>
+    <circle class="node" cx="106" cy="260" r="22"/>
+    <path d="M95 260 h22 M106 249 v22" stroke="#dff8ff" stroke-width="3" stroke-linecap="round"/>
+    <text class="label" x="140" y="254">Cross-Cloud Rules</text>
+    <text class="small" x="140" y="278">TG021-TG023 invariants</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect class="panel" x="82" y="356" width="258" height="92"/>
+    <circle class="nodeGreen" cx="124" cy="402" r="22"/>
+    <path d="M112 397 h24 M112 407 h24 M117 387 h14" stroke="#b8f7ce" stroke-width="3" stroke-linecap="round"/>
+    <text class="label" x="158" y="396">Governance</text>
+    <text class="small" x="158" y="420">public roadmap and contribution flow</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect class="panel" x="860" y="92" width="266" height="92"/>
+    <circle class="node" cx="902" cy="138" r="22"/>
+    <path d="M890 138 h24 M902 126 v24" stroke="#dff8ff" stroke-width="3" stroke-linecap="round"/>
+    <text class="label" x="936" y="132">Reference CI</text>
+    <text class="small" x="936" y="156">GitHub, GitLab, Azure, AWS</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect class="panel" x="878" y="214" width="258" height="92"/>
+    <circle class="nodeGreen" cx="920" cy="260" r="22"/>
+    <path d="M910 250 h20 v20 h-20z M915 260 h10" fill="none" stroke="#b8f7ce" stroke-width="3" stroke-linecap="round"/>
+    <text class="label" x="954" y="254">Evidence Links</text>
+    <text class="small" x="954" y="278">result IDs and artifacts</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect class="panel" x="860" y="356" width="266" height="92"/>
+    <circle class="node" cx="902" cy="402" r="22"/>
+    <path d="M891 393 l11 -7 l11 7 v17 l-11 7 l-11 -7z" fill="none" stroke="#dff8ff" stroke-width="3"/>
+    <text class="label" x="936" y="396">Service Contract</text>
+    <text class="small" x="936" y="420">request IDs, packs, decisions</text>
+  </g>
+  <g transform="translate(424 402)">
+    <rect class="chip" x="0" y="0" width="112" height="30"/>
+    <text class="tiny" x="20" y="20">Installable</text>
+    <rect class="chip" x="126" y="0" width="114" height="30"/>
+    <text class="tiny" x="149" y="20">Repeatable</text>
+    <rect class="chip" x="254" y="0" width="118" height="30"/>
+    <text class="tiny" x="281" y="20">Extensible</text>
+  </g>
+</svg>

@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
+  <title id="title">Terraform Guardrail v4 Intelligent feature map</title>
+  <desc id="desc">An intelligent governance diagram showing context-aware evaluation, suggested fixes, explainability reports, SARIF and JUnit outputs, and policy waivers.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#08111f"/>
+      <stop offset="0.48" stop-color="#1b2637"/>
+      <stop offset="1" stop-color="#163326"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.06"/>
+    </linearGradient>
+    <linearGradient id="brain" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f59e0b"/>
+      <stop offset="0.52" stop-color="#2dd4bf"/>
+      <stop offset="1" stop-color="#60a5fa"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000000" flood-opacity="0.34"/>
+    </filter>
+    <style>
+      .title { font: 800 42px Inter, Segoe UI, Arial, sans-serif; fill: #f8fafc; }
+      .subtitle { font: 500 18px Inter, Segoe UI, Arial, sans-serif; fill: #cbd5e1; }
+      .label { font: 800 18px Inter, Segoe UI, Arial, sans-serif; fill: #f8fafc; }
+      .small { font: 600 13px Inter, Segoe UI, Arial, sans-serif; fill: #c7d5e3; }
+      .tiny { font: 800 12px Inter, Segoe UI, Arial, sans-serif; fill: #fff8e8; }
+      .panel { fill: url(#panel); stroke: rgba(255,255,255,0.2); stroke-width: 1.5; rx: 16; }
+      .wire { stroke: #fbbf24; stroke-width: 2.5; stroke-linecap: round; opacity: 0.52; }
+      .wireBlue { stroke: #38bdf8; stroke-width: 2.5; stroke-linecap: round; opacity: 0.62; }
+      .node { fill: #0d2433; stroke: #38bdf8; stroke-width: 2; }
+      .nodeAmber { fill: #2d2411; stroke: #f59e0b; stroke-width: 2; }
+      .chip { fill: rgba(245,158,11,0.15); stroke: rgba(245,158,11,0.45); stroke-width: 1; rx: 11; }
+    </style>
+  </defs>
+  <rect width="1200" height="520" fill="url(#bg)"/>
+  <path d="M90 388 C200 326 283 390 382 312 C493 225 542 122 680 158 C816 193 828 318 968 280 C1058 255 1090 184 1134 204" fill="none" stroke="#f59e0b" stroke-opacity="0.14" stroke-width="78" stroke-linecap="round"/>
+  <g transform="translate(58 56)">
+    <text class="title" x="0" y="0">v4 Intelligent Governance</text>
+    <text class="subtitle" x="0" y="34">Context, explanations, remediation, CI-native reports, and approved exceptions for every decision.</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect class="panel" x="410" y="132" width="380" height="254"/>
+    <circle cx="600" cy="226" r="66" fill="url(#brain)"/>
+    <path d="M572 225 c0 -18 16 -31 34 -25 c16 -8 36 3 38 21 c15 6 19 28 6 40 c-6 15 -25 20 -39 10 c-14 9 -33 3 -39 -12 c-16 -6 -16 -26 0 -34z" fill="#07111f" opacity="0.9"/>
+    <path d="M588 218 h22 M610 218 v34 M610 236 h22" stroke="#f8fafc" stroke-width="5" stroke-linecap="round"/>
+    <text class="label" x="494" y="318">Intelligent Evaluation</text>
+    <text class="small" x="466" y="344">context-aware pass / warn / block decisions</text>
+  </g>
+  <g>
+    <line class="wire" x1="410" y1="190" x2="302" y2="132"/>
+    <line class="wireBlue" x1="410" y1="258" x2="294" y2="258"/>
+    <line class="wire" x1="410" y1="326" x2="304" y2="404"/>
+    <line class="wireBlue" x1="790" y1="190" x2="910" y2="132"/>
+    <line class="wire" x1="790" y1="258" x2="918" y2="258"/>
+    <line class="wireBlue" x1="790" y1="326" x2="910" y2="404"/>
+  </g>
+  <g filter="url(#shadow)">
+    <rect class="panel" x="78" y="92" width="268" height="92"/>
+    <circle class="nodeAmber" cx="120" cy="138" r="22"/>
+    <path d="M109 139 h22 M120 128 v22" stroke="#ffe7b8" stroke-width="3" stroke-linecap="round"/>
+    <text class="label" x="154" y="132">Risk Profiles</text>
+    <text class="small" x="154" y="156">environment and risk tier context</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect class="panel" x="62" y="214" width="284" height="92"/>
+    <circle class="node" cx="104" cy="260" r="22"/>
+    <path d="M94 267 l8 -18 h13 l-8 18z M112 267 h8" fill="none" stroke="#dff8ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <text class="label" x="138" y="254">Suggested Fixes</text>
+    <text class="small" x="138" y="278">developer-ready remediation</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect class="panel" x="78" y="356" width="268" height="92"/>
+    <circle class="nodeAmber" cx="120" cy="402" r="22"/>
+    <path d="M109 393 h22 M109 402 h22 M109 411 h14" stroke="#ffe7b8" stroke-width="3" stroke-linecap="round"/>
+    <text class="label" x="154" y="396">Explainability</text>
+    <text class="small" x="154" y="420">reasons, findings, next actions</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect class="panel" x="854" y="92" width="282" height="92"/>
+    <circle class="node" cx="896" cy="138" r="22"/>
+    <path d="M884 129 h24 v18 h-24z M889 153 h14" fill="none" stroke="#dff8ff" stroke-width="3" stroke-linecap="round"/>
+    <text class="label" x="930" y="132">SARIF / JUnit</text>
+    <text class="small" x="930" y="156">code scanning and test reports</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect class="panel" x="872" y="214" width="264" height="92"/>
+    <circle class="nodeAmber" cx="914" cy="260" r="22"/>
+    <path d="M905 260 l7 7 l14 -17" fill="none" stroke="#ffe7b8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text class="label" x="948" y="254">Policy Waivers</text>
+    <text class="small" x="948" y="278">approved, expiring exceptions</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect class="panel" x="854" y="356" width="282" height="92"/>
+    <circle class="node" cx="896" cy="402" r="22"/>
+    <path d="M884 394 h24 v16 h-24z M890 388 h12" fill="none" stroke="#dff8ff" stroke-width="3" stroke-linecap="round"/>
+    <text class="label" x="930" y="396">CI Comments</text>
+    <text class="small" x="930" y="420">Markdown summaries for reviews</text>
+  </g>
+  <g transform="translate(430 410)">
+    <rect class="chip" x="0" y="0" width="118" height="30"/>
+    <text class="tiny" x="21" y="20">Explainable</text>
+    <rect class="chip" x="132" y="0" width="126" height="30"/>
+    <text class="tiny" x="156" y="20">Actionable</text>
+    <rect class="chip" x="272" y="0" width="106" height="30"/>
+    <text class="tiny" x="294" y="20">Audited</text>
+  </g>
+</svg>

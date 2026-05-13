@@ -15,6 +15,10 @@ Use it as a CLI, REST API, web UI, MCP server, or CI gate. Start with the built-
 catalog, add enterprise metadata and approvals, then roll out pass/warn/block decisions across
 GitHub, GitLab, Azure DevOps, and AWS CodePipeline.
 
+![Terraform Guardrail v4 Intelligent feature map](docs/assets/terraguard-v4-intelligent.svg)
+
+![Terraform Guardrail v3 Ecosystem feature map](docs/assets/terraguard-v3-ecosystem.svg)
+
 ![Terraform Guardrail v2 Enterprise feature map](docs/assets/terraguard-v2-enterprise.svg)
 
 ![Terraform Guardrail v1 Foundation feature map](docs/assets/terraguard-v1-foundation.svg)

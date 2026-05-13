@@ -14,6 +14,10 @@ explainability reports, SARIF/JUnit CI artifacts, and approved policy waivers. T
 v2 enterprise control plane and v3 ecosystem integrations, then makes every pass/warn/block decision
 easier to understand, automate, and audit.
 
+![Terraform Guardrail v4 Intelligent feature map](https://raw.githubusercontent.com/Huzefaaa2/terraform-guardrail/main/docs/assets/terraguard-v4-intelligent.svg)
+
+![Terraform Guardrail v3 Ecosystem feature map](https://raw.githubusercontent.com/Huzefaaa2/terraform-guardrail/main/docs/assets/terraguard-v3-ecosystem.svg)
+
 ![Terraform Guardrail v2 Enterprise feature map](https://raw.githubusercontent.com/Huzefaaa2/terraform-guardrail/main/docs/assets/terraguard-v2-enterprise.svg)
 
 ![Terraform Guardrail v1 Foundation feature map](https://raw.githubusercontent.com/Huzefaaa2/terraform-guardrail/main/docs/assets/terraguard-v1-foundation.svg)
