@@ -54,7 +54,7 @@ brew install Huzefaaa2/tap/terraform-guardrail
 ```
 
 ```powershell
-choco install terraform-guardrail
+py -m pip install terraform-guardrail
 ```
 
 ## Licensing

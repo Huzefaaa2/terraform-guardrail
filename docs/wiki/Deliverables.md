@@ -70,10 +70,10 @@ Registry container published alongside core image. See [Packaging](Packaging.md)
 
 Homebrew formula for macOS installs. See [Packaging](Packaging.md).
 
-<a name="chocolatey-package"></a>
-## Chocolatey package (Windows)
+<a name="windows-pypi-install"></a>
+## Windows install via PyPI
 
-Chocolatey package for Windows installs. See [Packaging](Packaging.md).
+Windows users install from PyPI with Python. See [Packaging](Packaging.md).
 
 <a name="linux-install-script"></a>
 ## Linux install script (curl | bash)

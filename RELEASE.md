@@ -5,12 +5,12 @@
 | 4.0.0 | 2026-05-13 | Intelligent release: context-aware evaluation, suggested fixes, explainability, SARIF/JUnit, waivers |
 | 3.0.0 | 2026-05-11 | Ecosystem release: policy packs, service API, invariants, reference implementations, governance |
 | 2.0.0 | 2026-05-07 | Enterprise foundation: policy lifecycle, baselines, drift gates, evidence export |
-| 1.0.5 | 2026-01-27 | Chocolatey release bump after local verification |
-| 1.0.4 | 2026-01-25 | Chocolatey metadata aligned with review guidance |
-| 1.0.3 | 2026-01-25 | Chocolatey install fix (Python dependency) |
+| 1.0.5 | 2026-01-27 | Package release bump after local verification |
+| 1.0.4 | 2026-01-25 | Packaging metadata aligned with release guidance |
+| 1.0.3 | 2026-01-25 | Windows install guidance for Python dependency |
 | 1.0.2 | 2026-01-25 | CLI --version flag + web UI favicon |
-| 1.0.1 | 2026-01-25 | Fix Homebrew/Chocolatey workflow gating |
-| 1.0.0 | 2026-01-25 | TerraGuard branding, registry image, Homebrew/Chocolatey workflows |
+| 1.0.1 | 2026-01-25 | Fix Homebrew workflow gating |
+| 1.0.0 | 2026-01-25 | TerraGuard branding, registry image, Homebrew workflow |
 | 0.2.11 | 2026-01-24 | Packaging workflow + signed bundles + install docs |
 | 0.2.10 | 2026-01-24 | OPA policy evaluation, registry API, GitHub Action |
 | 0.2.9 | 2026-01-24 | OPA bundle support in policy registry, CLI + API endpoints |

@@ -45,24 +45,24 @@ All notable changes to this project will be documented in this file.
 ## [1.0.5] - 2026-01-27
 
 ### Changed
-- Version bump for Chocolatey republish after local verification.
-- Documented local Chocolatey verification steps.
+- Version bump after local package verification.
+- Documented local package verification steps.
 
 ## [1.0.4] - 2026-01-25
 
 ### Added
-- Chocolatey metadata fields (summary, release notes, icon, docs, source URLs).
+- Windows PyPI installation guidance.
 
 ### Changed
-- Packaging metadata aligned with Chocolatey review guidance.
+- Packaging metadata aligned with release guidance.
 
 ## [1.0.3] - 2026-01-25
 
 ### Added
-- Chocolatey dependency on Python 3.11+.
+- Windows installation dependency on Python 3.11+.
 
 ### Changed
-- Chocolatey install script now ensures Python is available.
+- Windows installation guidance now ensures Python is available.
 
 ## [1.0.2] - 2026-01-25
 
@@ -82,7 +82,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - Registry API container image workflow and Dockerfile.
-- Homebrew tap and Chocolatey publish workflows.
+- Homebrew tap publishing workflow.
 - OPA caching support for the GitHub Action.
 
 ### Changed
@@ -92,7 +92,7 @@ All notable changes to this project will be documented in this file.
 ## [0.2.11] - 2026-01-24
 
 ### Added
-- Packaging workflow + release artifacts for Homebrew/Chocolatey/Linux installs.
+- Packaging workflow + release artifacts for Homebrew, PyPI, and Linux installs.
 - Signed bundle example with public key metadata.
 - Packaging documentation.
 
@@ -106,7 +106,7 @@ All notable changes to this project will be documented in this file.
 - OPA policy evaluation for scans with bundle support and signature verification hooks.
 - Policy registry API with bundle versions and audit history.
 - GitHub Action for pre-apply / PR checks.
-- Roadmap entries for Homebrew/Chocolatey/Linux installers.
+- Roadmap entries for Homebrew, PyPI, and Linux installers.
 
 ### Changed
 - Registry index format now supports versions + entrypoints.

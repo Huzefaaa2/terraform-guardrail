@@ -13,7 +13,7 @@ CLI, and web UI.
 - Author: Huzefa Husain, https://www.linkedin.com/in/huzefaaa
 - Container image: `ghcr.io/huzefaaa2/terraform-guardrail:v2.0.0`
 - Registry image: `ghcr.io/huzefaaa2/terraform-guardrail-registry:v2.0.0`
-- Homebrew, Chocolatey, packaging, container, registry image, and CI workflows completed for the
+- Homebrew, PyPI packaging, container, registry image, and CI workflows completed for the
   release.
 
 ## What Shipped

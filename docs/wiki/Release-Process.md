@@ -56,6 +56,10 @@ The `Homebrew Tap Publish` workflow updates the formula repository when these se
 - `HOMEBREW_TAP_REPO` (for example `Huzefaaa2/homebrew-tap`)
 - `HOMEBREW_TAP_TOKEN`
 
-## Chocolatey Publish
+## Windows Install
 
-The `Chocolatey Publish` workflow pushes a package when `CHOCO_API_KEY` is configured.
+Windows users install the same PyPI package:
+
+```powershell
+py -m pip install terraform-guardrail
+```
