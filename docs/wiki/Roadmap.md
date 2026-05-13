@@ -6,6 +6,16 @@ phase.
 Latest delivered major release: [v5.0.0 Autonomous Governance Release](Release-v5.0.0).
 Current release-hardening track: v5.0.0 package verification, final documentation, and publishing.
 
+## Version Overview
+
+| Version | Image | Short details |
+| --- | --- | --- |
+| v1.0 Foundation | ![v1 Foundation](https://raw.githubusercontent.com/Huzefaaa2/terraform-guardrail/main/docs/assets/terraguard-v1-foundation.svg) | Registry, packaging, CI templates, policy layering, custom rules, and the first installable guardrail foundation. |
+| v2.0 Enterprise | ![v2 Enterprise](https://raw.githubusercontent.com/Huzefaaa2/terraform-guardrail/main/docs/assets/terraguard-v2-enterprise.svg) | Enterprise policy authoring, metadata, org baselines, group enforcement, drift prevention, and audit evidence export. |
+| v3.0 Ecosystem | ![v3 Ecosystem](https://raw.githubusercontent.com/Huzefaaa2/terraform-guardrail/main/docs/assets/terraguard-v3-ecosystem.svg) | Policy packs, Guardrails-as-a-Service, cross-provider invariants, reference implementations, and contribution governance. |
+| v4.0 Intelligent | ![v4 Intelligent](https://raw.githubusercontent.com/Huzefaaa2/terraform-guardrail/main/docs/assets/terraguard-v4-intelligent.svg) | Context-aware evaluation, suggested fixes, explainability, SARIF/JUnit output, CI comments, and policy waivers. |
+| v5.0 Autonomous Governance | ![v5 Autonomous Governance](https://raw.githubusercontent.com/Huzefaaa2/terraform-guardrail/main/docs/assets/terraguard-v5-autonomous.svg) | Remediation plans, patch bundles, GitHub PR automation, scheduled scans, evidence schedules, background runners, and trend dashboards. |
+
 Legend: <span style="color: green">✅ Delivered</span> • <span style="color: orange">🚧 Planned</span>
 
 | Deliverable | v1.0 Foundation | v2.0 Enterprise | v3.0 Ecosystem | v4.0 Intelligent | Docs |

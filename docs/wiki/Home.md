@@ -14,8 +14,10 @@ PR-ready patch bundles, GitHub PR automation, scheduled scans, evidence schedule
 runners, governance health, and trend dashboards. It builds on the v2 enterprise control plane,
 v3 ecosystem integrations, and v4 intelligent evaluation layer.
 
-**Roadmap status:** v5.0.0 is delivered. The next step is release verification and publication
-across GitHub Releases, PyPI, Homebrew, docs, and live app references.
+**Roadmap status:** v5.0.0 is delivered and published across GitHub Releases, PyPI, Homebrew,
+docs, and live app references.
+
+![Terraform Guardrail v5 Autonomous Governance feature map](https://raw.githubusercontent.com/Huzefaaa2/terraform-guardrail/main/docs/assets/terraguard-v5-autonomous.svg)
 
 ![Terraform Guardrail v4 Intelligent feature map](https://raw.githubusercontent.com/Huzefaaa2/terraform-guardrail/main/docs/assets/terraguard-v4-intelligent.svg)
 
@@ -43,11 +45,11 @@ The current roadmap status is:
 
 | Phase | Status | Focus |
 | --- | --- | --- |
-| v1.0 Foundation | Delivered | Registry, packaging, CI templates, policy layering, custom rules |
-| v2.0 Enterprise | Delivered | Authoring UI, baselines, group enforcement, drift gates, evidence export |
-| v3.0 Ecosystem | Delivered | Policy packs, service API, invariants, reference implementations, governance |
-| v4.0 Intelligent | Delivered | Context-aware evaluation, suggested fixes, explainability reports, SARIF/JUnit bridge, policy waivers |
-| v5.0 Autonomous Governance | Delivered | Remediation plans, PR automation, scheduled governance, evidence schedules, trend dashboards |
+| v1.0 Foundation | Delivered | Registry, packaging, CI templates, policy layering, and custom rules. |
+| v2.0 Enterprise | Delivered | Policy authoring UI, org baselines, group enforcement, drift gates, and evidence export. |
+| v3.0 Ecosystem | Delivered | Policy packs, service API, cross-provider invariants, reference implementations, and governance. |
+| v4.0 Intelligent | Delivered | Context-aware evaluation, suggested fixes, explainability reports, SARIF/JUnit bridge, and waivers. |
+| v5.0 Autonomous Governance | Delivered | Remediation plans, GitHub PR automation, scheduled governance, evidence schedules, and trend dashboards. |
 
 ## Quick Install
 
