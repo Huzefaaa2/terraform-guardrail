@@ -95,6 +95,7 @@ terraform-guardrail enterprise remediation github-pr <bundle-id> \
   --repository Huzefaaa2/terraform-guardrail
 terraform-guardrail enterprise remediation github-prs --bundle-id <bundle-id>
 terraform-guardrail enterprise health
+terraform-guardrail enterprise trends
 terraform-guardrail enterprise schedule create \
   --name daily-prod \
   --path ./infra \

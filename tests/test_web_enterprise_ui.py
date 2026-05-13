@@ -242,6 +242,10 @@ def test_web_v5_governance_dashboard_and_remediation_plan(monkeypatch, tmp_path)
     dashboard = client.get("/")
     assert dashboard.status_code == 200
     assert "Governance health dashboard" in dashboard.text
+    assert "Waiver aging" in dashboard.text
+    assert "Evidence coverage" in dashboard.text
+    assert "Remediation flow" in dashboard.text
+    assert "7-day governance activity" in dashboard.text
     assert "TG011" in dashboard.text
     assert "No immediate governance health risks detected." not in dashboard.text
 

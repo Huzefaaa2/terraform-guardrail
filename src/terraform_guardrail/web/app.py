@@ -20,6 +20,7 @@ from terraform_guardrail.enterprise import (
     create_remediation_plan,
     evaluate_enterprise,
     governance_health_report,
+    governance_trend_report,
     preview_policy,
     resolve_policy_set,
 )
@@ -496,6 +497,7 @@ def _template_context(
         selected_default_rule = default_rules[0]
     remediation_plans = store.list_remediation_plans()
     health = governance_health_report(store=store)
+    trends = governance_trend_report(store=store)
     latest_remediation_plans = list(reversed(remediation_plans[-3:]))
     return {
         "request": request,
@@ -516,6 +518,7 @@ def _template_context(
         "remediation_plans": remediation_plans,
         "latest_remediation_plans": latest_remediation_plans,
         "governance_health": health,
+        "governance_trends": trends,
         "next_rule_id": _next_rule_id(store),
         "how_to_guides": HOW_TO_GUIDES,
         "how_to_guides_url": f"{WIKI_BASE_URL}/How-To-Guides",

@@ -9,6 +9,7 @@
 - GitHub pull request automation records safe dry-run PR plans and can call `gh pr create` on demand.
 - Evidence schedules define recurring audit exports by result, context, standard, or control.
 - Background runner scaffold executes enabled scan and evidence schedules from one command or API call.
+- Governance trend dashboard charts waiver aging, evidence coverage, remediation flow, and PR activity.
 
 ## Added
 - `terraform-guardrail enterprise remediation create/list/show` commands.
@@ -19,6 +20,7 @@
 - API and CLI support for GitHub pull request records from patch bundles.
 - API and CLI support for evidence schedules and on-demand evidence schedule runs.
 - API and CLI support for automation runner history and execution.
+- API and CLI support for governance trend reports.
 
 ## Changed
 - Version updated to 5.0.0 for the Autonomous Governance development track.

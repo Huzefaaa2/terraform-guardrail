@@ -249,6 +249,11 @@ resource "aws_s3_bucket" "logs" {
     assert health.json()["totals"]["remediation_plans"] == 1
     assert health.json()["totals"]["pull_requests"] == 1
 
+    trends = client.get("/governance/trends?days=7")
+    assert trends.status_code == 200
+    assert trends.json()["remediation_activity"]
+    assert trends.json()["summary"]["pull_requests"] == 1
+
     scheduled = client.post(
         "/scheduled-scans",
         json={
@@ -407,6 +412,11 @@ resource "aws_s3_bucket" "logs" {
     assert health.exit_code == 0
     assert "Governance health" in health.output
     assert "TG011" in health.output
+
+    trends = runner.invoke(app, ["enterprise", "trends"])
+    assert trends.exit_code == 0
+    assert "Governance trends" in trends.output
+    assert "Evidence coverage" in trends.output
 
     plan = EnterpriseStore().list_remediation_plans()[0]
     bundle = runner.invoke(

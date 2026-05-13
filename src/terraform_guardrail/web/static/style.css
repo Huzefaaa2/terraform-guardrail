@@ -543,6 +543,152 @@ button:hover {
     var(--panel);
 }
 
+.trend-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 4px 0 16px;
+}
+
+.trend-card,
+.timeline-card {
+  background: #fbfefe;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  min-width: 0;
+  padding: 12px;
+}
+
+.trend-card-title {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.trend-card-title h3 {
+  font-size: 0.92rem;
+  margin: 0;
+}
+
+.trend-card-title span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.trend-bars {
+  display: grid;
+  gap: 8px;
+}
+
+.trend-row {
+  align-items: center;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(78px, 0.8fr) minmax(92px, 1.4fr) 28px;
+}
+
+.trend-row span,
+.trend-row strong {
+  font-size: 0.78rem;
+  overflow-wrap: anywhere;
+}
+
+.trend-row span {
+  color: var(--muted);
+  font-weight: 750;
+}
+
+.trend-row strong {
+  color: var(--ink);
+  text-align: right;
+}
+
+.bar-track {
+  background: #e7f1f1;
+  border-radius: 999px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.bar-track i {
+  background: #0f766e;
+  border-radius: inherit;
+  display: block;
+  height: 100%;
+}
+
+.evidence-bar i {
+  background: #2563eb;
+}
+
+.remediation-bar i {
+  background: #b45309;
+}
+
+.timeline-card {
+  margin-bottom: 16px;
+}
+
+.timeline-bars {
+  align-items: end;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  min-height: 116px;
+}
+
+.timeline-day {
+  align-items: center;
+  display: grid;
+  gap: 7px;
+  grid-template-rows: 86px auto;
+  min-width: 0;
+}
+
+.timeline-stack {
+  align-self: end;
+  background: #edf4f4;
+  border-radius: 8px 8px 3px 3px;
+  display: flex;
+  flex-direction: column-reverse;
+  min-height: 3px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.timeline-stack i {
+  display: block;
+  min-height: 0;
+}
+
+.eval-slice {
+  background: #0f766e;
+}
+
+.evidence-slice {
+  background: #2563eb;
+}
+
+.remediation-slice {
+  background: #b45309;
+}
+
+.pr-slice {
+  background: #7c3aed;
+}
+
+.timeline-day span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-align: center;
+}
+
 .dashboard-split {
   display: grid;
   gap: 14px;
@@ -915,12 +1061,17 @@ button:hover {
   .detail-grid,
   .summary,
   .health-grid,
+  .trend-grid,
   .intelligence-panel,
   .dashboard-split,
   .waiver-card,
   .remediation-action,
   .finding {
     grid-template-columns: 1fr;
+  }
+
+  .timeline-bars {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .remediation-create-form {

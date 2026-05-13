@@ -30,6 +30,7 @@ from terraform_guardrail.enterprise import (
     get_builtin_policy_pack,
     get_rule_recommendation,
     governance_health_report,
+    governance_trend_report,
     install_policy_pack,
     list_builtin_policy_packs,
     list_rule_recommendations,
@@ -641,6 +642,10 @@ def create_app() -> FastAPI:
     @app.get("/governance/health")
     def governance_health(window: str = "all") -> dict[str, Any]:
         return governance_health_report(window=window).model_dump(mode="json")
+
+    @app.get("/governance/trends")
+    def governance_trends(days: int = 7) -> dict[str, Any]:
+        return governance_trend_report(days=days).model_dump(mode="json")
 
     @app.post("/automation/run")
     def automation_run(request: AutomationRunRequest) -> dict[str, Any]:

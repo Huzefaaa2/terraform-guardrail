@@ -25,6 +25,7 @@ from terraform_guardrail.enterprise import (
     get_builtin_policy_pack,
     get_rule_recommendation,
     governance_health_report,
+    governance_trend_report,
     install_policy_pack,
     list_builtin_policy_packs,
     list_rule_recommendations,
@@ -328,6 +329,19 @@ resource "aws_s3_bucket" "logs" {
     result = evaluate_enterprise(infra, store=store)
     plan = create_remediation_plan(result.id, store=store, actor="platform")
     bundle = create_remediation_patch_bundle(plan.id, store=store, actor="platform")
+    export_evidence(result.id, format="json", store=store, actor="auditor")
+    store.approve_waiver(
+        store.save_waiver(
+            PolicyWaiver(
+                rule_id="TG011",
+                reason="Migration",
+                owner="platform",
+                expires_at="2099-01-01T00:00:00Z",
+            ),
+            actor="platform",
+        ).id,
+        actor="platform",
+    )
 
     pull_request = create_github_pull_request(
         bundle.id,
@@ -336,6 +350,7 @@ resource "aws_s3_bucket" "logs" {
         actor="platform",
     )
     health = governance_health_report(store=store)
+    trends = governance_trend_report(store=store)
 
     assert pull_request.status == "planned"
     assert pull_request.dry_run is True
@@ -347,6 +362,13 @@ resource "aws_s3_bucket" "logs" {
     assert (Path(bundle.artifact_dir) / "github-pr-command.sh").exists()
     assert store.list_pull_requests()[0].id == pull_request.id
     assert health.totals["pull_requests"] == 1
+    assert trends.summary["coverage_percent"] == 100
+    assert trends.summary["active_waivers"] == 1
+    assert any(
+        bucket["label"] == "PR planned" and bucket["count"] == 1
+        for bucket in trends.remediation_activity
+    )
+    assert trends.activity_timeline[-1]["pull_requests"] == 1
     assert store.audit_events()[-1].action == "remediation.pull_request.github"
 
 

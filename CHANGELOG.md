@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 - GitHub pull request dry-run and create workflow from remediation patch bundles.
 - Evidence schedules for recurring audit exports by result, context, standard, or control.
 - Automation runner scaffold for executing enabled scan and evidence schedules from cron or external orchestrators.
+- Governance trend charts for waiver aging, evidence coverage, remediation flow, and PR activity.
 
 ### Changed
 - Package/API versions updated to 5.0.0 for v5 development.

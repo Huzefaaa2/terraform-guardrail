@@ -78,6 +78,78 @@
                 <strong>{{ governance_health.totals.remediation_plans }}</strong>
               </div>
             </div>
+            <div class="trend-grid">
+              <article class="trend-card">
+                <div class="trend-card-title">
+                  <h3>Waiver aging</h3>
+                  <span>{{ governance_trends.summary.active_waivers }} active</span>
+                </div>
+                <div class="trend-bars">
+                  {% for bucket in governance_trends.waiver_aging %}
+                  <div class="trend-row">
+                    <span>{{ bucket.label }}</span>
+                    <div class="bar-track">
+                      <i style="width: {{ bucket.percent }}%"></i>
+                    </div>
+                    <strong>{{ bucket.count }}</strong>
+                  </div>
+                  {% endfor %}
+                </div>
+              </article>
+              <article class="trend-card">
+                <div class="trend-card-title">
+                  <h3>Evidence coverage</h3>
+                  <span>{{ governance_trends.summary.coverage_percent }}%</span>
+                </div>
+                <div class="trend-bars">
+                  {% for bucket in governance_trends.evidence_coverage %}
+                  <div class="trend-row">
+                    <span>{{ bucket.label }}</span>
+                    <div class="bar-track evidence-bar">
+                      <i style="width: {{ bucket.percent }}%"></i>
+                    </div>
+                    <strong>{{ bucket.count }}</strong>
+                  </div>
+                  {% endfor %}
+                </div>
+              </article>
+              <article class="trend-card">
+                <div class="trend-card-title">
+                  <h3>Remediation flow</h3>
+                  <span>{{ governance_trends.summary.pull_requests }} PRs</span>
+                </div>
+                <div class="trend-bars">
+                  {% for bucket in governance_trends.remediation_activity %}
+                  <div class="trend-row">
+                    <span>{{ bucket.label }}</span>
+                    <div class="bar-track remediation-bar">
+                      <i style="width: {{ bucket.percent }}%"></i>
+                    </div>
+                    <strong>{{ bucket.count }}</strong>
+                  </div>
+                  {% endfor %}
+                </div>
+              </article>
+            </div>
+            <div class="timeline-card">
+              <div class="trend-card-title">
+                <h3>7-day governance activity</h3>
+                <span>evaluations · evidence · remediation · PR</span>
+              </div>
+              <div class="timeline-bars">
+                {% for day in governance_trends.activity_timeline %}
+                <div class="timeline-day" title="{{ day.total }} events">
+                  <div class="timeline-stack" style="height: {{ day.percent }}%">
+                    <i class="eval-slice" style="flex-grow: {{ day.evaluations }}"></i>
+                    <i class="evidence-slice" style="flex-grow: {{ day.evidence }}"></i>
+                    <i class="remediation-slice" style="flex-grow: {{ day.remediation }}"></i>
+                    <i class="pr-slice" style="flex-grow: {{ day.pull_requests }}"></i>
+                  </div>
+                  <span>{{ day.label }}</span>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
             <div class="dashboard-split">
               <div>
                 <h3>Top recurring rules</h3>

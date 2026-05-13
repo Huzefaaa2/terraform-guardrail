@@ -38,6 +38,7 @@ from terraform_guardrail.enterprise import (
     get_builtin_policy_pack,
     get_rule_recommendation,
     governance_health_report,
+    governance_trend_report,
     install_policy_pack,
     list_builtin_policy_packs,
     list_rule_recommendations,
@@ -1171,6 +1172,25 @@ def enterprise_health(
             console.print(f"- {item['rule_id']}: {item['count']}")
     for signal in report.risk_signals:
         console.print(f"- {signal}")
+
+
+@enterprise_app.command("trends")
+def enterprise_trends(
+    days: Annotated[int, typer.Option(help="Activity timeline window in days")] = 7,
+    format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
+) -> None:
+    report = governance_trend_report(days=days)
+    if format == "json":
+        console.print(JSON(json.dumps(report.model_dump(mode="json"), indent=2)))
+        return
+    console.print(f"Governance trends: {report.id}")
+    console.print(f"Evidence coverage: {report.summary['coverage_percent']}%")
+    console.print("Waiver aging:")
+    for bucket in report.waiver_aging:
+        console.print(f"- {bucket['label']}: {bucket['count']}")
+    console.print("Remediation flow:")
+    for bucket in report.remediation_activity:
+        console.print(f"- {bucket['label']}: {bucket['count']}")
 
 
 @enterprise_schedule_app.command("create")

@@ -4,8 +4,8 @@
 
 **v5.0 Autonomous Governance is in development.** Terraform Guardrail now starts moving from
 explaining governance decisions to operating the governance loop: remediation plans, PR-ready fix
-guidance, GitHub PR automation, scheduled governance loops, and health signals built from
-evaluations, evidence, and waivers.
+guidance, GitHub PR automation, scheduled governance loops, trend dashboards, and health signals
+built from evaluations, evidence, and waivers.
 
 Terraform Guardrail Multi-Cloud Policy (MCP) (TerraGuard) runs outside Terraform and turns platform
 standards into executable CI/CD guardrails. It gives platform teams policy lifecycle management,

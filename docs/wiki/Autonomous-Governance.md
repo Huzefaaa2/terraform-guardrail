@@ -37,20 +37,25 @@ Governance health summarizes stored enterprise activity:
 ```bash
 terraform-guardrail enterprise health
 terraform-guardrail enterprise health --format json
+terraform-guardrail enterprise trends
 ```
 
 API:
 
 - `GET /governance/health`
+- `GET /governance/trends`
 
 The report includes total evaluations, findings, policies, baselines, remediation plans,
 pass/warn/block counts, top recurring rules, waiver summary, evidence summary, and risk signals.
+The trend report adds chart-ready waiver aging, evidence coverage, remediation/PR activity, and
+7-day governance activity data.
 
 ## Web UI Dashboard
 
 The Enterprise web workspace includes a **Governance health dashboard** at the top of the page. It
-shows evaluation, finding, blocked-decision, waiver, evidence, and remediation-plan counts, plus top
-recurring rules, current risk signals, and latest remediation plans.
+shows evaluation, finding, blocked-decision, waiver, evidence, and remediation-plan counts, plus
+trend charts for waiver aging, evidence coverage, remediation/PR activity, 7-day governance
+activity, top recurring rules, current risk signals, and latest remediation plans.
 
 After a scan, select **Create Remediation Plan** in the evaluation report to generate a v5 plan from
 the stored result. The page displays reviewable actions, suggested fixes, confidence, and Terraform
@@ -189,4 +194,4 @@ API:
 
 ## Next v5 Steps
 
-- Dashboard trend charts for waiver aging and evidence coverage.
+- Release hardening for the v5.0.0 final build, package verification, and documentation polish.

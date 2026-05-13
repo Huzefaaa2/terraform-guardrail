@@ -5,7 +5,7 @@ import json
 import os
 import subprocess
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from importlib import resources
 from pathlib import Path
 from typing import Any, Literal
@@ -309,6 +309,17 @@ class GovernanceHealthReport(BaseModel):
     waiver_summary: dict[str, Any] = Field(default_factory=dict)
     evidence_summary: dict[str, Any] = Field(default_factory=dict)
     risk_signals: list[str] = Field(default_factory=list)
+
+
+class GovernanceTrendReport(BaseModel):
+    id: str = Field(default_factory=lambda: new_id("trend"))
+    created_at: str = Field(default_factory=utc_now)
+    days: int = 7
+    waiver_aging: list[dict[str, Any]] = Field(default_factory=list)
+    evidence_coverage: list[dict[str, Any]] = Field(default_factory=list)
+    remediation_activity: list[dict[str, Any]] = Field(default_factory=list)
+    activity_timeline: list[dict[str, Any]] = Field(default_factory=list)
+    summary: dict[str, Any] = Field(default_factory=dict)
 
 
 class ScheduledScanTarget(BaseModel):
@@ -962,6 +973,15 @@ class EnterpriseStore:
                 if pull_request.bundle_id == bundle_id
             ]
         return pull_requests
+
+    def list_exports(self, result_id: str | None = None) -> list[EvidenceExport]:
+        exports = [
+            EvidenceExport.model_validate(item)
+            for item in self._read_list("exports")
+        ]
+        if result_id:
+            exports = [export for export in exports if export.result_id == result_id]
+        return exports
 
     def list_scheduled_scan_targets(self) -> list[ScheduledScanTarget]:
         return [
@@ -1902,6 +1922,73 @@ def governance_health_report(
     )
 
 
+def governance_trend_report(
+    store: EnterpriseStore | None = None,
+    days: int = 7,
+) -> GovernanceTrendReport:
+    store = store or EnterpriseStore()
+    days = max(days, 1)
+    evaluations = store.list_evaluations()
+    waivers = store.list_waivers()
+    exports = store.list_exports()
+    plans = store.list_remediation_plans()
+    patch_bundles = store.list_patch_bundles()
+    pull_requests = store.list_pull_requests()
+    exported_result_ids = {export.result_id for export in exports}
+    covered = sum(1 for result in evaluations if result.id in exported_result_ids)
+    uncovered = max(len(evaluations) - covered, 0)
+    waiver_aging = _waiver_aging_buckets(waivers)
+    evidence_coverage = _percent_buckets(
+        [
+            {"label": "Covered", "count": covered},
+            {"label": "Uncovered", "count": uncovered},
+        ]
+    )
+    remediation_activity = _percent_buckets(
+        [
+            {"label": "Plans", "count": len(plans)},
+            {"label": "Bundles", "count": len(patch_bundles)},
+            {
+                "label": "PR planned",
+                "count": sum(1 for pr in pull_requests if pr.status == "planned"),
+            },
+            {
+                "label": "PR created",
+                "count": sum(1 for pr in pull_requests if pr.status == "created"),
+            },
+            {
+                "label": "PR failed",
+                "count": sum(1 for pr in pull_requests if pr.status == "failed"),
+            },
+        ]
+    )
+    activity_timeline = _activity_timeline(
+        days,
+        evaluations=evaluations,
+        remediation_plans=plans,
+        exports=exports,
+        pull_requests=pull_requests,
+    )
+    return GovernanceTrendReport(
+        days=days,
+        waiver_aging=waiver_aging,
+        evidence_coverage=evidence_coverage,
+        remediation_activity=remediation_activity,
+        activity_timeline=activity_timeline,
+        summary={
+            "coverage_percent": _percentage(covered, len(evaluations)),
+            "covered_results": covered,
+            "uncovered_results": uncovered,
+            "exports": len(exports),
+            "export_formats": _count_by([export.format for export in exports]),
+            "active_waivers": sum(
+                1 for waiver in waivers if waiver.status == "approved" and _waiver_is_active(waiver)
+            ),
+            "pull_requests": len(pull_requests),
+        },
+    )
+
+
 def run_scheduled_scan(
     target_id: str,
     store: EnterpriseStore | None = None,
@@ -2583,6 +2670,124 @@ def _count_by(values: list[str]) -> dict[str, int]:
     for value in values:
         counts[value] = counts.get(value, 0) + 1
     return counts
+
+
+def _percent_buckets(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    max_count = max([int(item.get("count") or 0) for item in items] + [1])
+    buckets: list[dict[str, Any]] = []
+    for item in items:
+        count = int(item.get("count") or 0)
+        buckets.append(
+            {
+                **item,
+                "percent": _percentage(count, max_count),
+            }
+        )
+    return buckets
+
+
+def _percentage(value: int, total: int) -> int:
+    if total <= 0:
+        return 0
+    return int(round((value / total) * 100))
+
+
+def _waiver_aging_buckets(waivers: list[PolicyWaiver]) -> list[dict[str, Any]]:
+    buckets = {
+        "0-7 days": 0,
+        "8-30 days": 0,
+        "31-90 days": 0,
+        "90+ days": 0,
+        "Expired": 0,
+        "Requested": 0,
+        "Revoked": 0,
+    }
+    now = datetime.now(timezone.utc)
+    for waiver in waivers:
+        if waiver.status == "revoked":
+            buckets["Revoked"] += 1
+            continue
+        if waiver.status == "requested":
+            buckets["Requested"] += 1
+            continue
+        expires = _parse_datetime(waiver.expires_at)
+        if expires is None or expires <= now:
+            buckets["Expired"] += 1
+            continue
+        remaining_days = (expires - now).days
+        if remaining_days <= 7:
+            buckets["0-7 days"] += 1
+        elif remaining_days <= 30:
+            buckets["8-30 days"] += 1
+        elif remaining_days <= 90:
+            buckets["31-90 days"] += 1
+        else:
+            buckets["90+ days"] += 1
+    return _percent_buckets(
+        [{"label": label, "count": count} for label, count in buckets.items()]
+    )
+
+
+def _activity_timeline(
+    days: int,
+    evaluations: list[EvaluationResult],
+    remediation_plans: list[RemediationPlan],
+    exports: list[EvidenceExport],
+    pull_requests: list[RemediationPullRequest],
+) -> list[dict[str, Any]]:
+    today = datetime.now(timezone.utc).date()
+    dates = [today - timedelta(days=offset) for offset in range(days - 1, -1, -1)]
+    rows: list[dict[str, Any]] = []
+    for item_date in dates:
+        label = item_date.isoformat()[5:]
+        rows.append(
+            {
+                "label": label,
+                "evaluations": _count_created_on(evaluations, item_date),
+                "remediation": _count_created_on(remediation_plans, item_date),
+                "evidence": _count_created_on(exports, item_date),
+                "pull_requests": _count_created_on(pull_requests, item_date),
+            }
+        )
+    max_total = max(
+        [
+            row["evaluations"]
+            + row["remediation"]
+            + row["evidence"]
+            + row["pull_requests"]
+            for row in rows
+        ]
+        + [1]
+    )
+    for row in rows:
+        total = (
+            row["evaluations"]
+            + row["remediation"]
+            + row["evidence"]
+            + row["pull_requests"]
+        )
+        row["total"] = total
+        row["percent"] = _percentage(total, max_total)
+    return rows
+
+
+def _count_created_on(items: list[Any], item_date: Any) -> int:
+    count = 0
+    for item in items:
+        created = _parse_datetime(getattr(item, "created_at", ""))
+        if created and created.date() == item_date:
+            count += 1
+    return count
+
+
+def _parse_datetime(value: str) -> datetime | None:
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed
 
 
 def _limit_items(items: list[Any], limit: int | None) -> list[Any]:
