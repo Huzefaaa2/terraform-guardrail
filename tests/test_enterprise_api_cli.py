@@ -257,6 +257,32 @@ resource "aws_s3_bucket" "logs" {
     assert runs.status_code == 200
     assert runs.json()["runs"][0]["target_id"] == target_id
 
+    evidence_schedule = client.post(
+        "/evidence/schedules",
+        json={
+            "name": "monthly-prod",
+            "cadence": "monthly",
+            "format": "json",
+            "repo": "payments-infra",
+            "limit": 3,
+        },
+    )
+    assert evidence_schedule.status_code == 200
+    schedule_id = evidence_schedule.json()["id"]
+
+    evidence_schedules = client.get("/evidence/schedules")
+    assert evidence_schedules.status_code == 200
+    assert evidence_schedules.json()["schedules"][0]["id"] == schedule_id
+
+    evidence_run = client.post(f"/evidence/schedules/{schedule_id}/run")
+    assert evidence_run.status_code == 200
+    assert evidence_run.json()["status"] == "completed"
+    assert evidence_run.json()["export_ids"]
+
+    evidence_runs = client.get(f"/evidence/schedules/{schedule_id}/runs")
+    assert evidence_runs.status_code == 200
+    assert evidence_runs.json()["runs"][0]["schedule_id"] == schedule_id
+
 
 def test_context_risk_profile_and_recommendation_api(monkeypatch, tmp_path: Path) -> None:
     monkeypatch.setenv("GUARDRAIL_ENTERPRISE_DATA_DIR", str(tmp_path / "store"))
@@ -415,6 +441,55 @@ resource "aws_s3_bucket" "logs" {
     runs = runner.invoke(app, ["enterprise", "schedule", "runs", "--target-id", target.id])
     assert runs.exit_code == 0
     assert target.id in runs.output
+
+
+def test_enterprise_cli_evidence_schedule(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("GUARDRAIL_ENTERPRISE_DATA_DIR", str(tmp_path / "store"))
+    infra = tmp_path / "main.tf"
+    infra.write_text(
+        """
+resource "aws_s3_bucket" "logs" {
+  bucket = "logs"
+}
+""",
+        encoding="utf-8",
+    )
+    evaluate_enterprise(infra, context={"repo": "payments"}, store=EnterpriseStore())
+    runner = CliRunner()
+
+    created = runner.invoke(
+        app,
+        [
+            "evidence",
+            "schedule",
+            "create",
+            "--name",
+            "monthly-payments",
+            "--cadence",
+            "monthly",
+            "--format",
+            "json",
+            "--repo",
+            "payments",
+            "--output-format",
+            "json",
+        ],
+    )
+    assert created.exit_code == 0
+    assert "monthly-payments" in created.output
+    schedule = EnterpriseStore().list_evidence_schedules()[0]
+
+    listed = runner.invoke(app, ["evidence", "schedule", "list"])
+    assert listed.exit_code == 0
+    assert schedule.id in listed.output
+
+    run = runner.invoke(app, ["evidence", "schedule", "run", schedule.id, "--format", "json"])
+    assert run.exit_code == 0
+    assert "completed" in run.output
+
+    runs = runner.invoke(app, ["evidence", "schedule", "runs", "--schedule-id", schedule.id])
+    assert runs.exit_code == 0
+    assert schedule.id in runs.output
 
 
 def test_enterprise_api_waiver_lifecycle(monkeypatch, tmp_path: Path) -> None:

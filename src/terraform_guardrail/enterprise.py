@@ -315,6 +315,36 @@ class ScheduledScanRun(BaseModel):
     error: str | None = None
 
 
+class EvidenceSchedule(BaseModel):
+    id: str = Field(default_factory=lambda: new_id("evid_sched"))
+    name: str
+    cadence: Literal["daily", "weekly", "monthly", "quarterly"] = "monthly"
+    format: Literal["json", "csv", "pdf"] = "json"
+    enabled: bool = True
+    result_id: str | None = None
+    baseline: str | None = None
+    app: str | None = None
+    org: str | None = None
+    group: str | None = None
+    repo: str | None = None
+    standard: str | None = None
+    control_id: str | None = None
+    limit: int = 10
+    created_at: str = Field(default_factory=utc_now)
+    updated_at: str = Field(default_factory=utc_now)
+
+
+class EvidenceScheduleRun(BaseModel):
+    id: str = Field(default_factory=lambda: new_id("evid_sched_run"))
+    schedule_id: str
+    schedule_name: str
+    created_at: str = Field(default_factory=utc_now)
+    status: Literal["completed", "failed"]
+    export_ids: list[str] = Field(default_factory=list)
+    result_ids: list[str] = Field(default_factory=list)
+    error: str | None = None
+
+
 class EvidenceExport(BaseModel):
     id: str = Field(default_factory=lambda: new_id("evid"))
     result_id: str
@@ -907,6 +937,74 @@ class EnterpriseStore:
                 "status": run.status,
                 "result_id": run.result_id,
                 "decision": run.decision,
+            },
+        )
+        return run
+
+    def list_evidence_schedules(self) -> list[EvidenceSchedule]:
+        return [
+            EvidenceSchedule.model_validate(item)
+            for item in self._read_list("evidence_schedules")
+        ]
+
+    def get_evidence_schedule(self, schedule_id: str) -> EvidenceSchedule:
+        for schedule in self.list_evidence_schedules():
+            if schedule.id == schedule_id:
+                return schedule
+        raise KeyError(f"Evidence schedule not found: {schedule_id}")
+
+    def save_evidence_schedule(
+        self,
+        schedule: EvidenceSchedule,
+        actor: str = "system",
+    ) -> EvidenceSchedule:
+        schedules = self.list_evidence_schedules()
+        for idx, current in enumerate(schedules):
+            if current.id == schedule.id:
+                schedule.updated_at = utc_now()
+                schedules[idx] = schedule
+                self._write_models("evidence_schedules", schedules)
+                self.add_audit(
+                    actor,
+                    "evidence_schedule.update",
+                    schedule.id,
+                    schedule.model_dump(),
+                )
+                return schedule
+        schedules.append(schedule)
+        self._write_models("evidence_schedules", schedules)
+        self.add_audit(actor, "evidence_schedule.create", schedule.id, schedule.model_dump())
+        return schedule
+
+    def list_evidence_schedule_runs(
+        self,
+        schedule_id: str | None = None,
+    ) -> list[EvidenceScheduleRun]:
+        runs = [
+            EvidenceScheduleRun.model_validate(item)
+            for item in self._read_list("evidence_schedule_runs")
+        ]
+        if schedule_id:
+            runs = [run for run in runs if run.schedule_id == schedule_id]
+        return runs
+
+    def save_evidence_schedule_run(
+        self,
+        run: EvidenceScheduleRun,
+        actor: str = "system",
+    ) -> EvidenceScheduleRun:
+        runs = self.list_evidence_schedule_runs()
+        runs.append(run)
+        self._write_models("evidence_schedule_runs", runs)
+        self.add_audit(
+            actor,
+            "evidence_schedule.run",
+            run.id,
+            {
+                "schedule_id": run.schedule_id,
+                "status": run.status,
+                "export_ids": run.export_ids,
+                "result_ids": run.result_ids,
             },
         )
         return run
@@ -1591,6 +1689,8 @@ def governance_health_report(
             "remediation_plans": len(store.list_remediation_plans()),
             "scheduled_targets": len(store.list_scheduled_scan_targets()),
             "scheduled_runs": len(store.list_scheduled_scan_runs()),
+            "evidence_schedules": len(store.list_evidence_schedules()),
+            "evidence_schedule_runs": len(store.list_evidence_schedule_runs()),
         },
         decisions=decisions,
         top_rules=sorted(rule_counts.values(), key=lambda item: item["count"], reverse=True)[:10],
@@ -1656,6 +1756,51 @@ def run_scheduled_scan(
             error=str(exc),
         )
     return store.save_scheduled_scan_run(run, actor=actor)
+
+
+def run_evidence_schedule(
+    schedule_id: str,
+    store: EnterpriseStore | None = None,
+    actor: str = "system",
+) -> EvidenceScheduleRun:
+    store = store or EnterpriseStore()
+    schedule = store.get_evidence_schedule(schedule_id)
+    if not schedule.enabled:
+        run = EvidenceScheduleRun(
+            schedule_id=schedule.id,
+            schedule_name=schedule.name,
+            status="failed",
+            error="Evidence schedule is disabled.",
+        )
+        return store.save_evidence_schedule_run(run, actor=actor)
+    try:
+        results = _matching_evidence_results(store, schedule)
+        export_ids = []
+        result_ids = []
+        for result in results[: max(schedule.limit, 1)]:
+            export = export_evidence(
+                result.id,
+                format=schedule.format,
+                store=store,
+                actor=actor,
+            )
+            export_ids.append(export.id)
+            result_ids.append(result.id)
+        run = EvidenceScheduleRun(
+            schedule_id=schedule.id,
+            schedule_name=schedule.name,
+            status="completed",
+            export_ids=export_ids,
+            result_ids=result_ids,
+        )
+    except Exception as exc:  # noqa: BLE001
+        run = EvidenceScheduleRun(
+            schedule_id=schedule.id,
+            schedule_name=schedule.name,
+            status="failed",
+            error=str(exc),
+        )
+    return store.save_evidence_schedule_run(run, actor=actor)
 
 
 def install_policy_pack(
@@ -2176,6 +2321,39 @@ def _governance_risk_signals(
     if not signals:
         signals.append("No immediate governance health risks detected.")
     return signals
+
+
+def _matching_evidence_results(
+    store: EnterpriseStore,
+    schedule: EvidenceSchedule,
+) -> list[EvaluationResult]:
+    if schedule.result_id:
+        return [store.get_evaluation(schedule.result_id)]
+    results = list(reversed(store.list_evaluations()))
+    matched = []
+    for result in results:
+        if schedule.baseline and result.context.baseline != schedule.baseline:
+            continue
+        if schedule.app and result.context.app != schedule.app:
+            continue
+        if schedule.org and result.context.org != schedule.org:
+            continue
+        if schedule.group and result.context.group != schedule.group:
+            continue
+        if schedule.repo and result.context.repo != schedule.repo:
+            continue
+        if schedule.standard or schedule.control_id:
+            findings = result.report.get("findings", [])
+            if schedule.standard and not any(
+                finding.get("standard") == schedule.standard for finding in findings
+            ):
+                continue
+            if schedule.control_id and not any(
+                finding.get("control_id") == schedule.control_id for finding in findings
+            ):
+                continue
+        matched.append(result)
+    return matched
 
 
 def _metadata_severity(rule_id: str) -> Literal["low", "medium", "high"] | None:

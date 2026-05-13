@@ -52,4 +52,4 @@ Legend: <span style="color: green">✅ Delivered</span> • <span style="color: 
 | Scheduled multi-repo background runner | <span style="color: orange">🚧 Planned</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Autonomous-Governance) |
 | Remediation patch bundle scaffold | <span style="color: green">✅ Delivered (v5.0 foundation)</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Autonomous-Governance) |
 | GitHub pull request automation | <span style="color: orange">🚧 Planned</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Autonomous-Governance) |
-| Evidence scheduling | <span style="color: orange">🚧 Planned</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Autonomous-Governance) |
+| Evidence scheduling | <span style="color: green">✅ Delivered (v5.0 foundation)</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Autonomous-Governance) |

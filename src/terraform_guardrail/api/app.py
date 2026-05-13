@@ -14,6 +14,7 @@ from terraform_guardrail.enterprise import (
     EnterprisePolicy,
     EnterpriseStore,
     EvaluationContext,
+    EvidenceSchedule,
     GroupPolicyBinding,
     PolicyWaiver,
     RiskProfile,
@@ -37,6 +38,7 @@ from terraform_guardrail.enterprise import (
     render_remediation_markdown,
     resolve_policy_set,
     run_drift_gate,
+    run_evidence_schedule,
     run_scheduled_scan,
 )
 from terraform_guardrail.generator import generate_snippet
@@ -626,6 +628,39 @@ def create_app() -> FastAPI:
     @app.get("/scheduled-scans/{target_id}/runs")
     def scheduled_scan_runs(target_id: str) -> dict[str, Any]:
         runs = EnterpriseStore().list_scheduled_scan_runs(target_id=target_id)
+        return {"runs": [run.model_dump(mode="json") for run in runs]}
+
+    @app.post("/evidence/schedules")
+    def create_evidence_schedule(schedule: EvidenceSchedule) -> dict[str, Any]:
+        try:
+            return EnterpriseStore().save_evidence_schedule(schedule).model_dump(mode="json")
+        except Exception as exc:  # noqa: BLE001
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.get("/evidence/schedules")
+    def evidence_schedules(enabled: bool | None = None) -> dict[str, Any]:
+        schedules = EnterpriseStore().list_evidence_schedules()
+        if enabled is not None:
+            schedules = [schedule for schedule in schedules if schedule.enabled is enabled]
+        return {"schedules": [schedule.model_dump(mode="json") for schedule in schedules]}
+
+    @app.get("/evidence/schedules/{schedule_id}")
+    def evidence_schedule(schedule_id: str) -> dict[str, Any]:
+        try:
+            return EnterpriseStore().get_evidence_schedule(schedule_id).model_dump(mode="json")
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.post("/evidence/schedules/{schedule_id}/run")
+    def run_evidence_schedule_endpoint(schedule_id: str) -> dict[str, Any]:
+        try:
+            return run_evidence_schedule(schedule_id).model_dump(mode="json")
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.get("/evidence/schedules/{schedule_id}/runs")
+    def evidence_schedule_runs(schedule_id: str) -> dict[str, Any]:
+        runs = EnterpriseStore().list_evidence_schedule_runs(schedule_id=schedule_id)
         return {"runs": [run.model_dump(mode="json") for run in runs]}
 
     @app.post("/integrations/gitlab/groups")

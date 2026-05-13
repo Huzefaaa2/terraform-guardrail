@@ -116,8 +116,48 @@ API:
 - `GET /remediation/patch-bundles`
 - `GET /remediation/patch-bundles/{bundle_id}`
 
+## Evidence Scheduling
+
+Evidence schedules define recurring audit export jobs by result ID or by matching evaluation
+context. The current foundation stores schedules and supports manual execution; a later background
+runner can call the same run endpoint on a cadence.
+
+Create a monthly schedule for a repository:
+
+```bash
+terraform-guardrail evidence schedule create \
+  --name monthly-payments \
+  --cadence monthly \
+  --format json \
+  --repo payments-infra \
+  --limit 10
+```
+
+Run and inspect it:
+
+```bash
+terraform-guardrail evidence schedule run <schedule-id>
+terraform-guardrail evidence schedule runs --schedule-id <schedule-id>
+```
+
+Schedules can filter by:
+
+- `result_id`
+- `baseline`
+- `app`, `org`, `group`, or `repo`
+- `standard`
+- `control_id`
+
+API:
+
+- `POST /evidence/schedules`
+- `GET /evidence/schedules`
+- `GET /evidence/schedules/{schedule_id}`
+- `POST /evidence/schedules/{schedule_id}/run`
+- `GET /evidence/schedules/{schedule_id}/runs`
+
 ## Next v5 Steps
 
 - GitHub pull request creation from patch bundles.
-- Evidence scheduling by app, group, standard, or control.
+- Background runners for scheduled scans and evidence schedules.
 - Dashboard trend charts for waiver aging and evidence coverage.

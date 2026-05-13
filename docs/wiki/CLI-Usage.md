@@ -101,6 +101,13 @@ terraform-guardrail enterprise schedule create \
   --context risk_tier=high
 terraform-guardrail enterprise schedule run <target-id>
 terraform-guardrail enterprise schedule runs --target-id <target-id>
+terraform-guardrail evidence schedule create \
+  --name monthly-payments \
+  --cadence monthly \
+  --format json \
+  --repo payments-infra
+terraform-guardrail evidence schedule run <schedule-id>
+terraform-guardrail evidence schedule runs --schedule-id <schedule-id>
 terraform-guardrail enterprise waiver create \
   --rule-id TG011 \
   --reason "Legacy module migration" \

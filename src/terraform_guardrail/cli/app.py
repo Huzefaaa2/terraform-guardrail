@@ -22,6 +22,7 @@ from terraform_guardrail.enterprise import (
     EnterprisePolicy,
     EnterpriseStore,
     EvaluationContext,
+    EvidenceSchedule,
     GroupPolicyBinding,
     PolicyMetadata,
     PolicyWaiver,
@@ -44,6 +45,7 @@ from terraform_guardrail.enterprise import (
     render_remediation_markdown,
     resolve_policy_set,
     run_drift_gate,
+    run_evidence_schedule,
     run_scheduled_scan,
 )
 from terraform_guardrail.generator import generate_snippet
@@ -74,10 +76,12 @@ enterprise_schedule_app = typer.Typer(help="Enterprise scheduled governance scan
 enterprise_aws_app = typer.Typer(help="AWS enterprise integration commands.")
 enterprise_aws_codepipeline_app = typer.Typer(help="AWS CodePipeline scaffold commands.")
 evidence_app = typer.Typer(help="Evidence export commands.")
+evidence_schedule_app = typer.Typer(help="Evidence schedule commands.")
 app.add_typer(policy_app, name="policy")
 app.add_typer(rules_app, name="rules")
 app.add_typer(enterprise_app, name="enterprise")
 app.add_typer(evidence_app, name="evidence")
+evidence_app.add_typer(evidence_schedule_app, name="schedule")
 enterprise_app.add_typer(enterprise_policy_app, name="policy")
 enterprise_app.add_typer(enterprise_baseline_app, name="baseline")
 enterprise_app.add_typer(enterprise_binding_app, name="binding")
@@ -1329,6 +1333,102 @@ def evidence_export(
         console.print(f"Evidence export failed: {exc}")
         raise typer.Exit(code=1) from exc
     console.print(f"Evidence exported: {export.path}")
+
+
+@evidence_schedule_app.command("create")
+def evidence_schedule_create(
+    name: Annotated[str, typer.Option(help="Evidence schedule name")],
+    cadence: Annotated[
+        str,
+        typer.Option(help="Cadence: daily, weekly, monthly, or quarterly"),
+    ] = "monthly",
+    format: Annotated[str, typer.Option(help="json, csv, or pdf")] = "json",
+    result_id: Annotated[str | None, typer.Option(help="Specific result ID to export")] = None,
+    baseline: Annotated[str | None, typer.Option(help="Filter by baseline")] = None,
+    app_name: Annotated[str | None, typer.Option("--app", help="Filter by app context")] = None,
+    org: Annotated[str | None, typer.Option(help="Filter by org context")] = None,
+    group: Annotated[str | None, typer.Option(help="Filter by group context")] = None,
+    repo: Annotated[str | None, typer.Option(help="Filter by repo context")] = None,
+    standard: Annotated[str | None, typer.Option(help="Filter by finding standard")] = None,
+    control_id: Annotated[str | None, typer.Option(help="Filter by finding control ID")] = None,
+    limit: Annotated[int, typer.Option(help="Maximum matching results to export")] = 10,
+    disabled: Annotated[bool, typer.Option(help="Create schedule disabled")] = False,
+    format_output: Annotated[
+        str,
+        typer.Option("--output-format", help="pretty or json"),
+    ] = "pretty",
+) -> None:
+    if cadence not in {"daily", "weekly", "monthly", "quarterly"}:
+        console.print("Cadence must be daily, weekly, monthly, or quarterly.")
+        raise typer.Exit(code=2)
+    if format not in {"json", "csv", "pdf"}:
+        console.print("Evidence format must be json, csv, or pdf.")
+        raise typer.Exit(code=2)
+    schedule = EvidenceSchedule(
+        name=name,
+        cadence=cadence,  # type: ignore[arg-type]
+        format=format,  # type: ignore[arg-type]
+        enabled=not disabled,
+        result_id=result_id,
+        baseline=baseline,
+        app=app_name,
+        org=org,
+        group=group,
+        repo=repo,
+        standard=standard,
+        control_id=control_id,
+        limit=limit,
+    )
+    saved = EnterpriseStore().save_evidence_schedule(schedule)
+    _print_model(saved, format_output)
+
+
+@evidence_schedule_app.command("list")
+def evidence_schedule_list(
+    format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
+) -> None:
+    schedules = EnterpriseStore().list_evidence_schedules()
+    if format == "json":
+        console.print(
+            JSON(json.dumps([schedule.model_dump(mode="json") for schedule in schedules], indent=2))
+        )
+        return
+    for schedule in schedules:
+        console.print(
+            f"- {schedule.id} {schedule.name} cadence={schedule.cadence} "
+            f"format={schedule.format} enabled={schedule.enabled}"
+        )
+
+
+@evidence_schedule_app.command("run")
+def evidence_schedule_run(
+    schedule_id: Annotated[str, typer.Argument(help="Evidence schedule ID")],
+    format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
+) -> None:
+    try:
+        run = run_evidence_schedule(schedule_id)
+    except KeyError as exc:
+        console.print(str(exc))
+        raise typer.Exit(code=1) from exc
+    _print_model(run, format)
+    if run.status == "failed":
+        raise typer.Exit(code=1)
+
+
+@evidence_schedule_app.command("runs")
+def evidence_schedule_runs(
+    schedule_id: Annotated[str | None, typer.Option(help="Filter by schedule ID")] = None,
+    format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
+) -> None:
+    runs = EnterpriseStore().list_evidence_schedule_runs(schedule_id=schedule_id)
+    if format == "json":
+        console.print(JSON(json.dumps([run.model_dump(mode="json") for run in runs], indent=2)))
+        return
+    for run in runs:
+        console.print(
+            f"- {run.id} schedule={run.schedule_id} status={run.status} "
+            f"exports={len(run.export_ids)}"
+        )
 
 
 @enterprise_app.command("drift-check")

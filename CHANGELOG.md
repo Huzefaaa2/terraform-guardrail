@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 - REST API endpoints and CLI commands for remediation plans and governance health.
 - Scheduler-ready governance scan targets with manual run records through CLI and REST API.
 - Remediation patch bundle scaffolds with branch metadata, PR body, manifest, and Terraform snippets.
+- Evidence schedules for recurring audit exports by result, context, standard, or control.
 
 ### Changed
 - Package/API versions updated to 5.0.0 for v5 development.

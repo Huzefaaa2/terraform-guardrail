@@ -8,6 +8,7 @@ from terraform_guardrail.enterprise import (
     EnterprisePolicy,
     EnterpriseStore,
     EvaluationContext,
+    EvidenceSchedule,
     GroupPolicyBinding,
     PolicyMetadata,
     PolicyWaiver,
@@ -34,6 +35,7 @@ from terraform_guardrail.enterprise import (
     resolve_policy_ids,
     resolve_policy_set,
     run_drift_gate,
+    run_evidence_schedule,
     run_scheduled_scan,
 )
 
@@ -347,6 +349,45 @@ resource "aws_s3_bucket" "logs" {
         "evaluation.create",
         "scheduled_scan.run",
     ]
+
+
+def test_evidence_schedule_exports_matching_results(tmp_path: Path) -> None:
+    infra = tmp_path / "main.tf"
+    infra.write_text(
+        """
+resource "aws_s3_bucket" "logs" {
+  bucket = "logs"
+}
+""",
+        encoding="utf-8",
+    )
+    store = EnterpriseStore(tmp_path / "store")
+    result = evaluate_enterprise(
+        infra,
+        context={"repo": "payments", "environment": "prod"},
+        store=store,
+    )
+    schedule = store.save_evidence_schedule(
+        EvidenceSchedule(
+            name="monthly-payments",
+            cadence="monthly",
+            format="json",
+            repo="payments",
+            limit=5,
+        ),
+        actor="auditor",
+    )
+
+    run = run_evidence_schedule(schedule.id, store=store, actor="auditor")
+    health = governance_health_report(store=store)
+
+    assert run.status == "completed"
+    assert run.result_ids == [result.id]
+    assert len(run.export_ids) == 1
+    assert store.get_export(run.export_ids[0]).result_id == result.id
+    assert health.totals["evidence_schedules"] == 1
+    assert health.totals["evidence_schedule_runs"] == 1
+    assert store.audit_events()[-1].action == "evidence_schedule.run"
 
 
 def test_context_aware_evaluation_escalates_production_findings(tmp_path: Path) -> None:

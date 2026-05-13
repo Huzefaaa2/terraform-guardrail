@@ -6,6 +6,7 @@
 - Governance health summarizes stored evaluations, decisions, recurring rules, waivers, evidence exports, and risk signals.
 - Scheduled governance scan targets define path, cadence, context, baseline, and fail threshold, with manual execution records.
 - Remediation patch bundles generate provider-neutral PR scaffolds from remediation plans.
+- Evidence schedules define recurring audit exports by result, context, standard, or control.
 
 ## Added
 - `terraform-guardrail enterprise remediation create/list/show` commands.
@@ -13,6 +14,7 @@
 - API endpoints for remediation plans and governance health.
 - API and CLI support for scheduled scan targets and on-demand scheduled runs.
 - API and CLI support for remediation patch bundle scaffolds.
+- API and CLI support for evidence schedules and on-demand evidence schedule runs.
 
 ## Changed
 - Version updated to 5.0.0 for the Autonomous Governance development track.
