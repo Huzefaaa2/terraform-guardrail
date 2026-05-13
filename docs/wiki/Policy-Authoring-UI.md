@@ -20,6 +20,7 @@ The FastAPI web UI includes an enterprise workspace for policy authoring and rev
 - Browse built-in risk profiles from the right-side Intelligence section.
 - Request, approve, revoke, and inspect time-bound policy waivers.
 - See waived findings annotated directly in the intelligent evaluation report.
+- Review v5 governance health, recurring rules, risk signals, and remediation plans.
 
 ## Example
 

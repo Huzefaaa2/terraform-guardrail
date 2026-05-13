@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from fastapi.testclient import TestClient
 
-from terraform_guardrail.enterprise import EnterprisePolicy, EnterpriseStore
+from terraform_guardrail.enterprise import EnterprisePolicy, EnterpriseStore, evaluate_enterprise
 from terraform_guardrail.web.app import _next_rule_id, create_app
 
 
@@ -227,3 +227,26 @@ def test_web_waiver_lifecycle_and_scan_annotation(monkeypatch, tmp_path) -> None
     revoked = client.post(f"/waivers/{waiver.id}/revoke")
     assert revoked.status_code == 200
     assert EnterpriseStore().get_waiver(waiver.id).status == "revoked"
+
+
+def test_web_v5_governance_dashboard_and_remediation_plan(monkeypatch, tmp_path) -> None:
+    monkeypatch.setenv("GUARDRAIL_ENTERPRISE_DATA_DIR", str(tmp_path / "store"))
+    infra = tmp_path / "main.tf"
+    infra.write_text(
+        'resource "aws_s3_bucket" "logs" { bucket = "logs" }',
+        encoding="utf-8",
+    )
+    result = evaluate_enterprise(infra, store=EnterpriseStore())
+    client = TestClient(create_app())
+
+    dashboard = client.get("/")
+    assert dashboard.status_code == 200
+    assert "Governance health dashboard" in dashboard.text
+    assert "TG011" in dashboard.text
+    assert "No immediate governance health risks detected." not in dashboard.text
+
+    created = client.post("/remediation/plans", data={"result_id": result.id})
+    assert created.status_code == 200
+    assert "Remediation plan" in created.text
+    assert "aws_s3_bucket_server_side_encryption_configuration" in created.text
+    assert "Latest remediation plans" in created.text

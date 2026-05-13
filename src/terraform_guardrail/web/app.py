@@ -17,7 +17,9 @@ from terraform_guardrail.enterprise import (
     GroupPolicyBinding,
     PolicyMetadata,
     PolicyWaiver,
+    create_remediation_plan,
     evaluate_enterprise,
+    governance_health_report,
     preview_policy,
     resolve_policy_set,
 )
@@ -375,6 +377,24 @@ def create_app() -> FastAPI:
             _template_context(request, store, error=error),
         )
 
+    @app.post("/remediation/plans", response_class=HTMLResponse)
+    async def create_remediation(
+        request: Request,
+        result_id: str = Form(...),
+    ) -> HTMLResponse:
+        store = EnterpriseStore()
+        try:
+            plan = create_remediation_plan(result_id, store=store, actor="web")
+            error = None
+        except Exception as exc:  # noqa: BLE001
+            plan = None
+            error = str(exc)
+        return templates.TemplateResponse(
+            request,
+            "index.html",
+            _template_context(request, store, error=error, remediation_plan=plan),
+        )
+
     @app.post("/baselines", response_class=HTMLResponse)
     async def create_baseline(
         request: Request,
@@ -454,6 +474,7 @@ def _template_context(
     selected_rule_id: str | None = None,
     preview=None,  # type: ignore[no-untyped-def]
     resolved=None,  # type: ignore[no-untyped-def]
+    remediation_plan=None,  # type: ignore[no-untyped-def]
 ) -> dict:
     policies = sorted(
         store.list_policies(),
@@ -473,6 +494,9 @@ def _template_context(
         selected_policy = policies[0]
     if selected_policy is None and selected_default_rule is None and default_rules:
         selected_default_rule = default_rules[0]
+    remediation_plans = store.list_remediation_plans()
+    health = governance_health_report(store=store)
+    latest_remediation_plans = list(reversed(remediation_plans[-3:]))
     return {
         "request": request,
         "report": report,
@@ -488,6 +512,10 @@ def _template_context(
         "selected_default_rule": selected_default_rule,
         "preview": preview,
         "resolved": resolved,
+        "remediation_plan": remediation_plan,
+        "remediation_plans": remediation_plans,
+        "latest_remediation_plans": latest_remediation_plans,
+        "governance_health": health,
         "next_rule_id": _next_rule_id(store),
         "how_to_guides": HOW_TO_GUIDES,
         "how_to_guides_url": f"{WIKI_BASE_URL}/How-To-Guides",

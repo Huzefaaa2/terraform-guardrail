@@ -48,6 +48,76 @@
 
       <section class="workspace">
         <div class="main-column">
+          <section class="panel governance-panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">v5 Autonomous Governance</p>
+                <h2>Governance health dashboard</h2>
+              </div>
+              <span class="count-pill">{{ governance_health.totals.evaluations }} evaluations</span>
+            </div>
+            <div class="health-grid">
+              <div>
+                <span>Findings</span>
+                <strong>{{ governance_health.totals.findings }}</strong>
+              </div>
+              <div>
+                <span>Blocked</span>
+                <strong>{{ governance_health.decisions.block }}</strong>
+              </div>
+              <div>
+                <span>Active waivers</span>
+                <strong>{{ governance_health.waiver_summary.active }}</strong>
+              </div>
+              <div>
+                <span>Evidence exports</span>
+                <strong>{{ governance_health.evidence_summary.exports }}</strong>
+              </div>
+              <div>
+                <span>Remediation plans</span>
+                <strong>{{ governance_health.totals.remediation_plans }}</strong>
+              </div>
+            </div>
+            <div class="dashboard-split">
+              <div>
+                <h3>Top recurring rules</h3>
+                {% if governance_health.top_rules %}
+                <div class="top-rule-list">
+                  {% for rule in governance_health.top_rules[:5] %}
+                  <span>
+                    <strong>{{ rule.rule_id }}</strong>
+                    {{ rule.count }} findings · high={{ rule.high }} · medium={{ rule.medium }}
+                  </span>
+                  {% endfor %}
+                </div>
+                {% else %}
+                <p class="detail-copy">No recurring rule risk yet. Run an evaluation to build trends.</p>
+                {% endif %}
+              </div>
+              <div>
+                <h3>Risk signals</h3>
+                <div class="risk-signal-list">
+                  {% for signal in governance_health.risk_signals %}
+                  <span>{{ signal }}</span>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            {% if latest_remediation_plans %}
+            <div class="remediation-strip">
+              <h3>Latest remediation plans</h3>
+              <div class="remediation-list">
+                {% for plan in latest_remediation_plans %}
+                <span>
+                  <strong>{{ plan.id }}</strong>
+                  result={{ plan.result_id }} · actions={{ plan.actions | length }} · skipped={{ plan.skipped | length }}
+                </span>
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+          </section>
+
           <section class="panel scan-panel">
             <div class="section-heading">
               <div>
@@ -466,6 +536,42 @@
           </section>
           {% endif %}
 
+          {% if remediation_plan %}
+          <section class="panel remediation-report">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Remediation plan</p>
+                <h2>{{ remediation_plan.id }}</h2>
+              </div>
+              <span class="count-pill">{{ remediation_plan.actions | length }} actions</span>
+            </div>
+            <div class="summary">
+              <div><strong>{{ remediation_plan.actions | length }}</strong><span>Actions</span></div>
+              <div><strong>{{ remediation_plan.skipped | length }}</strong><span>Skipped</span></div>
+              <div><strong>{{ remediation_plan.summary.high }}</strong><span>High</span></div>
+              <div><strong>{{ remediation_plan.summary.medium }}</strong><span>Medium</span></div>
+            </div>
+            {% if remediation_plan.actions %}
+            <div class="remediation-actions">
+              {% for action in remediation_plan.actions %}
+              <div class="remediation-action">
+                <span class="tag">{{ action.severity }}</span>
+                <div>
+                  <strong>{{ action.rule_id }} · {{ action.suggested_fix }}</strong>
+                  <small>{{ action.path or "n/a" }} · confidence={{ action.confidence }}</small>
+                  {% if action.patch_preview %}
+                  <pre>{{ action.patch_preview }}</pre>
+                  {% endif %}
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+            {% else %}
+            <p class="detail-copy">No remediation actions were required for this result.</p>
+            {% endif %}
+          </section>
+          {% endif %}
+
           {% if report %}
           <section class="panel report">
             <div class="section-heading">
@@ -477,6 +583,13 @@
               <span class="status-badge decision-{{ evaluation.decision }}">{{ evaluation.decision }}</span>
               {% endif %}
             </div>
+            {% if evaluation %}
+            <form action="/remediation/plans" method="post" class="remediation-create-form">
+              <input type="hidden" name="result_id" value="{{ evaluation.id }}" />
+              <span>Result {{ evaluation.id }}</span>
+              <button type="submit">Create Remediation Plan</button>
+            </form>
+            {% endif %}
             {% if report.metadata and report.metadata.intelligence %}
             {% set intelligence = report.metadata.intelligence %}
             <div class="intelligence-panel">

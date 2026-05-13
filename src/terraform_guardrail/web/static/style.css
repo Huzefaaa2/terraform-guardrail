@@ -497,7 +497,8 @@ button:hover {
 
 .detail-grid,
 .summary,
-.intelligence-panel {
+.intelligence-panel,
+.health-grid {
   display: grid;
   gap: 10px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -506,7 +507,8 @@ button:hover {
 
 .detail-grid div,
 .summary div,
-.intelligence-panel div {
+.intelligence-panel div,
+.health-grid div {
   background: var(--panel-soft);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -516,17 +518,127 @@ button:hover {
 
 .detail-grid strong,
 .summary strong,
-.intelligence-panel strong {
+.intelligence-panel strong,
+.health-grid strong {
   display: block;
   overflow-wrap: anywhere;
 }
 
 .summary span,
-.intelligence-panel span {
+.intelligence-panel span,
+.health-grid span {
   color: var(--muted);
   display: block;
   font-size: 0.8rem;
   margin-top: 3px;
+}
+
+.health-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.governance-panel {
+  background:
+    linear-gradient(135deg, rgba(15, 118, 110, 0.08), rgba(17, 94, 89, 0.03)),
+    var(--panel);
+}
+
+.dashboard-split {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.dashboard-split h3,
+.remediation-strip h3 {
+  font-size: 0.92rem;
+  margin: 0 0 10px;
+}
+
+.top-rule-list,
+.risk-signal-list,
+.remediation-list,
+.remediation-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.top-rule-list span,
+.risk-signal-list span,
+.remediation-list span {
+  background: #f7fbfb;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--muted);
+  padding: 10px 12px;
+}
+
+.top-rule-list strong,
+.remediation-list strong {
+  color: var(--ink);
+}
+
+.risk-signal-list span {
+  border-left: 4px solid var(--warning);
+}
+
+.remediation-strip {
+  border-top: 1px solid var(--border);
+  margin-top: 16px;
+  padding-top: 16px;
+}
+
+.remediation-create-form {
+  align-items: center;
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding: 10px 12px;
+}
+
+.remediation-create-form span {
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.remediation-action {
+  align-items: start;
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 76px minmax(0, 1fr);
+  padding: 12px;
+}
+
+.remediation-action strong,
+.remediation-action small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.remediation-action small {
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.remediation-action pre {
+  background: #102a2a;
+  border-radius: 8px;
+  color: #d9fbf6;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  margin: 10px 0 0;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 10px;
 }
 
 .intelligence-panel {
@@ -802,10 +914,18 @@ button:hover {
   .baseline-list form,
   .detail-grid,
   .summary,
+  .health-grid,
   .intelligence-panel,
+  .dashboard-split,
   .waiver-card,
+  .remediation-action,
   .finding {
     grid-template-columns: 1fr;
+  }
+
+  .remediation-create-form {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .fix,

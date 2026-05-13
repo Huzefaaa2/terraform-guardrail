@@ -46,9 +46,19 @@ API:
 The report includes total evaluations, findings, policies, baselines, remediation plans,
 pass/warn/block counts, top recurring rules, waiver summary, evidence summary, and risk signals.
 
+## Web UI Dashboard
+
+The Enterprise web workspace includes a **Governance health dashboard** at the top of the page. It
+shows evaluation, finding, blocked-decision, waiver, evidence, and remediation-plan counts, plus top
+recurring rules, current risk signals, and latest remediation plans.
+
+After a scan, select **Create Remediation Plan** in the evaluation report to generate a v5 plan from
+the stored result. The page displays reviewable actions, suggested fixes, confidence, and Terraform
+snippet previews when a common safe fix is available.
+
 ## Next v5 Steps
 
 - Scheduled scans across configured repositories or folders.
 - Remediation pull request automation.
 - Evidence scheduling by app, group, standard, or control.
-- Governance dashboard UI for trends, waiver aging, and evidence coverage.
+- Dashboard trend charts for waiver aging and evidence coverage.
