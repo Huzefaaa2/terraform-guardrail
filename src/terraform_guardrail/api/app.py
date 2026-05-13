@@ -17,6 +17,7 @@ from terraform_guardrail.enterprise import (
     GroupPolicyBinding,
     PolicyWaiver,
     RiskProfile,
+    ScheduledScanTarget,
     check_drift,
     create_remediation_plan,
     ensure_policy_pack_installed,
@@ -35,6 +36,7 @@ from terraform_guardrail.enterprise import (
     render_remediation_markdown,
     resolve_policy_set,
     run_drift_gate,
+    run_scheduled_scan,
 )
 from terraform_guardrail.generator import generate_snippet
 from terraform_guardrail.policy_registry import (
@@ -561,6 +563,39 @@ def create_app() -> FastAPI:
     @app.get("/governance/health")
     def governance_health(window: str = "all") -> dict[str, Any]:
         return governance_health_report(window=window).model_dump(mode="json")
+
+    @app.post("/scheduled-scans")
+    def create_scheduled_scan(target: ScheduledScanTarget) -> dict[str, Any]:
+        try:
+            return EnterpriseStore().save_scheduled_scan_target(target).model_dump(mode="json")
+        except Exception as exc:  # noqa: BLE001
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.get("/scheduled-scans")
+    def scheduled_scans(enabled: bool | None = None) -> dict[str, Any]:
+        targets = EnterpriseStore().list_scheduled_scan_targets()
+        if enabled is not None:
+            targets = [target for target in targets if target.enabled is enabled]
+        return {"targets": [target.model_dump(mode="json") for target in targets]}
+
+    @app.get("/scheduled-scans/{target_id}")
+    def scheduled_scan(target_id: str) -> dict[str, Any]:
+        try:
+            return EnterpriseStore().get_scheduled_scan_target(target_id).model_dump(mode="json")
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.post("/scheduled-scans/{target_id}/run")
+    def run_scheduled_scan_endpoint(target_id: str) -> dict[str, Any]:
+        try:
+            return run_scheduled_scan(target_id).model_dump(mode="json")
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.get("/scheduled-scans/{target_id}/runs")
+    def scheduled_scan_runs(target_id: str) -> dict[str, Any]:
+        runs = EnterpriseStore().list_scheduled_scan_runs(target_id=target_id)
+        return {"runs": [run.model_dump(mode="json") for run in runs]}
 
     @app.post("/integrations/gitlab/groups")
     def create_gitlab_group_binding(binding: GroupPolicyBinding) -> dict[str, Any]:

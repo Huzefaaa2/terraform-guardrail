@@ -266,6 +266,34 @@ class GovernanceHealthReport(BaseModel):
     risk_signals: list[str] = Field(default_factory=list)
 
 
+class ScheduledScanTarget(BaseModel):
+    id: str = Field(default_factory=lambda: new_id("sched"))
+    name: str
+    path: str
+    cadence: Literal["hourly", "daily", "weekly", "monthly"] = "daily"
+    enabled: bool = True
+    state_path: str | None = None
+    provider: str | None = None
+    baseline: str | None = None
+    policy_set: str | None = None
+    fail_on: Literal["low", "medium", "high"] | None = None
+    context: dict[str, Any] = Field(default_factory=dict)
+    created_at: str = Field(default_factory=utc_now)
+    updated_at: str = Field(default_factory=utc_now)
+
+
+class ScheduledScanRun(BaseModel):
+    id: str = Field(default_factory=lambda: new_id("sched_run"))
+    target_id: str
+    target_name: str
+    created_at: str = Field(default_factory=utc_now)
+    status: Literal["completed", "failed"]
+    result_id: str | None = None
+    decision: Literal["pass", "warn", "block"] | None = None
+    summary: dict[str, Any] = Field(default_factory=dict)
+    error: str | None = None
+
+
 class EvidenceExport(BaseModel):
     id: str = Field(default_factory=lambda: new_id("evid"))
     result_id: str
@@ -761,6 +789,66 @@ class EnterpriseStore:
         if result_id:
             plans = [plan for plan in plans if plan.result_id == result_id]
         return plans
+
+    def list_scheduled_scan_targets(self) -> list[ScheduledScanTarget]:
+        return [
+            ScheduledScanTarget.model_validate(item)
+            for item in self._read_list("scheduled_scan_targets")
+        ]
+
+    def get_scheduled_scan_target(self, target_id: str) -> ScheduledScanTarget:
+        for target in self.list_scheduled_scan_targets():
+            if target.id == target_id:
+                return target
+        raise KeyError(f"Scheduled scan target not found: {target_id}")
+
+    def save_scheduled_scan_target(
+        self,
+        target: ScheduledScanTarget,
+        actor: str = "system",
+    ) -> ScheduledScanTarget:
+        targets = self.list_scheduled_scan_targets()
+        for idx, current in enumerate(targets):
+            if current.id == target.id:
+                target.updated_at = utc_now()
+                targets[idx] = target
+                self._write_models("scheduled_scan_targets", targets)
+                self.add_audit(actor, "scheduled_scan.update", target.id, target.model_dump())
+                return target
+        targets.append(target)
+        self._write_models("scheduled_scan_targets", targets)
+        self.add_audit(actor, "scheduled_scan.create", target.id, target.model_dump())
+        return target
+
+    def list_scheduled_scan_runs(self, target_id: str | None = None) -> list[ScheduledScanRun]:
+        runs = [
+            ScheduledScanRun.model_validate(item)
+            for item in self._read_list("scheduled_scan_runs")
+        ]
+        if target_id:
+            runs = [run for run in runs if run.target_id == target_id]
+        return runs
+
+    def save_scheduled_scan_run(
+        self,
+        run: ScheduledScanRun,
+        actor: str = "system",
+    ) -> ScheduledScanRun:
+        runs = self.list_scheduled_scan_runs()
+        runs.append(run)
+        self._write_models("scheduled_scan_runs", runs)
+        self.add_audit(
+            actor,
+            "scheduled_scan.run",
+            run.id,
+            {
+                "target_id": run.target_id,
+                "status": run.status,
+                "result_id": run.result_id,
+                "decision": run.decision,
+            },
+        )
+        return run
 
     def save_export(self, export: EvidenceExport, actor: str = "system") -> EvidenceExport:
         exports = [EvidenceExport.model_validate(item) for item in self._read_list("exports")]
@@ -1379,6 +1467,8 @@ def governance_health_report(
             "policies": len(store.list_policies()),
             "baselines": len(store.list_baselines()),
             "remediation_plans": len(store.list_remediation_plans()),
+            "scheduled_targets": len(store.list_scheduled_scan_targets()),
+            "scheduled_runs": len(store.list_scheduled_scan_runs()),
         },
         decisions=decisions,
         top_rules=sorted(rule_counts.values(), key=lambda item: item["count"], reverse=True)[:10],
@@ -1394,6 +1484,56 @@ def governance_health_report(
         },
         risk_signals=risk_signals,
     )
+
+
+def run_scheduled_scan(
+    target_id: str,
+    store: EnterpriseStore | None = None,
+    actor: str = "system",
+) -> ScheduledScanRun:
+    store = store or EnterpriseStore()
+    target = store.get_scheduled_scan_target(target_id)
+    if not target.enabled:
+        run = ScheduledScanRun(
+            target_id=target.id,
+            target_name=target.name,
+            status="failed",
+            error="Scheduled scan target is disabled.",
+        )
+        return store.save_scheduled_scan_run(run, actor=actor)
+    try:
+        result = evaluate_enterprise(
+            path=target.path,
+            state_path=target.state_path,
+            provider=target.provider,
+            policy_set=target.policy_set,
+            baseline=target.baseline,
+            context=target.context,
+            fail_on=target.fail_on,
+            store=store,
+            actor=actor,
+            service_metadata={
+                "scheduled_scan_target_id": target.id,
+                "scheduled_scan_target_name": target.name,
+                "scheduled_scan_cadence": target.cadence,
+            },
+        )
+        run = ScheduledScanRun(
+            target_id=target.id,
+            target_name=target.name,
+            status="completed",
+            result_id=result.id,
+            decision=result.decision,
+            summary=result.report.get("summary", {}),
+        )
+    except Exception as exc:  # noqa: BLE001
+        run = ScheduledScanRun(
+            target_id=target.id,
+            target_name=target.name,
+            status="failed",
+            error=str(exc),
+        )
+    return store.save_scheduled_scan_run(run, actor=actor)
 
 
 def install_policy_pack(

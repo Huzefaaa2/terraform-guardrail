@@ -26,6 +26,7 @@ from terraform_guardrail.enterprise import (
     PolicyMetadata,
     PolicyWaiver,
     RiskProfile,
+    ScheduledScanTarget,
     check_drift,
     create_remediation_plan,
     evaluate_enterprise,
@@ -42,6 +43,7 @@ from terraform_guardrail.enterprise import (
     render_remediation_markdown,
     resolve_policy_set,
     run_drift_gate,
+    run_scheduled_scan,
 )
 from terraform_guardrail.generator import generate_snippet
 from terraform_guardrail.mcp.server import run_stdio
@@ -67,6 +69,7 @@ enterprise_pack_app = typer.Typer(help="Enterprise policy pack commands.")
 enterprise_risk_app = typer.Typer(help="Enterprise context risk profile commands.")
 enterprise_waiver_app = typer.Typer(help="Enterprise policy waiver commands.")
 enterprise_remediation_app = typer.Typer(help="Enterprise remediation plan commands.")
+enterprise_schedule_app = typer.Typer(help="Enterprise scheduled governance scan commands.")
 enterprise_aws_app = typer.Typer(help="AWS enterprise integration commands.")
 enterprise_aws_codepipeline_app = typer.Typer(help="AWS CodePipeline scaffold commands.")
 evidence_app = typer.Typer(help="Evidence export commands.")
@@ -81,6 +84,7 @@ enterprise_app.add_typer(enterprise_pack_app, name="pack")
 enterprise_app.add_typer(enterprise_risk_app, name="risk-profile")
 enterprise_app.add_typer(enterprise_waiver_app, name="waiver")
 enterprise_app.add_typer(enterprise_remediation_app, name="remediation")
+enterprise_app.add_typer(enterprise_schedule_app, name="schedule")
 enterprise_app.add_typer(enterprise_aws_app, name="aws")
 enterprise_aws_app.add_typer(enterprise_aws_codepipeline_app, name="codepipeline")
 console = Console()
@@ -1040,6 +1044,97 @@ def enterprise_health(
             console.print(f"- {item['rule_id']}: {item['count']}")
     for signal in report.risk_signals:
         console.print(f"- {signal}")
+
+
+@enterprise_schedule_app.command("create")
+def enterprise_schedule_create(
+    name: Annotated[str, typer.Option(help="Scheduled scan name")],
+    path: Annotated[Path, typer.Option(help="Terraform path to scan")],
+    cadence: Annotated[
+        str,
+        typer.Option(help="Cadence: hourly, daily, weekly, or monthly"),
+    ] = "daily",
+    provider: Annotated[str | None, typer.Option(help="Provider context")] = None,
+    baseline: Annotated[str | None, typer.Option(help="Baseline ID or name")] = None,
+    policy_set: Annotated[str | None, typer.Option(help="Policy set name")] = None,
+    fail_on: Annotated[
+        str | None,
+        typer.Option(help="Block if findings at/above severity: low, medium, high"),
+    ] = None,
+    context: Annotated[
+        list[str] | None,
+        typer.Option(help="Evaluation context as key=value, repeatable"),
+    ] = None,
+    disabled: Annotated[bool, typer.Option(help="Create target disabled")] = False,
+    format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
+) -> None:
+    if cadence not in {"hourly", "daily", "weekly", "monthly"}:
+        console.print("Cadence must be hourly, daily, weekly, or monthly.")
+        raise typer.Exit(code=2)
+    if fail_on and fail_on not in {"low", "medium", "high"}:
+        console.print("fail-on must be low, medium, or high.")
+        raise typer.Exit(code=2)
+    target = ScheduledScanTarget(
+        name=name,
+        path=str(path),
+        cadence=cadence,  # type: ignore[arg-type]
+        enabled=not disabled,
+        provider=provider,
+        baseline=baseline,
+        policy_set=policy_set,
+        fail_on=fail_on,  # type: ignore[arg-type]
+        context=_parse_key_values(context),
+    )
+    saved = EnterpriseStore().save_scheduled_scan_target(target)
+    _print_model(saved, format)
+
+
+@enterprise_schedule_app.command("list")
+def enterprise_schedule_list(
+    format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
+) -> None:
+    targets = EnterpriseStore().list_scheduled_scan_targets()
+    if format == "json":
+        console.print(
+            JSON(json.dumps([target.model_dump(mode="json") for target in targets], indent=2))
+        )
+        return
+    for target in targets:
+        console.print(
+            f"- {target.id} {target.name} cadence={target.cadence} "
+            f"enabled={target.enabled} path={target.path}"
+        )
+
+
+@enterprise_schedule_app.command("run")
+def enterprise_schedule_run(
+    target_id: Annotated[str, typer.Argument(help="Scheduled scan target ID")],
+    format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
+) -> None:
+    try:
+        run = run_scheduled_scan(target_id)
+    except KeyError as exc:
+        console.print(str(exc))
+        raise typer.Exit(code=1) from exc
+    _print_model(run, format)
+    if run.status == "failed":
+        raise typer.Exit(code=1)
+
+
+@enterprise_schedule_app.command("runs")
+def enterprise_schedule_runs(
+    target_id: Annotated[str | None, typer.Option(help="Filter by target ID")] = None,
+    format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
+) -> None:
+    runs = EnterpriseStore().list_scheduled_scan_runs(target_id=target_id)
+    if format == "json":
+        console.print(JSON(json.dumps([run.model_dump(mode="json") for run in runs], indent=2)))
+        return
+    for run in runs:
+        console.print(
+            f"- {run.id} target={run.target_id} status={run.status} "
+            f"decision={run.decision or 'none'}"
+        )
 
 
 @enterprise_waiver_app.command("create")

@@ -12,6 +12,7 @@ from terraform_guardrail.enterprise import (
     PolicyMetadata,
     PolicyWaiver,
     RiskProfile,
+    ScheduledScanTarget,
     check_drift,
     create_remediation_plan,
     ensure_policy_pack_installed,
@@ -32,6 +33,7 @@ from terraform_guardrail.enterprise import (
     resolve_policy_ids,
     resolve_policy_set,
     run_drift_gate,
+    run_scheduled_scan,
 )
 
 
@@ -277,6 +279,45 @@ resource "aws_s3_bucket" "logs" {
     assert health.totals["remediation_plans"] == 1
     assert health.decisions["warn"] == 1
     assert health.top_rules[0]["rule_id"] == "TG011"
+
+
+def test_scheduled_scan_target_runs_and_updates_health(tmp_path: Path) -> None:
+    infra = tmp_path / "main.tf"
+    infra.write_text(
+        """
+resource "aws_s3_bucket" "logs" {
+  bucket = "logs"
+}
+""",
+        encoding="utf-8",
+    )
+    store = EnterpriseStore(tmp_path / "store")
+    target = store.save_scheduled_scan_target(
+        ScheduledScanTarget(
+            name="daily-prod",
+            path=str(infra),
+            cadence="daily",
+            provider="aws",
+            context={"environment": "prod", "risk_tier": "high"},
+        ),
+        actor="platform",
+    )
+
+    run = run_scheduled_scan(target.id, store=store, actor="scheduler")
+    health = governance_health_report(store=store)
+
+    assert run.status == "completed"
+    assert run.result_id is not None
+    assert run.decision == "block"
+    assert store.get_evaluation(run.result_id).service_metadata["scheduled_scan_target_id"] == (
+        target.id
+    )
+    assert health.totals["scheduled_targets"] == 1
+    assert health.totals["scheduled_runs"] == 1
+    assert [event.action for event in store.audit_events()][-2:] == [
+        "evaluation.create",
+        "scheduled_scan.run",
+    ]
 
 
 def test_context_aware_evaluation_escalates_production_findings(tmp_path: Path) -> None:

@@ -219,6 +219,32 @@ resource "aws_s3_bucket" "logs" {
     assert health.json()["totals"]["evaluations"] == 1
     assert health.json()["totals"]["remediation_plans"] == 1
 
+    scheduled = client.post(
+        "/scheduled-scans",
+        json={
+            "name": "daily-prod",
+            "path": str(infra),
+            "cadence": "daily",
+            "provider": "aws",
+            "context": {"environment": "prod", "risk_tier": "high"},
+        },
+    )
+    assert scheduled.status_code == 200
+    target_id = scheduled.json()["id"]
+
+    targets = client.get("/scheduled-scans")
+    assert targets.status_code == 200
+    assert targets.json()["targets"][0]["id"] == target_id
+
+    run = client.post(f"/scheduled-scans/{target_id}/run")
+    assert run.status_code == 200
+    assert run.json()["status"] == "completed"
+    assert run.json()["result_id"]
+
+    runs = client.get(f"/scheduled-scans/{target_id}/runs")
+    assert runs.status_code == 200
+    assert runs.json()["runs"][0]["target_id"] == target_id
+
 
 def test_context_risk_profile_and_recommendation_api(monkeypatch, tmp_path: Path) -> None:
     monkeypatch.setenv("GUARDRAIL_ENTERPRISE_DATA_DIR", str(tmp_path / "store"))
@@ -312,6 +338,58 @@ resource "aws_s3_bucket" "logs" {
     assert health.exit_code == 0
     assert "Governance health" in health.output
     assert "TG011" in health.output
+
+
+def test_enterprise_cli_scheduled_scan(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("GUARDRAIL_ENTERPRISE_DATA_DIR", str(tmp_path / "store"))
+    infra = tmp_path / "main.tf"
+    infra.write_text(
+        """
+resource "aws_s3_bucket" "logs" {
+  bucket = "logs"
+}
+""",
+        encoding="utf-8",
+    )
+    runner = CliRunner()
+
+    created = runner.invoke(
+        app,
+        [
+            "enterprise",
+            "schedule",
+            "create",
+            "--name",
+            "daily-prod",
+            "--path",
+            str(infra),
+            "--cadence",
+            "daily",
+            "--provider",
+            "aws",
+            "--context",
+            "environment=prod",
+            "--context",
+            "risk_tier=high",
+            "--format",
+            "json",
+        ],
+    )
+    assert created.exit_code == 0
+    assert "daily-prod" in created.output
+    target = EnterpriseStore().list_scheduled_scan_targets()[0]
+
+    listed = runner.invoke(app, ["enterprise", "schedule", "list"])
+    assert listed.exit_code == 0
+    assert target.id in listed.output
+
+    run = runner.invoke(app, ["enterprise", "schedule", "run", target.id, "--format", "json"])
+    assert run.exit_code == 0
+    assert "completed" in run.output
+
+    runs = runner.invoke(app, ["enterprise", "schedule", "runs", "--target-id", target.id])
+    assert runs.exit_code == 0
+    assert target.id in runs.output
 
 
 def test_enterprise_api_waiver_lifecycle(monkeypatch, tmp_path: Path) -> None:

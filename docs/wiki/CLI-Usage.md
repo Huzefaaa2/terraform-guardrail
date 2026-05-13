@@ -90,6 +90,15 @@ terraform-guardrail enterprise remediation create <evaluation-result-id> \
   --format markdown \
   --output guardrail-remediation.md
 terraform-guardrail enterprise health
+terraform-guardrail enterprise schedule create \
+  --name daily-prod \
+  --path ./infra \
+  --cadence daily \
+  --provider aws \
+  --context environment=prod \
+  --context risk_tier=high
+terraform-guardrail enterprise schedule run <target-id>
+terraform-guardrail enterprise schedule runs --target-id <target-id>
 terraform-guardrail enterprise waiver create \
   --rule-id TG011 \
   --reason "Legacy module migration" \

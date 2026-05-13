@@ -56,9 +56,42 @@ After a scan, select **Create Remediation Plan** in the evaluation report to gen
 the stored result. The page displays reviewable actions, suggested fixes, confidence, and Terraform
 snippet previews when a common safe fix is available.
 
+## Scheduled Governance Scans
+
+v5 includes a scheduler-ready configuration layer for recurring governance scans. A target defines
+the Terraform path, cadence, provider, baseline, fail threshold, and context. The current foundation
+stores the schedule and supports manual execution; a later step can attach a background runner or
+external orchestrator.
+
+Create a target:
+
+```bash
+terraform-guardrail enterprise schedule create \
+  --name daily-prod \
+  --path ./infra \
+  --cadence daily \
+  --provider aws \
+  --context environment=prod \
+  --context risk_tier=high
+```
+
+Run it on demand:
+
+```bash
+terraform-guardrail enterprise schedule run <target-id>
+terraform-guardrail enterprise schedule runs --target-id <target-id>
+```
+
+API:
+
+- `POST /scheduled-scans`
+- `GET /scheduled-scans`
+- `GET /scheduled-scans/{target_id}`
+- `POST /scheduled-scans/{target_id}/run`
+- `GET /scheduled-scans/{target_id}/runs`
+
 ## Next v5 Steps
 
-- Scheduled scans across configured repositories or folders.
 - Remediation pull request automation.
 - Evidence scheduling by app, group, standard, or control.
 - Dashboard trend charts for waiver aging and evidence coverage.

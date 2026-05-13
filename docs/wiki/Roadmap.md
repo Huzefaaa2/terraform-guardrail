@@ -48,6 +48,7 @@ Legend: <span style="color: green">✅ Delivered</span> • <span style="color: 
 | --- | --- | --- |
 | Remediation plans + PR-ready fix guidance | <span style="color: green">✅ Delivered (v5.0 foundation)</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Autonomous-Governance) |
 | Governance health reporting | <span style="color: green">✅ Delivered (v5.0 foundation)</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Autonomous-Governance) |
-| Scheduled multi-repo governance scans | <span style="color: orange">🚧 Planned</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Autonomous-Governance) |
+| Scheduled governance scan configuration | <span style="color: green">✅ Delivered (v5.0 foundation)</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Autonomous-Governance) |
+| Scheduled multi-repo background runner | <span style="color: orange">🚧 Planned</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Autonomous-Governance) |
 | Remediation pull request automation | <span style="color: orange">🚧 Planned</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Autonomous-Governance) |
 | Evidence scheduling | <span style="color: orange">🚧 Planned</span> | [Docs](https://github.com/Huzefaaa2/terraform-guardrail/wiki/Autonomous-Governance) |
