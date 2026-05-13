@@ -90,8 +90,34 @@ API:
 - `POST /scheduled-scans/{target_id}/run`
 - `GET /scheduled-scans/{target_id}/runs`
 
+## Remediation Pull Request Scaffold
+
+The first PR automation step is provider-neutral. Terraform Guardrail generates branch/commit
+metadata, a pull request body, a manifest, and Terraform snippet files from a remediation plan. It
+does not open a pull request yet; teams can review the artifact directory or wire it into their own
+GitHub, GitLab, or Azure DevOps automation.
+
+```bash
+terraform-guardrail enterprise remediation patch-bundle <plan-id>
+terraform-guardrail enterprise remediation patch-bundles --plan-id <plan-id>
+```
+
+The bundle includes:
+
+- Branch name such as `guardrail/remediate/eval-...`.
+- Commit message.
+- `PULL_REQUEST.md`.
+- `manifest.json`.
+- Generated Terraform snippet files under `terraform-guardrail-remediation/`.
+
+API:
+
+- `POST /remediation/patch-bundles`
+- `GET /remediation/patch-bundles`
+- `GET /remediation/patch-bundles/{bundle_id}`
+
 ## Next v5 Steps
 
-- Remediation pull request automation.
+- GitHub pull request creation from patch bundles.
 - Evidence scheduling by app, group, standard, or control.
 - Dashboard trend charts for waiver aging and evidence coverage.

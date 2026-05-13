@@ -28,6 +28,7 @@ from terraform_guardrail.enterprise import (
     RiskProfile,
     ScheduledScanTarget,
     check_drift,
+    create_remediation_patch_bundle,
     create_remediation_plan,
     evaluate_enterprise,
     explain_evaluation,
@@ -1015,6 +1016,54 @@ def enterprise_remediation_show(
     console.print(f"Remediation plan: {plan.id}")
     for action in plan.actions:
         console.print(f"- {action.rule_id} {action.path or 'n/a'}: {action.suggested_fix}")
+
+
+@enterprise_remediation_app.command("patch-bundle")
+def enterprise_remediation_patch_bundle(
+    plan_id: Annotated[str, typer.Argument(help="Remediation plan ID")],
+    branch_prefix: Annotated[
+        str,
+        typer.Option(help="Branch prefix for provider-neutral PR metadata"),
+    ] = "guardrail/remediate",
+    actor: Annotated[str, typer.Option(help="Actor creating the bundle")] = "system",
+    format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
+) -> None:
+    try:
+        bundle = create_remediation_patch_bundle(
+            plan_id,
+            actor=actor,
+            branch_prefix=branch_prefix,
+        )
+    except KeyError as exc:
+        console.print(str(exc))
+        raise typer.Exit(code=1) from exc
+    if format == "json":
+        console.print(JSON(json.dumps(bundle.model_dump(mode="json"), indent=2)))
+        return
+    console.print(f"Patch bundle: {bundle.id}")
+    console.print(f"Branch: {bundle.branch_name}")
+    console.print(f"Commit: {bundle.commit_message}")
+    console.print(f"Artifact directory: {bundle.artifact_dir}")
+    for file in bundle.files:
+        console.print(f"- {file.path}")
+
+
+@enterprise_remediation_app.command("patch-bundles")
+def enterprise_remediation_patch_bundles(
+    plan_id: Annotated[str | None, typer.Option(help="Filter by remediation plan ID")] = None,
+    format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
+) -> None:
+    bundles = EnterpriseStore().list_patch_bundles(plan_id=plan_id)
+    if format == "json":
+        console.print(
+            JSON(json.dumps([bundle.model_dump(mode="json") for bundle in bundles], indent=2))
+        )
+        return
+    for bundle in bundles:
+        console.print(
+            f"- {bundle.id} plan={bundle.plan_id} branch={bundle.branch_name} "
+            f"files={len(bundle.files)}"
+        )
 
 
 @enterprise_app.command("health")

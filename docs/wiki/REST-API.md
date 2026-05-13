@@ -40,6 +40,9 @@ Terraform Guardrail Multi-Cloud Policy (MCP) (TerraGuard) exposes a REST API for
 | `GET /remediation/plans` | List remediation plans |
 | `GET /remediation/plans/{plan_id}` | Inspect a remediation plan |
 | `GET /remediation/plans/{plan_id}/markdown` | Render a remediation plan as Markdown |
+| `POST /remediation/patch-bundles` | Generate a PR-ready patch bundle scaffold |
+| `GET /remediation/patch-bundles` | List patch bundle scaffolds |
+| `GET /remediation/patch-bundles/{bundle_id}` | Inspect a patch bundle scaffold |
 | `GET /governance/health` | Summarize governance health and recurring risk |
 | `POST /scheduled-scans` | Create a scheduler-ready governance scan target |
 | `GET /scheduled-scans` | List scheduled scan targets |
@@ -92,4 +95,4 @@ adjustments, and suggested fixes.
 Delivered as part of the Dockerized Multi-Cloud Policy (MCP) + REST API milestone and extended
 in v3.0 development with policy pack and Guardrails-as-a-Service endpoints. v4.0 development adds
 context risk profiles and recommendation endpoints. v5.0 development adds remediation plans,
-governance health reporting, and scheduled scan target APIs.
+patch bundle scaffolds, governance health reporting, and scheduled scan target APIs.

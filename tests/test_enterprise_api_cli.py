@@ -214,6 +214,18 @@ resource "aws_s3_bucket" "logs" {
     assert markdown.status_code == 200
     assert "Terraform Guardrail Remediation Plan" in markdown.text
 
+    bundle = client.post(
+        "/remediation/patch-bundles",
+        json={"plan_id": plan["id"], "actor": "platform"},
+    )
+    assert bundle.status_code == 200
+    assert bundle.json()["branch_name"].startswith("guardrail/remediate/")
+    assert bundle.json()["files"]
+
+    bundles = client.get(f"/remediation/patch-bundles?plan_id={plan['id']}")
+    assert bundles.status_code == 200
+    assert bundles.json()["bundles"][0]["id"] == bundle.json()["id"]
+
     health = client.get("/governance/health")
     assert health.status_code == 200
     assert health.json()["totals"]["evaluations"] == 1
@@ -338,6 +350,19 @@ resource "aws_s3_bucket" "logs" {
     assert health.exit_code == 0
     assert "Governance health" in health.output
     assert "TG011" in health.output
+
+    plan = EnterpriseStore().list_remediation_plans()[0]
+    bundle = runner.invoke(
+        app,
+        ["enterprise", "remediation", "patch-bundle", plan.id],
+    )
+    assert bundle.exit_code == 0
+    assert "guardrail/remediate" in bundle.output
+    assert "terraform-guardrail-remediation" in bundle.output
+
+    bundles = runner.invoke(app, ["enterprise", "remediation", "patch-bundles"])
+    assert bundles.exit_code == 0
+    assert plan.id in bundles.output
 
 
 def test_enterprise_cli_scheduled_scan(monkeypatch, tmp_path: Path) -> None:

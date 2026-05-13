@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 - Governance health reports with decision counts, top rules, waiver summary, evidence summary, and risk signals.
 - REST API endpoints and CLI commands for remediation plans and governance health.
 - Scheduler-ready governance scan targets with manual run records through CLI and REST API.
+- Remediation patch bundle scaffolds with branch metadata, PR body, manifest, and Terraform snippets.
 
 ### Changed
 - Package/API versions updated to 5.0.0 for v5 development.

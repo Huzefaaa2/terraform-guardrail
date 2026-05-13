@@ -14,6 +14,7 @@ from terraform_guardrail.enterprise import (
     RiskProfile,
     ScheduledScanTarget,
     check_drift,
+    create_remediation_patch_bundle,
     create_remediation_plan,
     ensure_policy_pack_installed,
     evaluate_enterprise,
@@ -279,6 +280,34 @@ resource "aws_s3_bucket" "logs" {
     assert health.totals["remediation_plans"] == 1
     assert health.decisions["warn"] == 1
     assert health.top_rules[0]["rule_id"] == "TG011"
+
+
+def test_remediation_patch_bundle_creates_artifacts(tmp_path: Path) -> None:
+    infra = tmp_path / "main.tf"
+    infra.write_text(
+        """
+resource "aws_s3_bucket" "logs" {
+  bucket = "logs"
+}
+""",
+        encoding="utf-8",
+    )
+    store = EnterpriseStore(tmp_path / "store")
+    result = evaluate_enterprise(infra, store=store)
+    plan = create_remediation_plan(result.id, store=store, actor="platform")
+
+    bundle = create_remediation_patch_bundle(plan.id, store=store, actor="platform")
+
+    artifact_dir = Path(bundle.artifact_dir)
+    assert bundle.branch_name == f"guardrail/remediate/{result.id.replace('_', '-')}"
+    assert bundle.commit_message.startswith("Apply Terraform Guardrail remediation plan")
+    assert bundle.files[0].path.endswith("tg011.tf")
+    assert (artifact_dir / "PULL_REQUEST.md").exists()
+    assert (artifact_dir / "manifest.json").exists()
+    assert (artifact_dir / bundle.files[0].path).exists()
+    assert "aws_s3_bucket_server_side_encryption_configuration" in bundle.files[0].content
+    assert store.get_patch_bundle(bundle.id).id == bundle.id
+    assert store.audit_events()[-1].action == "remediation.patch_bundle.create"
 
 
 def test_scheduled_scan_target_runs_and_updates_health(tmp_path: Path) -> None:

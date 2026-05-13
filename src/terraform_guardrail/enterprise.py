@@ -254,6 +254,27 @@ class RemediationPlan(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
+class RemediationPatchFile(BaseModel):
+    path: str
+    content: str
+    action_id: str | None = None
+    rule_id: str | None = None
+
+
+class RemediationPatchBundle(BaseModel):
+    id: str = Field(default_factory=lambda: new_id("patch"))
+    plan_id: str
+    result_id: str
+    created_at: str = Field(default_factory=utc_now)
+    branch_name: str
+    commit_message: str
+    title: str
+    body: str
+    files: list[RemediationPatchFile] = Field(default_factory=list)
+    artifact_dir: str
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
 class GovernanceHealthReport(BaseModel):
     id: str = Field(default_factory=lambda: new_id("health"))
     created_at: str = Field(default_factory=utc_now)
@@ -394,6 +415,7 @@ class EnterpriseStore:
         self.root = Path(root) if root else enterprise_data_dir()
         self.root.mkdir(parents=True, exist_ok=True)
         (self.root / "evidence").mkdir(parents=True, exist_ok=True)
+        (self.root / "patches").mkdir(parents=True, exist_ok=True)
 
     def list_policies(self) -> list[EnterprisePolicy]:
         return [EnterprisePolicy.model_validate(item) for item in self._read_list("policies")]
@@ -789,6 +811,45 @@ class EnterpriseStore:
         if result_id:
             plans = [plan for plan in plans if plan.result_id == result_id]
         return plans
+
+    def save_patch_bundle(
+        self,
+        bundle: RemediationPatchBundle,
+        actor: str = "system",
+    ) -> RemediationPatchBundle:
+        bundles = [
+            RemediationPatchBundle.model_validate(item)
+            for item in self._read_list("patch_bundles")
+        ]
+        bundles.append(bundle)
+        self._write_models("patch_bundles", bundles)
+        self.add_audit(
+            actor,
+            "remediation.patch_bundle.create",
+            bundle.id,
+            {
+                "plan_id": bundle.plan_id,
+                "result_id": bundle.result_id,
+                "files": len(bundle.files),
+                "branch_name": bundle.branch_name,
+            },
+        )
+        return bundle
+
+    def get_patch_bundle(self, bundle_id: str) -> RemediationPatchBundle:
+        for bundle in self._read_list("patch_bundles"):
+            if bundle.get("id") == bundle_id:
+                return RemediationPatchBundle.model_validate(bundle)
+        raise KeyError(f"Patch bundle not found: {bundle_id}")
+
+    def list_patch_bundles(self, plan_id: str | None = None) -> list[RemediationPatchBundle]:
+        bundles = [
+            RemediationPatchBundle.model_validate(item)
+            for item in self._read_list("patch_bundles")
+        ]
+        if plan_id:
+            bundles = [bundle for bundle in bundles if bundle.plan_id == plan_id]
+        return bundles
 
     def list_scheduled_scan_targets(self) -> list[ScheduledScanTarget]:
         return [
@@ -1431,6 +1492,67 @@ def render_remediation_markdown(plan: RemediationPlan) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
+def create_remediation_patch_bundle(
+    plan_id: str,
+    store: EnterpriseStore | None = None,
+    actor: str = "system",
+    branch_prefix: str = "guardrail/remediate",
+) -> RemediationPatchBundle:
+    store = store or EnterpriseStore()
+    plan = store.get_remediation_plan(plan_id)
+    branch_name = _branch_name_for_plan(branch_prefix, plan)
+    commit_message = f"Apply Terraform Guardrail remediation plan {plan.id}"
+    title = f"Terraform Guardrail remediation for {plan.result_id}"
+    body = _patch_bundle_body(plan)
+    bundle_id = new_id("patch")
+    artifact_dir = store.root / "patches" / bundle_id
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    files: list[RemediationPatchFile] = []
+    (artifact_dir / "PULL_REQUEST.md").write_text(body, encoding="utf-8")
+    for index, action in enumerate(plan.actions, start=1):
+        if not action.patch_preview:
+            continue
+        path = f"terraform-guardrail-remediation/{index:02d}-{action.rule_id.lower()}.tf"
+        content = _patch_file_content(action)
+        target = artifact_dir / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(content, encoding="utf-8")
+        files.append(
+            RemediationPatchFile(
+                path=path,
+                content=content,
+                action_id=action.id,
+                rule_id=action.rule_id,
+            )
+        )
+    manifest = {
+        "id": bundle_id,
+        "plan_id": plan.id,
+        "result_id": plan.result_id,
+        "branch_name": branch_name,
+        "commit_message": commit_message,
+        "title": title,
+        "files": [file.model_dump(mode="json", exclude={"content"}) for file in files],
+    }
+    (artifact_dir / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    bundle = RemediationPatchBundle(
+        id=bundle_id,
+        plan_id=plan.id,
+        result_id=plan.result_id,
+        branch_name=branch_name,
+        commit_message=commit_message,
+        title=title,
+        body=body,
+        files=files,
+        artifact_dir=str(artifact_dir),
+        metadata={
+            "source": "v5-remediation-pr-scaffold",
+            "manual_review_required": True,
+        },
+    )
+    return store.save_patch_bundle(bundle, actor=actor)
+
+
 def governance_health_report(
     store: EnterpriseStore | None = None,
     window: str = "all",
@@ -1962,6 +2084,62 @@ def _remediation_patch_preview(rule_id: str, finding: dict[str, Any]) -> str:
     if preview and path:
         return f"# Review target: {path}\n{preview}"
     return preview
+
+
+def _branch_name_for_plan(prefix: str, plan: RemediationPlan) -> str:
+    suffix = plan.result_id.replace("_", "-").lower()
+    safe_prefix = prefix.strip("/").replace(" ", "-").lower() or "guardrail/remediate"
+    return f"{safe_prefix}/{suffix}"
+
+
+def _patch_bundle_body(plan: RemediationPlan) -> str:
+    lines = [
+        "## Terraform Guardrail Remediation",
+        "",
+        f"Result: `{plan.result_id}`",
+        f"Plan: `{plan.id}`",
+        f"Decision: `{plan.decision}`",
+        "",
+        "### Actions",
+        "",
+    ]
+    if not plan.actions:
+        lines.append("No remediation actions were generated.")
+    for action in plan.actions:
+        lines.extend(
+            [
+                f"- `{action.rule_id}` `{action.severity}` at `{action.path or 'n/a'}`",
+                f"  - {action.suggested_fix}",
+                f"  - Confidence: `{action.confidence}`",
+            ]
+        )
+    if plan.skipped:
+        lines.extend(["", "### Skipped", ""])
+        for item in plan.skipped:
+            lines.append(
+                f"- `{item.get('rule_id')}` at `{item.get('path') or 'n/a'}`: "
+                f"{item.get('reason')}"
+            )
+    lines.extend(
+        [
+            "",
+            "### Review Notes",
+            "",
+            "- Generated Terraform snippets are starting points and require platform review.",
+            "- Apply snippets to the correct Terraform module before opening a final pull request.",
+        ]
+    )
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _patch_file_content(action: RemediationAction) -> str:
+    return (
+        f"# Generated by Terraform Guardrail remediation plan.\n"
+        f"# Rule: {action.rule_id}\n"
+        f"# Source finding: {action.path or 'n/a'}\n"
+        f"# Review before applying to a Terraform module.\n\n"
+        f"{action.patch_preview.rstrip()}\n"
+    )
 
 
 def _remediation_confidence(

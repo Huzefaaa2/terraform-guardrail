@@ -19,6 +19,7 @@ from terraform_guardrail.enterprise import (
     RiskProfile,
     ScheduledScanTarget,
     check_drift,
+    create_remediation_patch_bundle,
     create_remediation_plan,
     ensure_policy_pack_installed,
     evaluate_enterprise,
@@ -179,6 +180,12 @@ class PolicyPackInstallRequest(BaseModel):
 class RemediationPlanRequest(BaseModel):
     result_id: str
     actor: str = "system"
+
+
+class PatchBundleRequest(BaseModel):
+    plan_id: str
+    actor: str = "system"
+    branch_prefix: str = "guardrail/remediate"
 
 
 def create_app() -> FastAPI:
@@ -559,6 +566,30 @@ def create_app() -> FastAPI:
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
         return render_remediation_markdown(plan)
+
+    @app.post("/remediation/patch-bundles")
+    def create_patch_bundle(request: PatchBundleRequest) -> dict[str, Any]:
+        try:
+            bundle = create_remediation_patch_bundle(
+                request.plan_id,
+                actor=request.actor,
+                branch_prefix=request.branch_prefix,
+            )
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        return bundle.model_dump(mode="json")
+
+    @app.get("/remediation/patch-bundles")
+    def patch_bundles(plan_id: str | None = None) -> dict[str, Any]:
+        bundles = EnterpriseStore().list_patch_bundles(plan_id=plan_id)
+        return {"bundles": [bundle.model_dump(mode="json") for bundle in bundles]}
+
+    @app.get("/remediation/patch-bundles/{bundle_id}")
+    def patch_bundle(bundle_id: str) -> dict[str, Any]:
+        try:
+            return EnterpriseStore().get_patch_bundle(bundle_id).model_dump(mode="json")
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     @app.get("/governance/health")
     def governance_health(window: str = "all") -> dict[str, Any]:
