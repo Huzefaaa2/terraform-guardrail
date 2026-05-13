@@ -36,6 +36,11 @@ Terraform Guardrail Multi-Cloud Policy (MCP) (TerraGuard) exposes a REST API for
 | `GET /waivers` | List waiver requests and approvals |
 | `POST /waivers/{waiver_id}/approve` | Approve a waiver |
 | `POST /waivers/{waiver_id}/revoke` | Revoke a waiver |
+| `POST /remediation/plans` | Create a v5 remediation plan from an evaluation |
+| `GET /remediation/plans` | List remediation plans |
+| `GET /remediation/plans/{plan_id}` | Inspect a remediation plan |
+| `GET /remediation/plans/{plan_id}/markdown` | Render a remediation plan as Markdown |
+| `GET /governance/health` | Summarize governance health and recurring risk |
 
 ## Policy Pack Install Example
 
@@ -81,4 +86,5 @@ adjustments, and suggested fixes.
 
 Delivered as part of the Dockerized Multi-Cloud Policy (MCP) + REST API milestone and extended
 in v3.0 development with policy pack and Guardrails-as-a-Service endpoints. v4.0 development adds
-context risk profiles and recommendation endpoints.
+context risk profiles and recommendation endpoints. v5.0 development adds remediation plans and
+governance health reporting.

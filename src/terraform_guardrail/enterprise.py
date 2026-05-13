@@ -229,6 +229,43 @@ class ExplainabilityReport(BaseModel):
     next_actions: list[str] = Field(default_factory=list)
 
 
+class RemediationAction(BaseModel):
+    id: str = Field(default_factory=lambda: new_id("fix"))
+    rule_id: str
+    severity: Literal["low", "medium", "high"]
+    path: str | None = None
+    message: str = ""
+    suggested_fix: str
+    patch_type: Literal["manual", "terraform_snippet"] = "manual"
+    patch_preview: str = ""
+    confidence: Literal["low", "medium", "high"] = "medium"
+    requires_review: bool = True
+    waiver_id: str | None = None
+
+
+class RemediationPlan(BaseModel):
+    id: str = Field(default_factory=lambda: new_id("remed"))
+    result_id: str
+    created_at: str = Field(default_factory=utc_now)
+    decision: Literal["pass", "warn", "block"]
+    summary: dict[str, Any] = Field(default_factory=dict)
+    actions: list[RemediationAction] = Field(default_factory=list)
+    skipped: list[dict[str, Any]] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class GovernanceHealthReport(BaseModel):
+    id: str = Field(default_factory=lambda: new_id("health"))
+    created_at: str = Field(default_factory=utc_now)
+    window: str = "all"
+    totals: dict[str, Any] = Field(default_factory=dict)
+    decisions: dict[str, int] = Field(default_factory=dict)
+    top_rules: list[dict[str, Any]] = Field(default_factory=list)
+    waiver_summary: dict[str, Any] = Field(default_factory=dict)
+    evidence_summary: dict[str, Any] = Field(default_factory=dict)
+    risk_signals: list[str] = Field(default_factory=list)
+
+
 class EvidenceExport(BaseModel):
     id: str = Field(default_factory=lambda: new_id("evid"))
     result_id: str
@@ -684,6 +721,46 @@ class EnterpriseStore:
             if result.get("id") == result_id:
                 return EvaluationResult.model_validate(result)
         raise KeyError(f"Evaluation not found: {result_id}")
+
+    def list_evaluations(self) -> list[EvaluationResult]:
+        return [
+            EvaluationResult.model_validate(item)
+            for item in self._read_list("evaluations")
+        ]
+
+    def save_remediation_plan(
+        self,
+        plan: RemediationPlan,
+        actor: str = "system",
+    ) -> RemediationPlan:
+        plans = [
+            RemediationPlan.model_validate(item)
+            for item in self._read_list("remediation_plans")
+        ]
+        plans.append(plan)
+        self._write_models("remediation_plans", plans)
+        self.add_audit(
+            actor,
+            "remediation.plan.create",
+            plan.id,
+            {"result_id": plan.result_id, "actions": len(plan.actions)},
+        )
+        return plan
+
+    def get_remediation_plan(self, plan_id: str) -> RemediationPlan:
+        for plan in self._read_list("remediation_plans"):
+            if plan.get("id") == plan_id:
+                return RemediationPlan.model_validate(plan)
+        raise KeyError(f"Remediation plan not found: {plan_id}")
+
+    def list_remediation_plans(self, result_id: str | None = None) -> list[RemediationPlan]:
+        plans = [
+            RemediationPlan.model_validate(item)
+            for item in self._read_list("remediation_plans")
+        ]
+        if result_id:
+            plans = [plan for plan in plans if plan.result_id == result_id]
+        return plans
 
     def save_export(self, export: EvidenceExport, actor: str = "system") -> EvidenceExport:
         exports = [EvidenceExport.model_validate(item) for item in self._read_list("exports")]
@@ -1157,6 +1234,168 @@ def render_evaluation_report(
     raise ValueError("Report format must be sarif or junit.")
 
 
+def create_remediation_plan(
+    result_id: str,
+    store: EnterpriseStore | None = None,
+    actor: str = "system",
+) -> RemediationPlan:
+    store = store or EnterpriseStore()
+    result = store.get_evaluation(result_id)
+    actions: list[RemediationAction] = []
+    skipped: list[dict[str, Any]] = []
+    seen: set[tuple[str, str | None]] = set()
+    for finding in result.report.get("findings", []):
+        rule_id = str(finding.get("rule_id") or "TG000")
+        path = finding.get("path")
+        key = (rule_id, path if isinstance(path, str) else None)
+        if key in seen:
+            continue
+        seen.add(key)
+        if _finding_is_waived(finding):
+            skipped.append(
+                {
+                    "rule_id": rule_id,
+                    "path": path,
+                    "reason": "approved waiver is active",
+                    "waiver_id": finding.get("waiver_id"),
+                }
+            )
+            continue
+        suggested_fix = str(
+            finding.get("suggested_fix")
+            or finding.get("remediation")
+            or _suggested_fix_for_rule(rule_id, "Review and remediate this finding.")
+        )
+        patch_preview = _remediation_patch_preview(rule_id, finding)
+        actions.append(
+            RemediationAction(
+                rule_id=rule_id,
+                severity=(
+                    finding.get("severity")
+                    if finding.get("severity") in SEVERITY_ORDER
+                    else "low"
+                ),
+                path=path if isinstance(path, str) else None,
+                message=str(finding.get("message") or ""),
+                suggested_fix=suggested_fix,
+                patch_type="terraform_snippet" if patch_preview else "manual",
+                patch_preview=patch_preview,
+                confidence=_remediation_confidence(rule_id, patch_preview),
+            )
+        )
+    plan = RemediationPlan(
+        result_id=result.id,
+        decision=result.decision,
+        summary=result.report.get("summary", {}),
+        actions=actions,
+        skipped=skipped,
+        metadata={
+            "source": "v5-autonomous-governance",
+            "scanned_path": result.report.get("scanned_path"),
+            "context": result.context.model_dump(mode="json"),
+        },
+    )
+    return store.save_remediation_plan(plan, actor=actor)
+
+
+def render_remediation_markdown(plan: RemediationPlan) -> str:
+    lines = [
+        "## Terraform Guardrail Remediation Plan",
+        "",
+        f"**Plan ID:** `{plan.id}`",
+        f"**Result ID:** `{plan.result_id}`",
+        f"**Decision:** `{plan.decision.upper()}`",
+        "",
+        "### Summary",
+        "",
+        "| Actions | Skipped | High | Medium | Low |",
+        "| ---: | ---: | ---: | ---: | ---: |",
+        (
+            f"| {len(plan.actions)} | {len(plan.skipped)} | "
+            f"{plan.summary.get('high', 0)} | {plan.summary.get('medium', 0)} | "
+            f"{plan.summary.get('low', 0)} |"
+        ),
+        "",
+    ]
+    if plan.actions:
+        lines.extend(["### Actions", ""])
+        for action in plan.actions:
+            lines.extend(
+                [
+                    f"#### {action.rule_id} - {action.severity}",
+                    "",
+                    f"- Path: `{action.path or 'n/a'}`",
+                    f"- Fix: {action.suggested_fix}",
+                    f"- Confidence: `{action.confidence}`",
+                ]
+            )
+            if action.patch_preview:
+                lines.extend(["", "```hcl", action.patch_preview.rstrip(), "```"])
+            lines.append("")
+    if plan.skipped:
+        lines.extend(["### Skipped", ""])
+        for item in plan.skipped:
+            lines.append(
+                f"- `{item.get('rule_id')}` at `{item.get('path') or 'n/a'}`: "
+                f"{item.get('reason')}"
+            )
+        lines.append("")
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def governance_health_report(
+    store: EnterpriseStore | None = None,
+    window: str = "all",
+) -> GovernanceHealthReport:
+    store = store or EnterpriseStore()
+    evaluations = store.list_evaluations()
+    decisions = {"pass": 0, "warn": 0, "block": 0}
+    rule_counts: dict[str, dict[str, Any]] = {}
+    total_findings = 0
+    for evaluation in evaluations:
+        decisions[evaluation.decision] += 1
+        for finding in evaluation.report.get("findings", []):
+            rule_id = str(finding.get("rule_id") or "TG000")
+            total_findings += 1
+            bucket = rule_counts.setdefault(
+                rule_id,
+                {"rule_id": rule_id, "count": 0, "high": 0, "medium": 0, "low": 0},
+            )
+            bucket["count"] += 1
+            severity = finding.get("severity")
+            if severity in {"high", "medium", "low"}:
+                bucket[severity] += 1
+    waivers = store.list_waivers()
+    exports = [EvidenceExport.model_validate(item) for item in store._read_list("exports")]
+    active_waivers = [
+        waiver for waiver in waivers if waiver.status == "approved" and _waiver_is_active(waiver)
+    ]
+    risk_signals = _governance_risk_signals(decisions, total_findings, active_waivers, exports)
+    return GovernanceHealthReport(
+        window=window,
+        totals={
+            "evaluations": len(evaluations),
+            "findings": total_findings,
+            "policies": len(store.list_policies()),
+            "baselines": len(store.list_baselines()),
+            "remediation_plans": len(store.list_remediation_plans()),
+        },
+        decisions=decisions,
+        top_rules=sorted(rule_counts.values(), key=lambda item: item["count"], reverse=True)[:10],
+        waiver_summary={
+            "total": len(waivers),
+            "active": len(active_waivers),
+            "requested": sum(1 for waiver in waivers if waiver.status == "requested"),
+            "revoked": sum(1 for waiver in waivers if waiver.status == "revoked"),
+        },
+        evidence_summary={
+            "exports": len(exports),
+            "formats": _count_by([export.format for export in exports]),
+        },
+        risk_signals=risk_signals,
+    )
+
+
 def install_policy_pack(
     pack_id: str,
     store: EnterpriseStore | None = None,
@@ -1525,6 +1764,100 @@ def _suggested_fix_for_rule(rule_id: str, remediation: str) -> str:
         "TG023": "Add consistent ownership tags or labels to every managed resource.",
     }
     return examples.get(rule_id, remediation)
+
+
+def _remediation_patch_preview(rule_id: str, finding: dict[str, Any]) -> str:
+    path = str(finding.get("path") or "")
+    examples = {
+        "TG001": (
+            'variable "example_secret" {\n'
+            "  type      = string\n"
+            "  sensitive = true\n"
+            "  ephemeral = true\n"
+            "}"
+        ),
+        "TG006": (
+            'resource "aws_s3_bucket_acl" "example" {\n'
+            "  bucket = aws_s3_bucket.example.id\n"
+            '  acl    = "private"\n'
+            "}"
+        ),
+        "TG007": (
+            'resource "aws_s3_bucket_public_access_block" "example" {\n'
+            "  bucket                  = aws_s3_bucket.example.id\n"
+            "  block_public_acls       = true\n"
+            "  block_public_policy     = true\n"
+            "  ignore_public_acls      = true\n"
+            "  restrict_public_buckets = true\n"
+            "}"
+        ),
+        "TG011": (
+            'resource "aws_s3_bucket_server_side_encryption_configuration" "example" {\n'
+            "  bucket = aws_s3_bucket.example.id\n\n"
+            "  rule {\n"
+            "    apply_server_side_encryption_by_default {\n"
+            '      sse_algorithm = "AES256"\n'
+            "    }\n"
+            "  }\n"
+            "}"
+        ),
+        "TG012": 'resource "aws_db_instance" "example" {\n  storage_encrypted = true\n}',
+        "TG015": 'resource "aws_db_instance" "example" {\n  publicly_accessible = false\n}',
+        "TG016": (
+            "tags = {\n"
+            '  Owner       = "platform-team"\n'
+            '  Environment = "prod"\n'
+            '  CostCenter  = "shared"\n'
+            "}"
+        ),
+        "TG020": 'resource "aws_ebs_volume" "example" {\n  encrypted = true\n}',
+        "TG023": (
+            "labels = {\n"
+            '  owner       = "platform-team"\n'
+            '  environment = "prod"\n'
+            "}"
+        ),
+    }
+    preview = examples.get(rule_id, "")
+    if preview and path:
+        return f"# Review target: {path}\n{preview}"
+    return preview
+
+
+def _remediation_confidence(
+    rule_id: str,
+    patch_preview: str,
+) -> Literal["low", "medium", "high"]:
+    if not patch_preview:
+        return "low"
+    if rule_id in {"TG007", "TG011", "TG012", "TG015", "TG016", "TG020", "TG023"}:
+        return "high"
+    return "medium"
+
+
+def _count_by(values: list[str]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for value in values:
+        counts[value] = counts.get(value, 0) + 1
+    return counts
+
+
+def _governance_risk_signals(
+    decisions: dict[str, int],
+    total_findings: int,
+    active_waivers: list[PolicyWaiver],
+    exports: list[EvidenceExport],
+) -> list[str]:
+    signals = []
+    if decisions.get("block", 0):
+        signals.append(f"{decisions['block']} blocked evaluations need remediation.")
+    if active_waivers:
+        signals.append(f"{len(active_waivers)} approved waivers are currently active.")
+    if total_findings and not exports:
+        signals.append("Findings exist without exported evidence records.")
+    if not signals:
+        signals.append("No immediate governance health risks detected.")
+    return signals
 
 
 def _metadata_severity(rule_id: str) -> Literal["low", "medium", "high"] | None:

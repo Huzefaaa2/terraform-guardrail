@@ -86,6 +86,10 @@ terraform-guardrail enterprise report <evaluation-result-id> \
 terraform-guardrail enterprise report <evaluation-result-id> \
   --format junit \
   --output guardrail-report.junit.xml
+terraform-guardrail enterprise remediation create <evaluation-result-id> \
+  --format markdown \
+  --output guardrail-remediation.md
+terraform-guardrail enterprise health
 terraform-guardrail enterprise waiver create \
   --rule-id TG011 \
   --reason "Legacy module migration" \

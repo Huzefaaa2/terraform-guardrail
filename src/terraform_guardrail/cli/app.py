@@ -27,16 +27,19 @@ from terraform_guardrail.enterprise import (
     PolicyWaiver,
     RiskProfile,
     check_drift,
+    create_remediation_plan,
     evaluate_enterprise,
     explain_evaluation,
     export_evidence,
     get_builtin_policy_pack,
     get_rule_recommendation,
+    governance_health_report,
     install_policy_pack,
     list_builtin_policy_packs,
     list_rule_recommendations,
     render_evaluation_report,
     render_explanation_markdown,
+    render_remediation_markdown,
     resolve_policy_set,
     run_drift_gate,
 )
@@ -63,6 +66,7 @@ enterprise_binding_app = typer.Typer(help="Enterprise group/repo binding command
 enterprise_pack_app = typer.Typer(help="Enterprise policy pack commands.")
 enterprise_risk_app = typer.Typer(help="Enterprise context risk profile commands.")
 enterprise_waiver_app = typer.Typer(help="Enterprise policy waiver commands.")
+enterprise_remediation_app = typer.Typer(help="Enterprise remediation plan commands.")
 enterprise_aws_app = typer.Typer(help="AWS enterprise integration commands.")
 enterprise_aws_codepipeline_app = typer.Typer(help="AWS CodePipeline scaffold commands.")
 evidence_app = typer.Typer(help="Evidence export commands.")
@@ -76,6 +80,7 @@ enterprise_app.add_typer(enterprise_binding_app, name="binding")
 enterprise_app.add_typer(enterprise_pack_app, name="pack")
 enterprise_app.add_typer(enterprise_risk_app, name="risk-profile")
 enterprise_app.add_typer(enterprise_waiver_app, name="waiver")
+enterprise_app.add_typer(enterprise_remediation_app, name="remediation")
 enterprise_app.add_typer(enterprise_aws_app, name="aws")
 enterprise_aws_app.add_typer(enterprise_aws_codepipeline_app, name="codepipeline")
 console = Console()
@@ -927,6 +932,114 @@ def enterprise_report(
         console.print(JSON(content))
     else:
         console.print(content)
+
+
+@enterprise_remediation_app.command("create")
+def enterprise_remediation_create(
+    result_id: Annotated[str, typer.Argument(help="Stored evaluation result ID")],
+    actor: Annotated[str, typer.Option(help="Actor creating the plan")] = "system",
+    format: Annotated[str, typer.Option(help="pretty, json, or markdown")] = "pretty",
+    output: Annotated[
+        Path | None,
+        typer.Option(help="Write markdown output to a file"),
+    ] = None,
+) -> None:
+    try:
+        plan = create_remediation_plan(result_id, actor=actor)
+    except KeyError as exc:
+        console.print(str(exc))
+        raise typer.Exit(code=1) from exc
+    if format == "json":
+        console.print(JSON(json.dumps(plan.model_dump(mode="json"), indent=2)))
+        return
+    if format == "markdown":
+        content = render_remediation_markdown(plan)
+        if output:
+            output.write_text(content, encoding="utf-8")
+            console.print(str(output))
+            return
+        console.print(content.rstrip())
+        return
+    console.print(f"Remediation plan: {plan.id}")
+    console.print(f"Result: {plan.result_id}")
+    console.print(f"Actions: {len(plan.actions)} Skipped: {len(plan.skipped)}")
+    for action in plan.actions:
+        console.print(f"- {action.rule_id} [{action.severity}] {action.suggested_fix}")
+
+
+@enterprise_remediation_app.command("list")
+def enterprise_remediation_list(
+    result_id: Annotated[str | None, typer.Option(help="Filter by evaluation result ID")] = None,
+    format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
+) -> None:
+    plans = EnterpriseStore().list_remediation_plans(result_id=result_id)
+    if format == "json":
+        console.print(JSON(json.dumps([plan.model_dump(mode="json") for plan in plans], indent=2)))
+        return
+    for plan in plans:
+        console.print(
+            f"- {plan.id} result={plan.result_id} actions={len(plan.actions)} "
+            f"skipped={len(plan.skipped)}"
+        )
+
+
+@enterprise_remediation_app.command("show")
+def enterprise_remediation_show(
+    plan_id: Annotated[str, typer.Argument(help="Remediation plan ID")],
+    format: Annotated[str, typer.Option(help="pretty, json, or markdown")] = "pretty",
+    output: Annotated[
+        Path | None,
+        typer.Option(help="Write markdown output to a file"),
+    ] = None,
+) -> None:
+    try:
+        plan = EnterpriseStore().get_remediation_plan(plan_id)
+    except KeyError as exc:
+        console.print(str(exc))
+        raise typer.Exit(code=1) from exc
+    if format == "json":
+        console.print(JSON(json.dumps(plan.model_dump(mode="json"), indent=2)))
+        return
+    if format == "markdown":
+        content = render_remediation_markdown(plan)
+        if output:
+            output.write_text(content, encoding="utf-8")
+            console.print(str(output))
+            return
+        console.print(content.rstrip())
+        return
+    console.print(f"Remediation plan: {plan.id}")
+    for action in plan.actions:
+        console.print(f"- {action.rule_id} {action.path or 'n/a'}: {action.suggested_fix}")
+
+
+@enterprise_app.command("health")
+def enterprise_health(
+    window: Annotated[str, typer.Option(help="Reporting window label")] = "all",
+    format: Annotated[str, typer.Option(help="pretty or json")] = "pretty",
+) -> None:
+    report = governance_health_report(window=window)
+    if format == "json":
+        console.print(JSON(json.dumps(report.model_dump(mode="json"), indent=2)))
+        return
+    console.print(f"Governance health: {report.id}")
+    console.print(
+        f"Evaluations: {report.totals.get('evaluations', 0)} "
+        f"Findings: {report.totals.get('findings', 0)} "
+        f"Policies: {report.totals.get('policies', 0)}"
+    )
+    console.print(
+        "Decisions: "
+        f"pass={report.decisions.get('pass', 0)} "
+        f"warn={report.decisions.get('warn', 0)} "
+        f"block={report.decisions.get('block', 0)}"
+    )
+    if report.top_rules:
+        console.print("Top rules:")
+        for item in report.top_rules:
+            console.print(f"- {item['rule_id']}: {item['count']}")
+    for signal in report.risk_signals:
+        console.print(f"- {signal}")
 
 
 @enterprise_waiver_app.command("create")

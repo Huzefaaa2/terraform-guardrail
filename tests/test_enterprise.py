@@ -13,12 +13,14 @@ from terraform_guardrail.enterprise import (
     PolicyWaiver,
     RiskProfile,
     check_drift,
+    create_remediation_plan,
     ensure_policy_pack_installed,
     evaluate_enterprise,
     explain_evaluation,
     export_evidence,
     get_builtin_policy_pack,
     get_rule_recommendation,
+    governance_health_report,
     install_policy_pack,
     list_builtin_policy_packs,
     list_rule_recommendations,
@@ -26,6 +28,7 @@ from terraform_guardrail.enterprise import (
     render_evaluation_junit,
     render_evaluation_sarif,
     render_explanation_markdown,
+    render_remediation_markdown,
     resolve_policy_ids,
     resolve_policy_set,
     run_drift_gate,
@@ -244,6 +247,36 @@ resource "aws_s3_bucket" "logs" {
     assert finding["suggested_fix"] == (
         "Add an `aws_s3_bucket_server_side_encryption_configuration` resource."
     )
+
+
+def test_remediation_plan_generates_actions_and_health_report(tmp_path: Path) -> None:
+    infra = tmp_path / "main.tf"
+    infra.write_text(
+        """
+resource "aws_s3_bucket" "logs" {
+  bucket = "logs"
+}
+""",
+        encoding="utf-8",
+    )
+    store = EnterpriseStore(tmp_path / "store")
+    result = evaluate_enterprise(infra, store=store)
+
+    plan = create_remediation_plan(result.id, store=store, actor="platform")
+    markdown = render_remediation_markdown(plan)
+    health = governance_health_report(store=store)
+
+    assert plan.result_id == result.id
+    assert plan.actions[0].rule_id == "TG011"
+    assert plan.actions[0].patch_type == "terraform_snippet"
+    assert "aws_s3_bucket_server_side_encryption_configuration" in plan.actions[0].patch_preview
+    assert "Terraform Guardrail Remediation Plan" in markdown
+    assert store.get_remediation_plan(plan.id).id == plan.id
+    assert store.audit_events()[-1].action == "remediation.plan.create"
+    assert health.totals["evaluations"] == 1
+    assert health.totals["remediation_plans"] == 1
+    assert health.decisions["warn"] == 1
+    assert health.top_rules[0]["rule_id"] == "TG011"
 
 
 def test_context_aware_evaluation_escalates_production_findings(tmp_path: Path) -> None:

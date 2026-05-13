@@ -2,10 +2,9 @@
 
 [![CI](https://github.com/Huzefaaa2/terraform-guardrail/actions/workflows/ci.yml/badge.svg)](https://github.com/Huzefaaa2/terraform-guardrail/actions/workflows/ci.yml)
 
-**v4.0 Intelligent is live.** Terraform Guardrail now pairs enterprise governance with context-aware
-decisions, suggested fixes, explainability reports, SARIF/JUnit CI artifacts, and approved policy
-waivers. It helps platform teams enforce standards while giving developers the reason, remediation,
-and exception path behind every decision.
+**v5.0 Autonomous Governance is in development.** Terraform Guardrail now starts moving from
+explaining governance decisions to operating the governance loop: remediation plans, PR-ready fix
+guidance, and governance health signals built from evaluations, evidence, and waivers.
 
 Terraform Guardrail Multi-Cloud Policy (MCP) (TerraGuard) runs outside Terraform and turns platform
 standards into executable CI/CD guardrails. It gives platform teams policy lifecycle management,
@@ -27,6 +26,7 @@ GitHub, GitLab, Azure DevOps, and AWS CodePipeline.
 - Enterprise wiki: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Release-v2.0.0
 - v3 Ecosystem release: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Release-v3.0.0
 - v4 Intelligent release: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Release-v4.0.0
+- v5 Autonomous Governance: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Autonomous-Governance
 - Contributing: https://github.com/Huzefaaa2/terraform-guardrail/blob/main/CONTRIBUTING.md
 - v1 Foundation live app: https://terraform-guardrail.streamlit.app/
 - v2 Enterprise live app: https://terraform-guardrail-enterprise.streamlit.app/

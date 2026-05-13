@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.0.0] - 2026-05-14
+
+### Added
+- v5 Autonomous Governance foundation with remediation plans generated from stored evaluations.
+- Markdown remediation output for pull requests, work items, and audit notes.
+- Governance health reports with decision counts, top rules, waiver summary, evidence summary, and risk signals.
+- REST API endpoints and CLI commands for remediation plans and governance health.
+
+### Changed
+- Package/API versions updated to 5.0.0 for v5 development.
+
 ## [4.0.0] - 2026-05-13
 
 ### Added

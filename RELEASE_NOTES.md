@@ -1,3 +1,20 @@
+# v5.0.0
+
+## Highlights
+- v5.0 Autonomous Governance foundation with remediation plans and governance health reporting.
+- Remediation plans turn evaluation findings into reviewable actions with suggested fixes and Terraform snippet previews for common safe fixes.
+- Governance health summarizes stored evaluations, decisions, recurring rules, waivers, evidence exports, and risk signals.
+
+## Added
+- `terraform-guardrail enterprise remediation create/list/show` commands.
+- `terraform-guardrail enterprise health` command.
+- API endpoints for remediation plans and governance health.
+
+## Changed
+- Version updated to 5.0.0 for the Autonomous Governance development track.
+
+---
+
 # v4.0.0
 
 ## Highlights

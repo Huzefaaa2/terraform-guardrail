@@ -2,6 +2,7 @@
 
 | Version | Date (UTC) | Highlights |
 | --- | --- | --- |
+| 5.0.0 | 2026-05-14 | Autonomous Governance foundation: remediation plans, governance health, risk signals |
 | 4.0.0 | 2026-05-13 | Intelligent release: context-aware evaluation, suggested fixes, explainability, SARIF/JUnit, waivers |
 | 3.0.0 | 2026-05-11 | Ecosystem release: policy packs, service API, invariants, reference implementations, governance |
 | 2.0.0 | 2026-05-07 | Enterprise foundation: policy lifecycle, baselines, drift gates, evidence export |

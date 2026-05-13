@@ -201,6 +201,24 @@ resource "aws_s3_bucket" "logs" {
     assert junit.headers["content-type"].startswith("application/xml")
     assert "<testsuite" in junit.text
 
+    remediation = client.post(
+        "/remediation/plans",
+        json={"result_id": payload["result_id"], "actor": "platform"},
+    )
+    assert remediation.status_code == 200
+    plan = remediation.json()
+    assert plan["actions"]
+    assert plan["actions"][0]["patch_type"] == "terraform_snippet"
+
+    markdown = client.get(f"/remediation/plans/{plan['id']}/markdown")
+    assert markdown.status_code == 200
+    assert "Terraform Guardrail Remediation Plan" in markdown.text
+
+    health = client.get("/governance/health")
+    assert health.status_code == 200
+    assert health.json()["totals"]["evaluations"] == 1
+    assert health.json()["totals"]["remediation_plans"] == 1
+
 
 def test_context_risk_profile_and_recommendation_api(monkeypatch, tmp_path: Path) -> None:
     monkeypatch.setenv("GUARDRAIL_ENTERPRISE_DATA_DIR", str(tmp_path / "store"))
@@ -263,6 +281,37 @@ def test_context_risk_profile_cli(monkeypatch, tmp_path: Path) -> None:
     )
     assert recommendations.exit_code == 0
     assert "aws_s3_bucket_server_side_encryption_configuration" in recommendations.output
+
+
+def test_enterprise_cli_remediation_and_health(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("GUARDRAIL_ENTERPRISE_DATA_DIR", str(tmp_path / "store"))
+    infra = tmp_path / "main.tf"
+    infra.write_text(
+        """
+resource "aws_s3_bucket" "logs" {
+  bucket = "logs"
+}
+""",
+        encoding="utf-8",
+    )
+    result = evaluate_enterprise(infra, store=EnterpriseStore())
+    runner = CliRunner()
+
+    create_result = runner.invoke(
+        app,
+        ["enterprise", "remediation", "create", result.id, "--format", "json"],
+    )
+    assert create_result.exit_code == 0
+    assert "terraform_snippet" in create_result.output
+
+    list_result = runner.invoke(app, ["enterprise", "remediation", "list"])
+    assert list_result.exit_code == 0
+    assert result.id in list_result.output
+
+    health = runner.invoke(app, ["enterprise", "health"])
+    assert health.exit_code == 0
+    assert "Governance health" in health.output
+    assert "TG011" in health.output
 
 
 def test_enterprise_api_waiver_lifecycle(monkeypatch, tmp_path: Path) -> None:

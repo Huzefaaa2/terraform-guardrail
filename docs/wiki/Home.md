@@ -14,6 +14,11 @@ explainability reports, SARIF/JUnit CI artifacts, and approved policy waivers. T
 v2 enterprise control plane and v3 ecosystem integrations, then makes every pass/warn/block decision
 easier to understand, automate, and audit.
 
+**Current development track: v5.0 Autonomous Governance**
+
+v5 starts the next layer: remediation plans, PR-ready fix guidance, and governance health reporting
+that summarize evaluations, evidence, waivers, and recurring rule risk.
+
 ![Terraform Guardrail v4 Intelligent feature map](https://raw.githubusercontent.com/Huzefaaa2/terraform-guardrail/main/docs/assets/terraguard-v4-intelligent.svg)
 
 ![Terraform Guardrail v3 Ecosystem feature map](https://raw.githubusercontent.com/Huzefaaa2/terraform-guardrail/main/docs/assets/terraguard-v3-ecosystem.svg)
@@ -27,6 +32,7 @@ Start with the release detail page, then follow the roadmap and task guides:
 - [v2.0.0 Enterprise Release](Release-v2.0.0)
 - [v3.0.0 Ecosystem Release](Release-v3.0.0)
 - [v4.0.0 Intelligent Release](Release-v4.0.0)
+- [v5.0 Autonomous Governance](Autonomous-Governance)
 - [Roadmap](Roadmap)
 - [Governance](Governance)
 - [Enterprise Features](Enterprise-Features)
@@ -42,6 +48,7 @@ The current roadmap status is:
 | v2.0 Enterprise | Delivered | Authoring UI, baselines, group enforcement, drift gates, evidence export |
 | v3.0 Ecosystem | Delivered | Policy packs, service API, invariants, reference implementations, governance |
 | v4.0 Intelligent | Delivered | Context-aware evaluation, suggested fixes, explainability reports, SARIF/JUnit bridge, policy waivers |
+| v5.0 Autonomous Governance | In development | Remediation plans, governance health, recurring risk signals |
 
 ## Quick Install
 

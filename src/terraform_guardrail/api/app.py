@@ -18,18 +18,21 @@ from terraform_guardrail.enterprise import (
     PolicyWaiver,
     RiskProfile,
     check_drift,
+    create_remediation_plan,
     ensure_policy_pack_installed,
     evaluate_enterprise,
     explain_evaluation,
     export_evidence,
     get_builtin_policy_pack,
     get_rule_recommendation,
+    governance_health_report,
     install_policy_pack,
     list_builtin_policy_packs,
     list_rule_recommendations,
     preview_policy,
     render_evaluation_report,
     render_explanation_markdown,
+    render_remediation_markdown,
     resolve_policy_set,
     run_drift_gate,
 )
@@ -171,8 +174,13 @@ class PolicyPackInstallRequest(BaseModel):
     create_baseline: bool = True
 
 
+class RemediationPlanRequest(BaseModel):
+    result_id: str
+    actor: str = "system"
+
+
 def create_app() -> FastAPI:
-    app = FastAPI(title="Terraform Guardrail MCP (TerraGuard) API", version="4.0.0")
+    app = FastAPI(title="Terraform Guardrail MCP (TerraGuard) API", version="5.0.0")
 
     @app.middleware("http")
     async def record_metrics(request, call_next):  # type: ignore[no-untyped-def]
@@ -521,6 +529,38 @@ def create_app() -> FastAPI:
             return get_rule_recommendation(rule_id).model_dump(mode="json")
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.post("/remediation/plans")
+    def create_remediation(request: RemediationPlanRequest) -> dict[str, Any]:
+        try:
+            plan = create_remediation_plan(request.result_id, actor=request.actor)
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        return plan.model_dump(mode="json")
+
+    @app.get("/remediation/plans")
+    def remediation_plans(result_id: str | None = None) -> dict[str, Any]:
+        plans = EnterpriseStore().list_remediation_plans(result_id=result_id)
+        return {"plans": [plan.model_dump(mode="json") for plan in plans]}
+
+    @app.get("/remediation/plans/{plan_id}")
+    def remediation_plan(plan_id: str) -> dict[str, Any]:
+        try:
+            return EnterpriseStore().get_remediation_plan(plan_id).model_dump(mode="json")
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.get("/remediation/plans/{plan_id}/markdown", response_class=PlainTextResponse)
+    def remediation_plan_markdown(plan_id: str) -> str:
+        try:
+            plan = EnterpriseStore().get_remediation_plan(plan_id)
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        return render_remediation_markdown(plan)
+
+    @app.get("/governance/health")
+    def governance_health(window: str = "all") -> dict[str, Any]:
+        return governance_health_report(window=window).model_dump(mode="json")
 
     @app.post("/integrations/gitlab/groups")
     def create_gitlab_group_binding(binding: GroupPolicyBinding) -> dict[str, Any]:
