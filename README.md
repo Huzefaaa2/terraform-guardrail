@@ -35,9 +35,12 @@ GitHub, GitLab, Azure DevOps, and AWS CodePipeline.
 - Contributing: https://github.com/Huzefaaa2/terraform-guardrail/blob/main/CONTRIBUTING.md
 - v1 Foundation live app: https://terraform-guardrail.streamlit.app/
 - v2 Enterprise live app: https://terraform-guardrail-enterprise.streamlit.app/
+- v3-v5 Governance live app: https://terraform-guardrail-governance.streamlit.app/
 - Author: Huzefa Husain — https://www.linkedin.com/in/huzefaaa
 
-Live app: https://terraform-guardrail.streamlit.app/
+Use the v1 and v2 apps for focused demos. Use the v3-v5 Governance app for the connected
+enterprise journey: policy packs, intelligent evaluation, remediation, PR automation, scheduled
+governance, evidence schedules, and health reporting.
 
 ## Terraform-Guardrail Multi-Cloud Policy (MCP) (TerraGuard)
 
@@ -542,12 +545,14 @@ adjustments, and suggested fixes alongside the standard findings.
 
 ## Streamlit App
 
-Terraform Guardrail keeps two Streamlit demos:
+Terraform Guardrail keeps three Streamlit demos. v1 and v2 stay focused, while one combined
+v3-v5 app shows the ecosystem, intelligence, and autonomous governance layers as a single flow.
 
 | App | Purpose | Main file | Live URL |
 | --- | --- | --- | --- |
 | v1 Foundation | Scanner, state leak checks, schema-aware validation | `streamlit_app.py` | https://terraform-guardrail.streamlit.app/ |
 | v2 Enterprise + Intelligence | Policy authoring, org baselines, drift gates, evidence export, risk profiles, suggested fixes, waiver demos | `streamlit_app_v2.py` | https://terraform-guardrail-enterprise.streamlit.app/ |
+| v3-v5 Governance | Policy packs, explainability, SARIF/JUnit, remediation plans, PR dry runs, scheduled scans, evidence schedules, health and trend dashboards | `streamlit_app_v3_v5.py` | https://terraform-guardrail-governance.streamlit.app/ |
 
 Run the v1 Foundation demo:
 
@@ -561,12 +566,19 @@ Run the v2 Enterprise demo:
 streamlit run streamlit_app_v2.py
 ```
 
+Run the v3-v5 Governance demo:
+
+```bash
+streamlit run streamlit_app_v3_v5.py
+```
+
 ### Streamlit Cloud deployment
 
 1. Push this repo to GitHub.
 2. Create one Streamlit Cloud app for v1 with main file path `streamlit_app.py`.
 3. Create a second Streamlit Cloud app for v2 with main file path `streamlit_app_v2.py`.
-4. Deploy (Streamlit will install from `requirements.txt`, use Python from `runtime.txt`,
+4. Create a third Streamlit Cloud app for v3-v5 with main file path `streamlit_app_v3_v5.py`.
+5. Deploy (Streamlit will install from `requirements.txt`, use Python from `runtime.txt`,
    and apply the shared theme from `.streamlit/config.toml`).
 
 ### Container deployment
@@ -583,6 +595,13 @@ Run the v2 Enterprise app:
 ```bash
 docker build -f Dockerfile.streamlit.v2 -t terraform-guardrail-streamlit:v2 .
 docker run --rm -p 8502:8501 terraform-guardrail-streamlit:v2
+```
+
+Run the v3-v5 Governance app:
+
+```bash
+docker build -f Dockerfile.streamlit.v3_v5 -t terraform-guardrail-streamlit:v3-v5 .
+docker run --rm -p 8503:8501 terraform-guardrail-streamlit:v3-v5
 ```
 
 ## REST API (Docker)

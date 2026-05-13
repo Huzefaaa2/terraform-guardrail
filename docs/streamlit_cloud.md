@@ -5,6 +5,7 @@
 - GitHub repo is public or connected to your Streamlit account.
 - `streamlit_app.py` exists at repo root for the v1 Foundation demo.
 - `streamlit_app_v2.py` exists at repo root for the v2 Enterprise demo.
+- `streamlit_app_v3_v5.py` exists at repo root for the v3-v5 Governance demo.
 - `requirements.txt` contains `-e .` (already included).
 - `runtime.txt` pins Python 3.11 for predictable Streamlit Cloud builds.
 - `.streamlit/config.toml` defines the shared app theme and disables usage telemetry.
@@ -28,6 +29,20 @@
 6. Choose **Deploy**.
 7. Use the app URL: https://terraform-guardrail-enterprise.streamlit.app/
 
+## v3-v5 Governance app
+
+This is the recommended additional app instead of one app per v3, v4, and v5. These releases are
+most useful as a connected workflow: install a policy pack, run intelligent evaluation, generate
+remediation, create a PR dry run, schedule scans, and export evidence.
+
+1. Go to https://streamlit.io/cloud and sign in.
+2. Click **New app**.
+3. Select your GitHub repo: `Huzefaaa2/terraform-guardrail`.
+4. Set **Main file path** to `streamlit_app_v3_v5.py`.
+5. Set the app URL/name to `terraform-guardrail-governance` when Streamlit asks for a URL.
+6. Choose **Deploy**.
+7. Use the app URL: https://terraform-guardrail-governance.streamlit.app/
+
 Recommended advanced settings:
 
 - Branch: `main`
@@ -37,11 +52,12 @@ Recommended advanced settings:
 
 ## Cross-links
 
-Both apps include links to each other:
+All apps include links to each other:
 
 - v1 Foundation app links to the v2 Enterprise demo.
-- v2 Enterprise app links back to the v1 Foundation demo.
-- Both apps link to the GitHub repo, wiki, and author LinkedIn page.
+- v2 Enterprise app links back to the v1 Foundation demo and forward to v3-v5 Governance.
+- v3-v5 Governance links back to v1 and v2.
+- All apps link to the GitHub repo, wiki, and author LinkedIn page.
 
 ## Container deployment
 
@@ -59,7 +75,16 @@ docker build -f Dockerfile.streamlit.v2 -t terraform-guardrail-streamlit:v2 .
 docker run --rm -p 8502:8501 terraform-guardrail-streamlit:v2
 ```
 
+Run the v3-v5 Governance app:
+
+```bash
+docker build -f Dockerfile.streamlit.v3_v5 -t terraform-guardrail-streamlit:v3-v5 .
+docker run --rm -p 8503:8501 terraform-guardrail-streamlit:v3-v5
+```
+
 ## Troubleshooting
 
-- If imports fail, ensure the repo has `requirements.txt` at the root.
+- If imports fail, ensure the repo has `requirements.txt` at the root and reboot the app so
+  Streamlit Cloud reinstalls `-e .`. The apps also include a repo `src/` fallback for stale cloud
+  builds.
 - If schema checks fail, disable schema mode or ensure Terraform CLI is available.

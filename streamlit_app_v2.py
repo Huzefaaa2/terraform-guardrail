@@ -1,12 +1,18 @@
 from __future__ import annotations
 
+import sys
 import tempfile
 from pathlib import Path
 from typing import Any
 
-import streamlit as st
+ROOT = Path(__file__).resolve().parent
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
 
-from terraform_guardrail.enterprise import (
+import streamlit as st  # noqa: E402
+
+from terraform_guardrail.enterprise import (  # noqa: E402
     Baseline,
     EnterprisePolicy,
     EnterpriseStore,
@@ -16,7 +22,7 @@ from terraform_guardrail.enterprise import (
     evaluate_enterprise,
     export_evidence,
 )
-from terraform_guardrail.scanner.rules import RULES
+from terraform_guardrail.scanner.rules import RULES  # noqa: E402
 
 REPO_URL = "https://github.com/Huzefaaa2/terraform-guardrail"
 WIKI_URL = "https://github.com/Huzefaaa2/terraform-guardrail/wiki"
@@ -24,6 +30,7 @@ RELEASE_URL = "https://github.com/Huzefaaa2/terraform-guardrail/releases/tag/v2.
 LINKEDIN_URL = "https://www.linkedin.com/in/huzefaaa"
 LIVE_V1_URL = "https://terraform-guardrail.streamlit.app/"
 LIVE_V2_URL = "https://terraform-guardrail-enterprise.streamlit.app/"
+LIVE_GOVERNANCE_URL = "https://terraform-guardrail-governance.streamlit.app/"
 
 SAMPLE_TERRAFORM = """resource "aws_s3_bucket" "logs" {
   bucket = "prod-logs"
@@ -228,6 +235,7 @@ with st.sidebar:
     st.markdown("### Live app versions")
     st.markdown(f"- [v1 Foundation demo]({LIVE_V1_URL})")
     st.markdown(f"- [v2 Enterprise demo]({LIVE_V2_URL})")
+    st.markdown(f"- [v3-v5 Governance demo]({LIVE_GOVERNANCE_URL})")
     st.divider()
     st.markdown("### Resources")
     st.markdown(f"- [GitHub Repository]({REPO_URL})")
@@ -245,6 +253,7 @@ st.markdown(
       <p>
         A live control-plane demo for authoring policies, enforcing org baselines,
         catching drift before apply, and exporting audit evidence from Terraform changes.
+        Open the v3-v5 Governance demo for policy packs, remediation, and scheduled governance.
       </p>
       <div class="pill-row">
         <span class="pill">Policy authoring</span>
@@ -375,15 +384,15 @@ with tab_evaluate:
             )
             if adjustments:
                 st.markdown("#### Context adjustments")
-                st.dataframe(adjustments, use_container_width=True, hide_index=True)
+                st.dataframe(adjustments, width="stretch", hide_index=True)
             if recommendations:
                 st.markdown("#### Suggested fixes")
-                st.dataframe(recommendations, use_container_width=True, hide_index=True)
+                st.dataframe(recommendations, width="stretch", hide_index=True)
             if waivers:
                 st.markdown("#### Applied waivers")
-                st.dataframe(waivers, use_container_width=True, hide_index=True)
+                st.dataframe(waivers, width="stretch", hide_index=True)
             if findings:
-                st.dataframe(finding_rows(findings), use_container_width=True)
+                st.dataframe(finding_rows(findings), width="stretch")
             else:
                 st.success("No enterprise findings were detected.")
 
@@ -420,7 +429,7 @@ with tab_authoring:
         for rule_id, name in sorted(RULES.items(), key=lambda item: item[0])
     ]
     st.markdown("#### Built-in default rules")
-    st.dataframe(default_rules, use_container_width=True, hide_index=True)
+    st.dataframe(default_rules, width="stretch", hide_index=True)
 
     st.markdown("#### Enterprise policy example")
     st.json(

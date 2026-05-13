@@ -1,20 +1,27 @@
 from __future__ import annotations
 
 import csv
+import sys
 import tempfile
 from datetime import datetime, timezone
 from io import StringIO
 from pathlib import Path
 
-import streamlit as st
+ROOT = Path(__file__).resolve().parent
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
 
-from terraform_guardrail.scanner.scan import scan_path
+import streamlit as st  # noqa: E402
+
+from terraform_guardrail.scanner.scan import scan_path  # noqa: E402
 
 REPO_URL = "https://github.com/Huzefaaa2/terraform-guardrail"
 WIKI_URL = "https://github.com/Huzefaaa2/terraform-guardrail/wiki"
 LINKEDIN_URL = "https://www.linkedin.com/in/huzefaaa"
 LIVE_V1_URL = "https://terraform-guardrail.streamlit.app/"
 LIVE_V2_URL = "https://terraform-guardrail-enterprise.streamlit.app/"
+LIVE_GOVERNANCE_URL = "https://terraform-guardrail-governance.streamlit.app/"
 
 st.set_page_config(page_title="Terraform Guardrail MCP (TerraGuard)", page_icon="🛡️", layout="wide")
 
@@ -23,7 +30,9 @@ st.caption("MCP-backed Terraform assistant with ephemeral-values compliance.")
 st.info(
     "You are viewing the v1 Foundation demo. "
     "Open the v2 Enterprise demo for policy authoring, baselines, drift gates, "
-    f"and evidence: {LIVE_V2_URL}"
+    f"and evidence: {LIVE_V2_URL}. "
+    f"Open the v3-v5 Governance demo for policy packs and autonomous governance: "
+    f"{LIVE_GOVERNANCE_URL}"
 )
 
 st.markdown("### What it checks")
@@ -43,6 +52,7 @@ with st.sidebar:
     st.markdown("### Live app versions")
     st.markdown(f"- [v1 Foundation demo]({LIVE_V1_URL})")
     st.markdown(f"- [v2 Enterprise demo]({LIVE_V2_URL})")
+    st.markdown(f"- [v3-v5 Governance demo]({LIVE_GOVERNANCE_URL})")
     st.divider()
     st.markdown(f"- [GitHub Repo]({REPO_URL})")
     st.markdown(f"- [Wiki Docs]({WIKI_URL})")
@@ -141,7 +151,7 @@ if st.button("Scan"):
                 "detail",
             ]
             table = [{key: finding.get(key) for key in columns} for finding in all_findings]
-            st.dataframe(table, use_container_width=True)
+            st.dataframe(table, width="stretch")
         else:
             st.success("No findings detected.")
 

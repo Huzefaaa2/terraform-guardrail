@@ -212,8 +212,13 @@ flowchart LR
 - [Docker Compose Stack](Docker-Compose)
 - [v1 Foundation Live App](https://terraform-guardrail.streamlit.app/)
 - [v2 Enterprise Live App](https://terraform-guardrail-enterprise.streamlit.app/)
+- [v3-v5 Governance Live App](https://terraform-guardrail-governance.streamlit.app/)
 - [PyPI Package](https://pypi.org/project/terraform-guardrail/)
 - [Release Process](Release-Process)
+
+The recommended app model is three public demos: v1 Foundation for scanner basics, v2 Enterprise
+for authoring and baselines, and one combined v3-v5 Governance app for policy packs, intelligent
+evaluation, remediation, PR dry runs, scheduled scans, evidence schedules, and health reporting.
 
 ## Latest Release
 
