@@ -22,9 +22,9 @@ jobs:
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         if: ${{ steps.gate.outputs.skip != 'true' }}
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         if: ${{ steps.gate.outputs.skip != 'true' }}
         with:
           python-version: "3.11"
@@ -66,7 +66,7 @@ jobs:
             > dist/packaging/homebrew/terraform-guardrail.rb
       - name: Checkout tap repository
         if: ${{ steps.gate.outputs.skip != 'true' }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: ${{ secrets.HOMEBREW_TAP_REPO }}
           token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
