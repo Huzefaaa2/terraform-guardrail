@@ -6,6 +6,7 @@ major releases.
 - [v2.0.0 Enterprise Release](Release-v2.0.0)
 - [v3.0.0 Ecosystem Release](Release-v3.0.0)
 - [v4.0.0 Intelligent Release](Release-v4.0.0)
+- [v5.0.0 Autonomous Governance Release](Release-v5.0.0)
 - [Roadmap](Roadmap)
 - [How-To Guides](How-To-Guides)
 
@@ -32,6 +33,7 @@ major releases.
 - [Explainability Reports](Explainability-Reports.md)
 - [Enterprise SARIF/JUnit](Enterprise-SARIF-JUnit.md)
 - [Policy Waivers](Policy-Waivers.md)
+- [Autonomous Governance](Autonomous-Governance.md)
 
 ## Integrations & Delivery
 

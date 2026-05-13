@@ -23,7 +23,7 @@
 - API and CLI support for governance trend reports.
 
 ## Changed
-- Version updated to 5.0.0 for the Autonomous Governance development track.
+- Version updated to 5.0.0 for the Autonomous Governance release.
 
 ---
 

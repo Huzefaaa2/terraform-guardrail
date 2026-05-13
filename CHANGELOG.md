@@ -17,7 +17,7 @@ All notable changes to this project will be documented in this file.
 - Governance trend charts for waiver aging, evidence coverage, remediation flow, and PR activity.
 
 ### Changed
-- Package/API versions updated to 5.0.0 for v5 development.
+- Package/API versions updated to 5.0.0 for the v5 Autonomous Governance release.
 
 ## [4.0.0] - 2026-05-13
 

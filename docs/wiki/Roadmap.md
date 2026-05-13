@@ -3,8 +3,8 @@
 Minor releases deliver increments within each major deliverable. Major releases group outcomes by
 phase.
 
-Latest delivered major release: [v4.0.0 Intelligent Release](Release-v4.0.0).
-Current development track: v5.0 Autonomous Governance.
+Latest delivered major release: [v5.0.0 Autonomous Governance Release](Release-v5.0.0).
+Current release-hardening track: v5.0.0 package verification, final documentation, and publishing.
 
 Legend: <span style="color: green">✅ Delivered</span> • <span style="color: orange">🚧 Planned</span>
 

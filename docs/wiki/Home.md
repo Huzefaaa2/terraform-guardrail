@@ -7,17 +7,15 @@ that prevent bad state before apply.
 
 ## Latest Release and Roadmap
 
-**Latest release: v4.0.0 Intelligent**
+**Latest release: v5.0.0 Autonomous Governance**
 
-v4.0.0 adds the intelligent governance layer: context-aware evaluation, suggested fixes,
-explainability reports, SARIF/JUnit CI artifacts, and approved policy waivers. The release keeps the
-v2 enterprise control plane and v3 ecosystem integrations, then makes every pass/warn/block decision
-easier to understand, automate, and audit.
+v5.0.0 turns Terraform Guardrail into an autonomous governance loop: remediation plans,
+PR-ready patch bundles, GitHub PR automation, scheduled scans, evidence schedules, background
+runners, governance health, and trend dashboards. It builds on the v2 enterprise control plane,
+v3 ecosystem integrations, and v4 intelligent evaluation layer.
 
-**Current development track: v5.0 Autonomous Governance**
-
-v5 starts the next layer: remediation plans, PR-ready fix guidance, and governance health reporting
-that summarize evaluations, evidence, waivers, and recurring rule risk.
+**Roadmap status:** v5.0.0 is delivered. The next step is release verification and publication
+across GitHub Releases, PyPI, Homebrew, docs, and live app references.
 
 ![Terraform Guardrail v4 Intelligent feature map](https://raw.githubusercontent.com/Huzefaaa2/terraform-guardrail/main/docs/assets/terraguard-v4-intelligent.svg)
 
@@ -32,7 +30,8 @@ Start with the release detail page, then follow the roadmap and task guides:
 - [v2.0.0 Enterprise Release](Release-v2.0.0)
 - [v3.0.0 Ecosystem Release](Release-v3.0.0)
 - [v4.0.0 Intelligent Release](Release-v4.0.0)
-- [v5.0 Autonomous Governance](Autonomous-Governance)
+- [v5.0.0 Autonomous Governance Release](Release-v5.0.0)
+- [Autonomous Governance Guide](Autonomous-Governance)
 - [Roadmap](Roadmap)
 - [Governance](Governance)
 - [Enterprise Features](Enterprise-Features)
@@ -48,7 +47,7 @@ The current roadmap status is:
 | v2.0 Enterprise | Delivered | Authoring UI, baselines, group enforcement, drift gates, evidence export |
 | v3.0 Ecosystem | Delivered | Policy packs, service API, invariants, reference implementations, governance |
 | v4.0 Intelligent | Delivered | Context-aware evaluation, suggested fixes, explainability reports, SARIF/JUnit bridge, policy waivers |
-| v5.0 Autonomous Governance | In development | Remediation plans, governance health, recurring risk signals |
+| v5.0 Autonomous Governance | Delivered | Remediation plans, PR automation, scheduled governance, evidence schedules, trend dashboards |
 
 ## Quick Install
 
@@ -214,9 +213,9 @@ flowchart LR
 
 ## Latest Release
 
-- Version: 4.0.0
-- Release: https://github.com/Huzefaaa2/terraform-guardrail/releases/tag/v4.0.0
-- PyPI: https://pypi.org/project/terraform-guardrail/4.0.0/
+- Version: 5.0.0
+- Release: https://github.com/Huzefaaa2/terraform-guardrail/releases/tag/v5.0.0
+- PyPI: https://pypi.org/project/terraform-guardrail/5.0.0/
 - Container image: https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail
 - Registry image: https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail-registry
 - Supported providers: AWS, Azure, GCP, Kubernetes, Helm, OCI, Vault, Alicloud, vSphere

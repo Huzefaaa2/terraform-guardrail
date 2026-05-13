@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=69", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -9,11 +9,11 @@ description = "MCP-backed Terraform assistant with ephemeral-values compliance."
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [{ name = "Huzefa Husain" }]
-license = { text = "BUSL-1.1" }
+license = "LicenseRef-BUSL-1.1"
+license-files = ["LICENSE", "NOTICE"]
 keywords = ["terraform", "mcp", "iac", "security", "compliance"]
 classifiers = [
   "Programming Language :: Python :: 3",
-  "License :: Other/Proprietary License",
   "Operating System :: OS Independent",
 ]
 dependencies = [

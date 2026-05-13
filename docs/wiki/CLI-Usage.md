@@ -14,7 +14,7 @@ pip install -e ".[dev]"
 pip install terraform-guardrail
 ```
 
-PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 4.0.0)
+PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 5.0.0)
 
 ## Scan
 

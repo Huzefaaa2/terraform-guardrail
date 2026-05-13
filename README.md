@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/Huzefaaa2/terraform-guardrail/actions/workflows/ci.yml/badge.svg)](https://github.com/Huzefaaa2/terraform-guardrail/actions/workflows/ci.yml)
 
-**v5.0 Autonomous Governance is in development.** Terraform Guardrail now starts moving from
+**v5.0 Autonomous Governance is the latest release.** Terraform Guardrail now moves from
 explaining governance decisions to operating the governance loop: remediation plans, PR-ready fix
 guidance, GitHub PR automation, scheduled governance loops, trend dashboards, and health signals
 built from evaluations, evidence, and waivers.
@@ -23,11 +23,11 @@ GitHub, GitLab, Azure DevOps, and AWS CodePipeline.
 
 ![Terraform Guardrail v1 Foundation feature map](docs/assets/terraguard-v1-foundation.svg)
 
-- Release notes: https://github.com/Huzefaaa2/terraform-guardrail/releases/tag/v4.0.0
+- Release notes: https://github.com/Huzefaaa2/terraform-guardrail/releases/tag/v5.0.0
 - Enterprise wiki: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Release-v2.0.0
 - v3 Ecosystem release: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Release-v3.0.0
 - v4 Intelligent release: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Release-v4.0.0
-- v5 Autonomous Governance: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Autonomous-Governance
+- v5 Autonomous Governance release: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Release-v5.0.0
 - Contributing: https://github.com/Huzefaaa2/terraform-guardrail/blob/main/CONTRIBUTING.md
 - v1 Foundation live app: https://terraform-guardrail.streamlit.app/
 - v2 Enterprise live app: https://terraform-guardrail-enterprise.streamlit.app/
@@ -421,7 +421,7 @@ terraform-guardrail web
 pip install terraform-guardrail
 ```
 
-PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 4.0.0)
+PyPI: https://pypi.org/project/terraform-guardrail/ (latest: 5.0.0)
 
 ## Examples
 
@@ -843,7 +843,7 @@ secrets are set:
 - PyPI: https://pypi.org/project/terraform-guardrail/
 - GitHub Releases: https://github.com/Huzefaaa2/terraform-guardrail/releases
 - Container Image: https://github.com/Huzefaaa2/terraform-guardrail/pkgs/container/terraform-guardrail
-- Latest release: v4.0.0
+- Latest release: v5.0.0
 - Release history: `RELEASE.md`
 - Enterprise Features: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Enterprise-Features
 
@@ -917,8 +917,8 @@ make changelog
 ### Release Helpers
 
 ```bash
-make release-dry VERSION=4.0.0
-make version-bump VERSION=4.0.0
+make release-dry VERSION=5.0.0
+make version-bump VERSION=5.0.0
 ```
 
 ## Multi-Cloud Policy (MCP) tools (current)
