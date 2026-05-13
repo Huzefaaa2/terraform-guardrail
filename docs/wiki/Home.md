@@ -17,6 +17,8 @@ v3 ecosystem integrations, and v4 intelligent evaluation layer.
 **Roadmap status:** v5.0.0 is delivered and published across GitHub Releases, PyPI, Homebrew,
 docs, and live app references.
 
+![Terraform Guardrail five-version enterprise journey](https://raw.githubusercontent.com/Huzefaaa2/terraform-guardrail/main/docs/assets/terraguard-five-version-journey.svg)
+
 ![Terraform Guardrail v5 Autonomous Governance feature map](https://raw.githubusercontent.com/Huzefaaa2/terraform-guardrail/main/docs/assets/terraguard-v5-autonomous.svg)
 
 ![Terraform Guardrail v4 Intelligent feature map](https://raw.githubusercontent.com/Huzefaaa2/terraform-guardrail/main/docs/assets/terraguard-v4-intelligent.svg)
