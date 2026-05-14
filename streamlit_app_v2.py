@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+# ruff: noqa: E402,I001
+
 import sys
 import tempfile
 from pathlib import Path
@@ -21,8 +23,9 @@ from terraform_guardrail.enterprise import (  # noqa: E402
     check_drift,
     evaluate_enterprise,
     export_evidence,
+    get_rule_recommendation,
 )
-from terraform_guardrail.scanner.rules import RULES  # noqa: E402
+from terraform_guardrail.scanner.rules import RULES, RULE_METADATA  # noqa: E402
 
 REPO_URL = "https://github.com/Huzefaaa2/terraform-guardrail"
 WIKI_URL = "https://github.com/Huzefaaa2/terraform-guardrail/wiki"
@@ -31,6 +34,9 @@ LINKEDIN_URL = "https://www.linkedin.com/in/huzefaaa"
 LIVE_V1_URL = "https://terraform-guardrail.streamlit.app/"
 LIVE_V2_URL = "https://terraform-guardrail-enterprise.streamlit.app/"
 LIVE_GOVERNANCE_URL = "https://terraform-guardrail-governance.streamlit.app/"
+LIVE_FULL_URL = "https://terraform-guardrail-platform.streamlit.app/"
+HOW_TO_GUIDES_URL = f"{WIKI_URL}/How-To-Guides"
+HOW_TO_APP_URL = f"{WIKI_URL}/How-To-Use-v2-Enterprise-Streamlit-App"
 
 SAMPLE_TERRAFORM = """resource "aws_s3_bucket" "logs" {
   bucket = "prod-logs"
@@ -225,6 +231,34 @@ def finding_rows(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [{key: finding.get(key) for key in columns} for finding in findings]
 
 
+def rule_detail(rule_id: str) -> dict[str, Any]:
+    metadata = RULE_METADATA.get(rule_id, {})
+    try:
+        recommendation = get_rule_recommendation(rule_id).model_dump(mode="json")
+    except KeyError:
+        recommendation = {}
+    return {
+        "rule_id": rule_id,
+        "name": RULES.get(rule_id, "Unknown rule"),
+        "risk": metadata.get("risk", "unknown"),
+        "remediation": metadata.get("remediation", "Review the finding."),
+        "suggested_fix": recommendation.get("suggested_fix", metadata.get("remediation", "")),
+        "policy_snippet": "\n".join(
+            [
+                "{",
+                f'  "rule_id": "{rule_id}",',
+                f'  "name": "{RULES.get(rule_id, "Unknown rule")}",',
+                f'  "risk": "{metadata.get("risk", "unknown")}",',
+                '  "severity": "block",',
+                '  "owner": "platform-security",',
+                '  "standard": "SOC2 / ISO / PCI",',
+                f'  "remediation": "{metadata.get("remediation", "Review the finding.")}"',
+                "}",
+            ]
+        ),
+    }
+
+
 with st.sidebar:
     st.markdown("## TerraGuard Enterprise + Intelligence")
     st.markdown(
@@ -236,11 +270,14 @@ with st.sidebar:
     st.markdown(f"- [v1 Foundation demo]({LIVE_V1_URL})")
     st.markdown(f"- [v2 Enterprise demo]({LIVE_V2_URL})")
     st.markdown(f"- [v3-v5 Governance demo]({LIVE_GOVERNANCE_URL})")
+    st.markdown(f"- [v1-v5 Full platform demo]({LIVE_FULL_URL})")
     st.divider()
     st.markdown("### Resources")
     st.markdown(f"- [GitHub Repository]({REPO_URL})")
     st.markdown(f"- [v2.0.0 Release]({RELEASE_URL})")
     st.markdown(f"- [Enterprise Wiki]({WIKI_URL}/Release-v2.0.0)")
+    st.markdown(f"- [How-to guides]({HOW_TO_GUIDES_URL})")
+    st.markdown(f"- [How to use this app]({HOW_TO_APP_URL})")
     st.markdown(f"- [Author: Huzefa Husain]({LINKEDIN_URL})")
     st.divider()
     st.code("pip install terraform-guardrail")
@@ -425,11 +462,42 @@ with tab_authoring:
         "and remediation."
     )
     default_rules = [
-        {"rule_id": rule_id, "name": name}
+        {
+            "rule_id": rule_id,
+            "name": name,
+            "risk": RULE_METADATA.get(rule_id, {}).get("risk", "unknown"),
+        }
         for rule_id, name in sorted(RULES.items(), key=lambda item: item[0])
     ]
+    if "selected_catalog_rule" not in st.session_state:
+        st.session_state["selected_catalog_rule"] = "TG001"
+
     st.markdown("#### Built-in default rules")
-    st.dataframe(default_rules, width="stretch", hide_index=True)
+    list_col, detail_col = st.columns([0.95, 1.25])
+    with list_col:
+        st.caption("Click a rule ID to open the rule details.")
+        for row in default_rules:
+            label = f"{row['rule_id']} - {row['name']}"
+            if st.button(label, key=f"catalog-{row['rule_id']}", width="stretch"):
+                st.session_state["selected_catalog_rule"] = row["rule_id"]
+    with detail_col:
+        selected_rule_id = st.session_state["selected_catalog_rule"]
+        detail = rule_detail(selected_rule_id)
+        st.markdown(f"#### {detail['rule_id']} - {detail['name']}")
+        st.write(
+            {
+                "risk": detail["risk"],
+                "remediation": detail["remediation"],
+                "suggested_fix": detail["suggested_fix"],
+            }
+        )
+        st.code(detail["policy_snippet"], language="json")
+        st.download_button(
+            "Download rule snippet",
+            data=detail["policy_snippet"],
+            file_name=f"{selected_rule_id.lower()}-policy.json",
+            mime="application/json",
+        )
 
     st.markdown("#### Enterprise policy example")
     st.json(

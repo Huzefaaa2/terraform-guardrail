@@ -15,7 +15,8 @@ def test_streamlit_apps_import_from_repo_source() -> None:
         [
             sys.executable,
             "-c",
-            "import streamlit_app; import streamlit_app_v2; import streamlit_app_v3_v5",
+            "import streamlit_app; import streamlit_app_v2; "
+            "import streamlit_app_v3_v5; import streamlit_app_full",
         ],
         cwd=ROOT,
         env=env,
@@ -39,4 +40,6 @@ def test_streamlit_docs_reference_all_live_apps() -> None:
         assert "streamlit_app.py" in content
         assert "streamlit_app_v2.py" in content
         assert "streamlit_app_v3_v5.py" in content
+        assert "streamlit_app_full.py" in content
         assert "terraform-guardrail-governance.streamlit.app" in content
+        assert "terraform-guardrail-platform.streamlit.app" in content

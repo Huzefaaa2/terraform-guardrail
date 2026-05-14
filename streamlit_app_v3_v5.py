@@ -42,6 +42,9 @@ LINKEDIN_URL = "https://www.linkedin.com/in/huzefaaa"
 LIVE_V1_URL = "https://terraform-guardrail.streamlit.app/"
 LIVE_V2_URL = "https://terraform-guardrail-enterprise.streamlit.app/"
 LIVE_GOVERNANCE_URL = "https://terraform-guardrail-governance.streamlit.app/"
+LIVE_FULL_URL = "https://terraform-guardrail-platform.streamlit.app/"
+HOW_TO_GUIDES_URL = f"{WIKI_URL}/How-To-Guides"
+HOW_TO_APP_URL = f"{WIKI_URL}/How-To-Use-v3-v5-Governance-Streamlit-App"
 
 SAMPLE_TERRAFORM = """resource "aws_s3_bucket" "logs" {
   bucket = "prod-logs"
@@ -323,10 +326,13 @@ with st.sidebar:
     st.markdown(f"- [v1 Foundation demo]({LIVE_V1_URL})")
     st.markdown(f"- [v2 Enterprise demo]({LIVE_V2_URL})")
     st.markdown(f"- [v3-v5 Governance demo]({LIVE_GOVERNANCE_URL})")
+    st.markdown(f"- [v1-v5 Full platform demo]({LIVE_FULL_URL})")
     st.divider()
     st.markdown("### Resources")
     st.markdown(f"- [GitHub Repository]({REPO_URL})")
     st.markdown(f"- [Wiki Docs]({WIKI_URL})")
+    st.markdown(f"- [How-to guides]({HOW_TO_GUIDES_URL})")
+    st.markdown(f"- [How to use this app]({HOW_TO_APP_URL})")
     st.markdown(f"- [Author: Huzefa Husain]({LINKEDIN_URL})")
     st.divider()
 

@@ -23,6 +23,13 @@ pip install -e .
 streamlit run streamlit_app_v3_v5.py
 ```
 
+Run the v1-v5 Full platform demo:
+
+```bash
+pip install -e .
+streamlit run streamlit_app_full.py
+```
+
 ## Live Apps
 
 | App | Purpose | URL |
@@ -30,6 +37,7 @@ streamlit run streamlit_app_v3_v5.py
 | v1 Foundation | Terraform scanning, state leak checks, schema-aware validation | https://terraform-guardrail.streamlit.app/ |
 | v2 Enterprise + Intelligence | Policy authoring, org baselines, drift gates, evidence export, risk profiles, suggested fixes, waiver demos | https://terraform-guardrail-enterprise.streamlit.app/ |
 | v3-v5 Governance | Policy packs, explainability, SARIF/JUnit, remediation plans, PR dry runs, scheduled scans, evidence schedules, health and trend dashboards | https://terraform-guardrail-governance.streamlit.app/ |
+| v1-v5 Full platform | Scanner, policy catalog, enterprise evaluation, policy packs, drift, evidence, explainability, remediation, schedules, health, and case-study playbooks | https://terraform-guardrail-platform.streamlit.app/ |
 
 All apps link to each other and to the author profile:
 https://www.linkedin.com/in/huzefaaa
@@ -43,7 +51,9 @@ https://www.linkedin.com/in/huzefaaa
 5. Main file: [streamlit_app_v2.py](https://github.com/Huzefaaa2/terraform-guardrail/blob/main/streamlit_app_v2.py).
 6. Create a third Streamlit Cloud app for v3-v5.
 7. Main file: [streamlit_app_v3_v5.py](https://github.com/Huzefaaa2/terraform-guardrail/blob/main/streamlit_app_v3_v5.py).
-8. Deploy (Streamlit installs dependencies from
+8. Create a fourth Streamlit Cloud app for v1-v5.
+9. Main file: [streamlit_app_full.py](https://github.com/Huzefaaa2/terraform-guardrail/blob/main/streamlit_app_full.py).
+10. Deploy (Streamlit installs dependencies from
    [requirements.txt](https://github.com/Huzefaaa2/terraform-guardrail/blob/main/requirements.txt)).
 
 Recommended settings:
@@ -53,9 +63,10 @@ Recommended settings:
   [runtime.txt](https://github.com/Huzefaaa2/terraform-guardrail/blob/main/runtime.txt)
 - Theme: read from
   [.streamlit/config.toml](https://github.com/Huzefaaa2/terraform-guardrail/blob/main/.streamlit/config.toml)
-- Secrets: none required for the public v1, v2, or v3-v5 demos
+- Secrets: none required for the public v1, v2, v3-v5, or v1-v5 demos
 - v2 app URL/name: `terraform-guardrail-enterprise`
 - v3-v5 app URL/name: `terraform-guardrail-governance`
+- v1-v5 app URL/name: `terraform-guardrail-platform`
 
 ## Container Deployment
 
@@ -78,6 +89,13 @@ Run the v3-v5 Governance app:
 ```bash
 docker build -f Dockerfile.streamlit.v3_v5 -t terraform-guardrail-streamlit:v3-v5 .
 docker run --rm -p 8503:8501 terraform-guardrail-streamlit:v3-v5
+```
+
+Run the v1-v5 Full platform app:
+
+```bash
+docker build -f Dockerfile.streamlit.full -t terraform-guardrail-streamlit:full .
+docker run --rm -p 8504:8501 terraform-guardrail-streamlit:full
 ```
 
 ## Troubleshooting

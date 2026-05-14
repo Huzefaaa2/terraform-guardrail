@@ -213,12 +213,15 @@ flowchart LR
 - [v1 Foundation Live App](https://terraform-guardrail.streamlit.app/)
 - [v2 Enterprise Live App](https://terraform-guardrail-enterprise.streamlit.app/)
 - [v3-v5 Governance Live App](https://terraform-guardrail-governance.streamlit.app/)
+- [v1-v5 Full Platform Live App](https://terraform-guardrail-platform.streamlit.app/)
+- [Enterprise Case Studies](Enterprise-Case-Studies)
 - [PyPI Package](https://pypi.org/project/terraform-guardrail/)
 - [Release Process](Release-Process)
 
 The recommended app model is three public demos: v1 Foundation for scanner basics, v2 Enterprise
-for authoring and baselines, and one combined v3-v5 Governance app for policy packs, intelligent
-evaluation, remediation, PR dry runs, scheduled scans, evidence schedules, and health reporting.
+for authoring and baselines, one combined v3-v5 Governance app for policy packs, intelligent
+evaluation, remediation, PR dry runs, scheduled scans, evidence schedules, and health reporting,
+and one v1-v5 Full platform app for the complete product story in a single enterprise GUI.
 
 ## Latest Release
 
