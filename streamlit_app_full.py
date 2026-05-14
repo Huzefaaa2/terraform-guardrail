@@ -134,6 +134,72 @@ st.markdown(
         background: #ffffff !important;
         color: #142033 !important;
       }
+      [data-testid="stFileUploader"] {
+        background: #ffffff;
+        border: 1px solid #a6b8cc;
+        border-radius: 8px;
+        padding: 10px;
+      }
+      [data-testid="stFileUploader"] section {
+        background: #f8fbff;
+        border: 1px dashed #6b84a0;
+        border-radius: 8px;
+      }
+      [data-testid="stFileUploader"] button {
+        background: #174a7c !important;
+        border: 1px solid #0f355c !important;
+        border-radius: 8px !important;
+        color: #ffffff !important;
+        font-weight: 800 !important;
+        min-height: 42px;
+      }
+      [data-testid="stFileUploader"] button:hover {
+        background: #0f6b6e !important;
+        border-color: #0b5558 !important;
+        color: #ffffff !important;
+      }
+      [data-testid="stFileUploader"] button *,
+      [data-testid="stFileUploader"] button p,
+      [data-testid="stFileUploader"] button span {
+        color: #ffffff !important;
+      }
+      [data-testid="stFileUploader"] small,
+      [data-testid="stFileUploader"] span,
+      [data-testid="stFileUploader"] p {
+        color: #263a52 !important;
+      }
+      [data-testid="stCodeBlock"],
+      [data-testid="stJson"] {
+        background: #0f172a !important;
+        border: 1px solid #334155 !important;
+        border-radius: 8px !important;
+        color: #e8f0f8 !important;
+      }
+      [data-testid="stCodeBlock"] pre,
+      [data-testid="stCodeBlock"] code,
+      [data-testid="stCodeBlock"] span,
+      [data-testid="stJson"] pre,
+      [data-testid="stJson"] code,
+      [data-testid="stJson"] span {
+        background: #0f172a !important;
+        color: #e8f0f8 !important;
+        text-shadow: none !important;
+      }
+      [data-testid="stCodeBlock"] button,
+      [data-testid="stJson"] button {
+        background: #1e3a5f !important;
+        border: 1px solid #4b6b91 !important;
+        color: #ffffff !important;
+      }
+      [data-testid="stCodeBlock"] button *,
+      [data-testid="stJson"] button * {
+        color: #ffffff !important;
+      }
+      pre,
+      code {
+        background: #0f172a !important;
+        color: #e8f0f8 !important;
+      }
       div[data-testid="stTabs"] [data-baseweb="tab-list"] {
         background: #d9e4ef;
         border: 1px solid #b8c8da;
