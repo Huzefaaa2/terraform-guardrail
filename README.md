@@ -15,6 +15,9 @@ Use it as a CLI, REST API, web UI, MCP server, or CI gate. Start with the built-
 catalog, add enterprise metadata and approvals, then roll out pass/warn/block decisions across
 GitHub, GitLab, Azure DevOps, and AWS CodePipeline.
 
+Enterprise case studies: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Enterprise-Case-Studies
+v1-v5 Full platform live app: https://terraform-guardrail-platform.streamlit.app/
+
 ![Terraform Guardrail five-version enterprise journey](docs/assets/terraguard-five-version-journey.svg)
 
 ![Terraform Guardrail v5 Autonomous Governance feature map](docs/assets/terraguard-v5-autonomous.svg)
