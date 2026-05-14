@@ -108,19 +108,112 @@ st.markdown(
     """
     <style>
       .stApp {
-        background: #f4f7fa;
-        color: #172033;
+        background: #eef3f8;
+        color: #142033;
       }
       [data-testid="stSidebar"] {
-        background: #0b1220;
+        background: #0a1424;
+        border-right: 1px solid #1e3554;
+      }
+      [data-testid="stSidebar"] * {
+        color: #e8f0f8;
+      }
+      [data-testid="stSidebar"] a {
+        color: #8fd7ff !important;
+      }
+      [data-testid="stHeader"] {
+        background: rgba(238, 243, 248, 0.86);
+      }
+      h2, h3, h4, p, label, span {
+        color: #142033;
+      }
+      div[data-baseweb="select"] > div,
+      textarea,
+      input {
+        border-color: #9fb1c6 !important;
+        background: #ffffff !important;
+        color: #142033 !important;
+      }
+      div[data-testid="stTabs"] [data-baseweb="tab-list"] {
+        background: #d9e4ef;
+        border: 1px solid #b8c8da;
+        border-radius: 8px;
+        gap: 8px;
+        padding: 8px;
+        overflow-x: auto;
+      }
+      button[data-baseweb="tab"] {
+        background: #ffffff;
+        border: 1px solid #9fb1c6;
+        border-radius: 8px;
+        color: #1e3350;
+        font-weight: 800;
+        min-height: 48px;
+        padding: 10px 16px;
+        white-space: nowrap;
+      }
+      button[data-baseweb="tab"] p {
+        color: inherit;
+        font-size: 15px;
+        font-weight: 800;
+      }
+      button[data-baseweb="tab"]:hover {
+        background: #edf7ff;
+        border-color: #2563eb;
+        color: #12315a;
+      }
+      button[data-baseweb="tab"][aria-selected="true"] {
+        background: #12315a;
+        border-color: #12315a;
+        box-shadow: 0 8px 18px rgba(18, 49, 90, 0.26);
+        color: #ffffff;
+      }
+      button[data-baseweb="tab"][aria-selected="true"] p {
+        color: #ffffff;
+      }
+      .stButton > button {
+        background: #174a7c;
+        border: 1px solid #0f355c;
+        border-radius: 8px;
+        color: #ffffff;
+        font-weight: 750;
+        min-height: 42px;
+      }
+      .stButton > button:hover {
+        background: #0f6b6e;
+        border-color: #0b5558;
+        color: #ffffff;
+      }
+      .stButton > button[kind="primary"] {
+        background: #0f766e;
+        border-color: #0a5c56;
+        color: #ffffff;
+        box-shadow: 0 8px 18px rgba(15, 118, 110, 0.22);
+      }
+      .stButton > button[kind="primary"]:hover {
+        background: #0b5f59;
+        border-color: #084b46;
+      }
+      [data-testid="stDownloadButton"] button {
+        background: #5b3a94;
+        border: 1px solid #442776;
+        border-radius: 8px;
+        color: #ffffff;
+        font-weight: 750;
+        min-height: 42px;
+      }
+      [data-testid="stDownloadButton"] button:hover {
+        background: #7c3aed;
+        border-color: #5b21b6;
+        color: #ffffff;
       }
       .platform-hero {
-        background: #ffffff;
-        border: 1px solid #d8e1ea;
+        background: linear-gradient(135deg, #ffffff 0%, #f7fbff 58%, #edf6f5 100%);
+        border: 1px solid #b8c8da;
         border-radius: 8px;
         padding: 30px;
         margin-bottom: 18px;
-        box-shadow: 0 14px 34px rgba(22, 33, 62, 0.08);
+        box-shadow: 0 14px 34px rgba(22, 33, 62, 0.12);
       }
       .platform-hero h1 {
         color: #111827;
@@ -129,7 +222,7 @@ st.markdown(
         margin: 0 0 12px 0;
       }
       .platform-hero p {
-        color: #43536a;
+        color: #31445d;
         font-size: 17px;
         max-width: 980px;
       }
@@ -140,28 +233,30 @@ st.markdown(
         margin-top: 18px;
       }
       .stage {
-        background: #eef6fb;
-        border: 1px solid #c9d8e6;
+        background: #ffffff;
+        border: 1px solid #aebfd2;
         border-radius: 8px;
         padding: 12px;
+        box-shadow: 0 6px 16px rgba(22, 33, 62, 0.08);
       }
       .stage strong {
         display: block;
-        color: #0f2f4f;
+        color: #12315a;
       }
       .stage span {
-        color: #50657a;
+        color: #334d66;
         font-size: 13px;
       }
       .metric-card {
-        border: 1px solid #d8e1ea;
+        border: 1px solid #b8c8da;
         border-radius: 8px;
         background: #ffffff;
         padding: 17px;
         min-height: 112px;
+        box-shadow: 0 8px 22px rgba(22, 33, 62, 0.08);
       }
       .metric-card span {
-        color: #64748b;
+        color: #445a72;
         font-size: 13px;
       }
       .metric-card strong {
@@ -171,14 +266,16 @@ st.markdown(
         margin-top: 7px;
       }
       .case-card {
-        border-left: 4px solid #0f766e;
+        border: 1px solid #b8c8da;
+        border-left: 5px solid #0f766e;
         background: #ffffff;
         border-radius: 8px;
         padding: 15px 18px;
         margin: 10px 0;
+        box-shadow: 0 6px 16px rgba(22, 33, 62, 0.07);
       }
       a {
-        color: #0f766e !important;
+        color: #0f5f8f !important;
       }
     </style>
     """,
