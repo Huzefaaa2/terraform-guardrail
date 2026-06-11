@@ -1,0 +1,30 @@
+<svg width="2048" height="2048" viewBox="0 0 2048 2048" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="TerraGuard mark">
+  <defs>
+    <linearGradient id="shield" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06B6D4"/>
+      <stop offset="54%" stop-color="#2563EB"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="light" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="55%" stop-color="#D7F8FF"/>
+      <stop offset="100%" stop-color="#B6CCFF"/>
+    </linearGradient>
+  </defs>
+  <path d="M574 524 L1024 344 L1474 524 L1389 1294 L1024 1699 L659 1294 Z" fill="url(#shield)" stroke="rgba(255,255,255,0.38)" stroke-width="12"/>
+  <path d="M626 583 L1024 424 L1422 583 L1347 1265 L1024 1623 L701 1265 Z" fill="#071426" stroke="#06B6D4" stroke-width="10"/>
+  <path d="M1394 935 A370 370 0 1 0 1320 1190" fill="none" stroke="#06B6D4" stroke-width="74" stroke-linecap="round"/>
+  <path d="M1365 935 H1640" stroke="#06B6D4" stroke-width="86" stroke-linecap="round"/>
+  <path d="M1498 1000 H1640" stroke="#2563EB" stroke-width="84" stroke-linecap="round"/>
+  <rect x="739" y="675" width="570" height="140" rx="36" fill="url(#light)"/>
+  <rect x="942" y="705" width="164" height="680" rx="48" fill="url(#light)"/>
+  <line x1="942" y1="940" x2="1106" y2="940" stroke="#2563EB" stroke-opacity="0.35" stroke-width="6"/>
+  <line x1="942" y1="1165" x2="1106" y2="1165" stroke="#2563EB" stroke-opacity="0.35" stroke-width="6"/>
+  <circle cx="659" cy="834" r="32" fill="#06B6D4" stroke="white" stroke-width="7"/>
+  <circle cx="1389" cy="834" r="32" fill="#7C3AED" stroke="white" stroke-width="7"/>
+  <circle cx="774" cy="1449" r="32" fill="#16A34A" stroke="white" stroke-width="7"/>
+  <circle cx="1279" cy="1449" r="32" fill="#F59E0B" stroke="white" stroke-width="7"/>
+  <rect x="759" y="1550" width="145" height="32" rx="16" fill="#16A34A"/>
+  <rect x="949" y="1550" width="145" height="32" rx="16" fill="#F59E0B"/>
+  <rect x="1139" y="1550" width="145" height="32" rx="16" fill="#2563EB"/>
+</svg>

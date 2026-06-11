@@ -1,0 +1,28 @@
+TerraGuard Logo Concept
+
+Core idea:
+A shielded TG monogram that combines Terraform infrastructure blocks, a guardrail decision loop, and multi-cloud policy nodes.
+
+Symbolism:
+- Shield: enterprise governance boundary.
+- T: Terraform and infrastructure-as-code building blocks.
+- G arc: guardrail loop for policy decisions.
+- Four nodes: multi-cloud surfaces and control evidence points.
+- Three bottom rails: pass / warn / block.
+
+Suggested usage:
+- Use the transparent icon for LinkedIn avatar, GitHub org/repo icon, favicon, app tile, and video watermark.
+- Use the horizontal transparent logo for article headers, video title cards, documentation, and presentation covers.
+- Use the dark cinematic card for LinkedIn posts, newsletter banners, and launch videos.
+- Use the SVG files when you need editable vector art.
+
+Palette:
+- Navy: #071426
+- Cyan: #06B6D4
+- Blue: #2563EB
+- Violet: #7C3AED
+- Green: #16A34A
+- Amber: #F59E0B
+
+Legal note:
+This is an original generated brand concept, but it is not a trademark clearance. Before commercial trademark use, run a formal trademark and logo similarity search in your target jurisdictions.

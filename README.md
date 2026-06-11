@@ -2,6 +2,15 @@
 
 [![CI](https://github.com/Huzefaaa2/terraform-guardrail/actions/workflows/ci.yml/badge.svg)](https://github.com/Huzefaaa2/terraform-guardrail/actions/workflows/ci.yml)
 
+<p align="center">
+  <img src="docs/assets/brand/terraguard_logo_cinematic_brand_card_4k.png" alt="TerraGuard v5.0 Autonomous Terraform Governance brand banner" width="100%">
+</p>
+
+**v5.0 Autonomous Governance is the latest release.** Terraform Guardrail now moves from
+explaining governance decisions to operating the governance loop: remediation plans, PR-ready fix
+guidance, GitHub PR automation, scheduled governance loops, trend dashboards, and health signals
+built from evaluations, evidence, and waivers.
+
 Terraform Guardrail Multi-Cloud Policy (MCP) (TerraGuard) runs outside Terraform and turns platform
 standards into executable CI/CD guardrails. It gives platform teams policy lifecycle management,
 developers fast feedback, and auditors traceable evidence without slowing delivery.
@@ -9,11 +18,6 @@ developers fast feedback, and auditors traceable evidence without slowing delive
 Use it as a CLI, REST API, web UI, MCP server, or CI gate. Start with the built-in TG001-TG023 rule
 catalog, add enterprise metadata and approvals, then roll out pass/warn/block decisions across
 GitHub, GitLab, Azure DevOps, and AWS CodePipeline.
-
-**v5.0 Autonomous Governance is the latest release.** Terraform Guardrail now moves from
-explaining governance decisions to operating the governance loop: remediation plans, PR-ready fix
-guidance, GitHub PR automation, scheduled governance loops, trend dashboards, and health signals
-built from evaluations, evidence, and waivers.
 
 ## Start with the TerraGuard v5.0 E-Book
 
@@ -24,6 +28,18 @@ The e-book takes users from beginner to expert with chapters on the product intr
 architecture, CLI, GUI, REST API, MCP server, policy registry, enterprise governance, CI/CD,
 supported cloud and on-premise platforms, evidence, drift, remediation, industry adoption
 playbooks, diagrams, command references, API routes, and the TG001-TG023 rule catalog.
+
+## TerraGuard Brand System
+
+TerraGuard uses a shielded TG monogram to represent Terraform guardrails, multi-cloud policy, and
+autonomous governance. The shield represents the governance boundary, the T represents Terraform
+infrastructure blocks, the G arc represents the guardrail decision loop, the cloud nodes represent
+multi-cloud policy surfaces, and the bottom rails represent pass, warn, and block decisions.
+
+Brand assets are available in [docs/assets/brand](docs/assets/brand), including transparent
+horizontal logos, icon files, editable SVGs, a cinematic banner, and the brand sheet.
+
+![TerraGuard brand system](docs/assets/brand/terraguard_logo_brand_sheet_4k.png)
 
 Enterprise case studies: https://github.com/Huzefaaa2/terraform-guardrail/wiki/Enterprise-Case-Studies
 
