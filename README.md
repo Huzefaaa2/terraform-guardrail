@@ -2,11 +2,6 @@
 
 [![CI](https://github.com/Huzefaaa2/terraform-guardrail/actions/workflows/ci.yml/badge.svg)](https://github.com/Huzefaaa2/terraform-guardrail/actions/workflows/ci.yml)
 
-**v5.0 Autonomous Governance is the latest release.** Terraform Guardrail now moves from
-explaining governance decisions to operating the governance loop: remediation plans, PR-ready fix
-guidance, GitHub PR automation, scheduled governance loops, trend dashboards, and health signals
-built from evaluations, evidence, and waivers.
-
 Terraform Guardrail Multi-Cloud Policy (MCP) (TerraGuard) runs outside Terraform and turns platform
 standards into executable CI/CD guardrails. It gives platform teams policy lifecycle management,
 developers fast feedback, and auditors traceable evidence without slowing delivery.
@@ -14,6 +9,11 @@ developers fast feedback, and auditors traceable evidence without slowing delive
 Use it as a CLI, REST API, web UI, MCP server, or CI gate. Start with the built-in TG001-TG023 rule
 catalog, add enterprise metadata and approvals, then roll out pass/warn/block decisions across
 GitHub, GitLab, Azure DevOps, and AWS CodePipeline.
+
+**v5.0 Autonomous Governance is the latest release.** Terraform Guardrail now moves from
+explaining governance decisions to operating the governance loop: remediation plans, PR-ready fix
+guidance, GitHub PR automation, scheduled governance loops, trend dashboards, and health signals
+built from evaluations, evidence, and waivers.
 
 ## Start with the TerraGuard v5.0 E-Book
 
